@@ -5,10 +5,10 @@ using tman.src.Alterations;
 
 ApplicationInitializer.Initialize();
 
-var map = Gbx.Parse<CGameCtnChallenge>("c:\\Users\\hugok\\Documents\\Trackmania\\Maps\\Campaigns\\Fall 2026\\United Kingdom 2026.Map.Gbx");
+var map = Gbx.Parse<CGameCtnChallenge>("c:\\Users\\hugok\\Documents\\Trackmania\\Maps\\Campaigns\\Fall 2026\\Fall 2026 - 01.Map.Gbx");
 
 var runner = new AlterationRunner(map);
 
-runner.Run(new AuthorRemoved(), new CheckpointsCleaned());
+runner.Run(new AuthorRemoved(), new Freewheel());
 
-map.Save("c:\\Users\\hugok\\Documents\\Trackmania\\Maps\\Campaigns\\Fall 2026\\United Kingdom 2026 Checkpoints Cleaned.Map.Gbx");
+map.Save("c:\\Users\\hugok\\Documents\\Trackmania\\Maps\\Campaigns\\Fall 2026\\Fall 2026 - 01 Freewheel.Map.Gbx");
