@@ -7,8 +7,6 @@ ApplicationInitializer.Initialize();
 
 var map = Gbx.Parse<CGameCtnChallenge>("c:\\Users\\hugok\\Documents\\Trackmania\\Maps\\Campaigns\\Fall 2026\\Fall 2026 - 01.Map.Gbx");
 
-var runner = new AlterationRunner(map);
-
-runner.Run(new AuthorRemoved(), new Flags());
+AlterationRunner.Run(map, new AuthorRemoved(), new Flags(), new MapNameSuffix(" Flags"));
 
 map.Save("c:\\Users\\hugok\\Documents\\Trackmania\\Maps\\Campaigns\\Fall 2026\\Fall 2026 - 01 Flags.Map.Gbx");

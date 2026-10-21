@@ -65,7 +65,6 @@ namespace tman.src.Alterations
         {
             RemoveCheckpointItems(map);
             CleanCheckpointBlocks(map);
-            map.MapName += " Checkpoints Cleaned";
         }
 
         private static void RemoveCheckpointItems(CGameCtnChallenge map)

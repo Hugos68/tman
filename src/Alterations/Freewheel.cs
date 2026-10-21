@@ -47,7 +47,6 @@ namespace tman.src.Alterations
                     },
                     new(0, 0, 1));
             }
-            map.MapName += " Freewheel";
         }
     }
 }

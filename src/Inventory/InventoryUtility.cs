@@ -11,6 +11,8 @@ namespace tman.src.Inventory
         public static bool IsCheckpoint(CGameCtnAnchoredObject item) => IsWaypoint(item) && item.ItemModel.Id.Contains("Checkpoint");
         public static bool IsStart(CGameCtnBlock block) => IsWaypoint(block) && block.BlockModel.Id.Contains("Start");
         public static bool IsStart(CGameCtnAnchoredObject item) => IsWaypoint(item) && item.ItemModel.Id.Contains("Start");
+        public static bool IsFinish(CGameCtnBlock block) => IsWaypoint(block) && block.BlockModel.Id.Contains("Finish");
+        public static bool IsFinish(CGameCtnAnchoredObject item) => IsWaypoint(item) && item.ItemModel.Id.Contains("Finish");
         public static string ItemCheckpointIdToItemEffectId(string id, string effect)
         {
             return id

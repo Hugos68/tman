@@ -2,16 +2,15 @@ using GBX.NET.Engines.Game;
 
 namespace tman.src
 {
-    public class AlterationRunner(CGameCtnChallenge map)
+    public static class AlterationRunner
     {
-        private CGameCtnChallenge Map { get; } = map;
-
-        public void Run(
+        public static void Run(
+            CGameCtnChallenge map,
             params IAlteration[] alterations)
         {
             foreach (IAlteration alteration in alterations)
             {
-                alteration.Apply(Map);
+                alteration.Apply(map);
             }
         }
     }

@@ -6,7 +6,6 @@ namespace tman.src.Alterations
         {
             map.Blocks.RemoveAll(block => block.BlockModel.Id.Contains("Checkpoint"));
             map.AnchoredObjects.RemoveAll(obj => obj.ItemModel.Id.Contains("Checkpoint"));
-            map.MapName += " Checkpoints Removed";
         }
     }
 }

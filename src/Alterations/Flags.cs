@@ -1,6 +1,8 @@
 using System.IO;
 using System.Linq;
 using GBX.NET.Engines.Game;
+using tman.src.Application;
+using tman.src.Inventory;
 using tman.src.Positioning;
 
 namespace tman.src.Alterations
@@ -10,28 +12,34 @@ namespace tman.src.Alterations
         public void Apply(CGameCtnChallenge map)
         {
             new CheckpointsCleaned().Apply(map);
-            map.UpdateEmbeddedZipData(zip =>
+
+            var finishes = map.AnchoredObjects.RemoveAll(InventoryUtility.IsFinish);
+
+            var flagsDirectory = Path.Combine(
+                ApplicationConstants.ProjectDirectory,
+                "data",
+                "items",
+                "flags");
+
+            var flagItemPaths = Directory.EnumerateFiles(flagsDirectory, "*.Item.Gbx");
+
+            foreach (string path in flagItemPaths)
             {
-                foreach (string filePath in Directory.EnumerateFiles(Path.Combine("data", "flags"), "*.Item.Gbx"))
-                {
-                    var entry = zip.CreateEntry(Path.Combine("items", "flags", Path.GetFileName(filePath)));
-                    using var entryStream = entry.Open();
-                    using var fileStream = File.OpenRead(filePath);
-                    fileStream.CopyTo(entryStream);
-                }
-            });
-            var flags = map.AnchoredObjects.Where(item => item.ItemModel.Id.Contains("Flag"));
+                EmbedUtility.Embed(map, path);
+            }
+
+            var flags = map.AnchoredObjects
+                .Where(item => item.ItemModel.Id.Contains("Flag"))
+                .ToList();
+
             foreach (var flag in flags)
             {
+                var flagItemPath = flagItemPaths.FirstOrDefault(path => Path.GetFileName(path).Contains(flag.ItemModel.Id));
                 Placement.PlaceRelative(map, flag, new()
                 {
-                    ItemModel = new()
-                    {
-                        Id = $"items/flags/Finish{flag.ItemModel.Id}"
-                    }
+                    ItemModel = EmbedUtility.ExtractIdent(flagItemPath)
                 });
             }
-            map.MapName = " Flags";
         }
     }
 }
