@@ -3,8 +3,6 @@ using System;
 using System.Numerics;
 using GBX.NET;
 using GBX.NET.Engines.Game;
-using Microsoft.VisualBasic;
-using tman.src.Inventory;
 
 namespace tman.src.Positioning;
 
@@ -27,7 +25,7 @@ public static class Placement
         CGameCtnBlock block)
     {
         PlaceRelative(map, referenceBlock, block, new Vector3(0, 0, 0));
-    }   
+    }
     public static void PlaceRelative(
         CGameCtnChallenge map,
         CGameCtnBlock referenceBlock,
@@ -45,7 +43,7 @@ public static class Placement
             if (block.Direction == Direction.South) z += GridConstants.BlockSize;
             return new(x, y, z);
         }
-        
+
         (float x, float z) = referenceBlock.Direction switch
         {
             Direction.North => (offset.X, offset.Z),

@@ -5,7 +5,7 @@ namespace tman.src
     public class AlterationRunner(CGameCtnChallenge map)
     {
         private CGameCtnChallenge Map { get; } = map;
-        
+
         public void Run(
             params IAlteration[] alterations)
         {
