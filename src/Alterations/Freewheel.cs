@@ -1,45 +1,59 @@
 using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 using GBX.NET.Engines.Game;
+using tman.src.Inventory;
 using tman.src.Positioning;
 
 namespace tman.src.Alterations
 {
-    
+
     public partial class Freewheel : IAlteration
     {
-        private static readonly Regex CheckpointAlignment = new("Center|Left|Right");
 
         public void Apply(CGameCtnChallenge map)
         {
-            var checkpointBlocks = map.Blocks
-                .Where(block => block.BlockModel.Id.Contains("Checkpoint"))
-                .ToList();
-            foreach (var checkpointBlock in checkpointBlocks)
-            {
-                Placement.PlaceRelative(map, checkpointBlock, new() { Name = "GateSpecialNoEngine" }, new(0, -GridConstants.BlockSize / 4, 0));
-                Placement.PlaceRelative(map, checkpointBlock, new() { Name = "GateSpecialTurbo" }, new(0, -GridConstants.BlockSize / 4, 0));
-            }
-            var checkpointItems = map.AnchoredObjects
-                .Where(item => item.ItemModel.Id.Contains("Checkpoint"))
-                .ToList();
-            foreach (var checkpointItem in checkpointItems)
-            {
-
-                Placement.PlaceRelative(
-                    map,
-                    checkpointItem,
-                    new() { ItemModel = new() { Id = GetReplacementItemId(checkpointItem.ItemModel.Id, "NoEngine") } },
-                    new(0, -GridConstants.BlockSize / 4, 0));
-                Placement.PlaceRelative(
-                    map,
-                    checkpointItem,
-                    new() { ItemModel = new() { Id = GetReplacementItemId(checkpointItem.ItemModel.Id, "Turbo") } },
-                    new(0, -GridConstants.BlockSize / 4, 0));
-            }
+            map.Blocks
+                .Where(block => InventoryUtility.IsStart(block) || InventoryUtility.IsCheckpoint(block))
+                .ToList()
+                .ForEach(block =>
+                {
+                    Placement.PlaceRelative(map, block, new() { Name = "GateSpecialNoEngine" }, new(0, -GridConstants.BlockSize / 4, 0));
+                    Placement.PlaceRelative(map, block, new() { Name = "GateSpecialTurbo" }, new(0, -GridConstants.BlockSize / 4, 1));
+                });
+            map.AnchoredObjects
+                .Where(item => InventoryUtility.IsStart(item) || InventoryUtility.IsCheckpoint(item))
+                .ToList()
+                .ForEach(item =>
+                {
+                    Placement.PlaceRelative(
+                        map,
+                        item,
+                        new()
+                        {
+                            ItemModel = new()
+                            {
+                                Id = GetReplacementItemId(item.ItemModel.Id, "NoEngine"),
+                                Author = item.ItemModel.Author,
+                                Collection = item.ItemModel.Collection
+                            }
+                        });
+                    Placement.PlaceRelative(
+                        map,
+                        item,
+                        new()
+                        {
+                            ItemModel = new()
+                            {
+                                Id = GetReplacementItemId(item.ItemModel.Id, "Turbo"),
+                                Author = item.ItemModel.Author,
+                                Collection = item.ItemModel.Collection
+                            }
+                        },
+                        new(0, 0, 1));
+                });
             map.MapName += " Freewheel";
         }
+
         private static string GetReplacementItemId(string itemId, string effect)
         {
             return itemId

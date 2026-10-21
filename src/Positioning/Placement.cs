@@ -18,6 +18,14 @@ public static class Placement
             _ => map.DecoBaseHeightOffset
         };
 
+
+    public static void PlaceRelative(
+        CGameCtnChallenge map,
+        CGameCtnBlock referenceBlock,
+        CGameCtnBlock block)
+    {
+        PlaceRelative(map, referenceBlock, block, new Vector3(0, 0, 0));
+    }   
     public static void PlaceRelative(
         CGameCtnChallenge map,
         CGameCtnBlock referenceBlock,
@@ -50,7 +58,6 @@ public static class Placement
 
         block.Coord = referenceBlock.Coord;
         block.Direction = Direction.North;
-        block.IsGround = referenceBlock.IsGround;
         block.Variant = referenceBlock.Variant;
         block.SubVariant = referenceBlock.SubVariant;
         block.IsFree = true;
@@ -65,13 +72,17 @@ public static class Placement
     public static void PlaceRelative(
         CGameCtnChallenge map,
         CGameCtnAnchoredObject referenceItem,
+        CGameCtnAnchoredObject item)
+    {
+        PlaceRelative(map, referenceItem, item, new Vector3(0, 0, 0));
+    }
+    public static void PlaceRelative(
+        CGameCtnChallenge map,
+        CGameCtnAnchoredObject referenceItem,
         CGameCtnAnchoredObject item,
         Vector3 offset)
     {
-        var position = referenceItem.AbsolutePositionInMap;
-        var rotation = referenceItem.YawPitchRoll;
-
-        var rotatedOffset = rotation.Y switch
+        var rotatedOffset = referenceItem.YawPitchRoll.Y switch
         {
             var yaw when MathF.Abs(yaw) < 0.001f =>
                 new Vector3(offset.X, offset.Y, offset.Z),
@@ -84,13 +95,11 @@ public static class Placement
             _ => offset
         };
 
-        map.PlaceAnchoredObject(
-            item.ItemModel,
-            new Vec3(
-                position.X + rotatedOffset.X,
-                position.Y + rotatedOffset.Y,
-                position.Z + rotatedOffset.Z),
-            rotation,
-            new Vec3(1, 1, 1));
+        var position = new Vec3(
+            referenceItem.AbsolutePositionInMap.X + rotatedOffset.X,
+            referenceItem.AbsolutePositionInMap.Y + rotatedOffset.Y,
+            referenceItem.AbsolutePositionInMap.Z + rotatedOffset.Z);
+
+        map.PlaceAnchoredObject(item.ItemModel, position, referenceItem.YawPitchRoll, Vec3.Zero);
     }
 }
