@@ -8,8 +8,6 @@ namespace tman.src.Positioning;
 
 public static class Placement
 {
-
-
     public static int GroundRow(CGameCtnChallenge map) =>
         map.Collection.ToString() switch
         {
@@ -18,87 +16,108 @@ public static class Placement
             _ => map.DecoBaseHeightOffset
         };
 
-
     public static void PlaceRelative(
         CGameCtnChallenge map,
-        CGameCtnBlock referenceBlock,
-        CGameCtnBlock block)
-    {
-        PlaceRelative(map, referenceBlock, block, new Vector3(0, 0, 0));
-    }
-    public static void PlaceRelative(
-        CGameCtnChallenge map,
-        CGameCtnBlock referenceBlock,
+        CGameCtnBlock reference,
         CGameCtnBlock block,
-        Vector3 offset)
+        Vector3 offset = default)
     {
-        var position = GetBlockPosition(referenceBlock, map);
+        var position = GetBlockPosition(reference, map);
+        var yaw = GetBlockYaw(reference.Direction);
+        var rotatedOffset = RotateOffset(offset, yaw);
 
-        static Vec3 GetBlockPosition(CGameCtnBlock block, CGameCtnChallenge map)
+        block.Coord = reference.Coord;
+        block.Direction = Direction.North;
+        block.IsFree = true;
+        block.YawPitchRoll = new Vec3(yaw, 0f, 0f);
+        block.AbsolutePositionInMap = Add(position, rotatedOffset);
+
+        map.PlaceBlock(block);
+    }
+
+    public static void PlaceRelative(
+        CGameCtnChallenge map,
+        CGameCtnAnchoredObject reference,
+        CGameCtnAnchoredObject item,
+        Vector3 offset = default)
+    {
+        var position = Add(reference.AbsolutePositionInMap, RotateOffset(offset, reference.YawPitchRoll.Y));
+
+        map.PlaceAnchoredObject(
+            item.ItemModel,
+            position,
+            reference.YawPitchRoll,
+            Vec3.Zero);
+    }
+
+    public static void PlaceRelative(
+        CGameCtnChallenge map,
+        CGameCtnBlock reference,
+        CGameCtnAnchoredObject item,
+        Vector3 offset = default)
+    {
+        var position = Add(GetBlockPosition(reference, map), RotateOffset(offset, GetBlockYaw(reference.Direction)));
+        var rotation = new Vec3(GetBlockYaw(reference.Direction), 0f, 0f);
+
+        map.PlaceAnchoredObject(item.ItemModel, position, rotation, Vec3.Zero);
+    }
+
+    public static void PlaceRelative(
+        CGameCtnChallenge map,
+        CGameCtnAnchoredObject reference,
+        CGameCtnBlock block,
+        Vector3 offset = default)
+    {
+        var yaw = reference.YawPitchRoll.Y;
+        var position = Add(reference.AbsolutePositionInMap, RotateOffset(offset, yaw));
+
+        block.Coord = new(0, 0, 0);
+        block.Direction = Direction.North;
+        block.IsFree = true;
+        block.YawPitchRoll = new Vec3(yaw, 0f, 0f);
+        block.AbsolutePositionInMap = position;
+
+        map.PlaceBlock(block);
+    }
+
+    private static Vec3 GetBlockPosition(CGameCtnBlock block, CGameCtnChallenge map)
+    {
+        var x = block.Coord.X * GridConstants.BlockSize;
+        var y = (block.Coord.Y - GroundRow(map)) * GridConstants.VerticalBlockSize;
+        var z = block.Coord.Z * GridConstants.BlockSize;
+
+        if (block.Direction != Direction.West)
         {
-            var x = block.Coord.X * GridConstants.BlockSize;
-            var y = (block.Coord.Y - GroundRow(map)) * GridConstants.VerticalBlockSize;
-            var z = block.Coord.Z * GridConstants.BlockSize;
-            if (block.Direction != Direction.West) x += GridConstants.BlockSize;
-            if (block.Direction == Direction.South) z += GridConstants.BlockSize;
-            return new(x, y, z);
+            x += GridConstants.BlockSize;
         }
 
-        (float x, float z) = referenceBlock.Direction switch
+        if (block.Direction == Direction.South)
         {
-            Direction.North => (offset.X, offset.Z),
-            Direction.East => (-offset.Z, offset.X),
-            Direction.South => (-offset.X, -offset.Z),
-            Direction.West => (offset.Z, -offset.X),
-            _ => throw new ArgumentOutOfRangeException(nameof(referenceBlock))
-        };
-        float yaw = referenceBlock.Direction switch
+            z += GridConstants.BlockSize;
+        }
+
+        return new Vec3(x, y, z);
+    }
+
+    private static float GetBlockYaw(Direction direction) =>
+        direction switch
         {
             Direction.North => 0f,
             Direction.East => -MathF.PI / 2f,
             Direction.South => MathF.PI,
             Direction.West => MathF.PI / 2f,
-            _ => throw new ArgumentOutOfRangeException(nameof(referenceBlock))
+            _ => throw new ArgumentOutOfRangeException(nameof(direction))
         };
-        block.Coord = referenceBlock.Coord;
-        block.Direction = Direction.North;
-        block.IsFree = true;
-        block.YawPitchRoll = new Vec3(yaw, 0f, 0f);
-        block.AbsolutePositionInMap = new Vec3(
-            position.X + x,
+
+    private static Vector3 RotateOffset(Vector3 offset, float yaw) =>
+        new(
+            offset.X * MathF.Cos(yaw) + offset.Z * MathF.Sin(yaw),
+            offset.Y,
+            -offset.X * MathF.Sin(yaw) + offset.Z * MathF.Cos(yaw));
+
+    private static Vec3 Add(Vec3 position, Vector3 offset) =>
+        new(
+            position.X + offset.X,
             position.Y + offset.Y,
-            position.Z + z);
-        map.PlaceBlock(block);
-    }
-    public static void PlaceRelative(
-        CGameCtnChallenge map,
-        CGameCtnAnchoredObject referenceItem,
-        CGameCtnAnchoredObject item)
-    {
-        PlaceRelative(map, referenceItem, item, new Vector3(0, 0, 0));
-    }
-    public static void PlaceRelative(
-        CGameCtnChallenge map,
-        CGameCtnAnchoredObject referenceItem,
-        CGameCtnAnchoredObject item,
-        Vector3 offset)
-    {
-        var rotatedOffset = referenceItem.YawPitchRoll.Y switch
-        {
-            var yaw when MathF.Abs(yaw) < 0.001f =>
-                new Vector3(offset.X, offset.Y, offset.Z),
-            var yaw when MathF.Abs(yaw + MathF.PI / 2f) < 0.001f =>
-                new Vector3(offset.Z, offset.Y, -offset.X),
-            var yaw when MathF.Abs(MathF.Abs(yaw) - MathF.PI) < 0.001f =>
-                new Vector3(-offset.X, offset.Y, -offset.Z),
-            var yaw when MathF.Abs(yaw - MathF.PI / 2f) < 0.001f =>
-                new Vector3(-offset.Z, offset.Y, offset.X),
-            _ => offset
-        };
-        var position = new Vec3(
-            referenceItem.AbsolutePositionInMap.X + rotatedOffset.X,
-            referenceItem.AbsolutePositionInMap.Y + rotatedOffset.Y,
-            referenceItem.AbsolutePositionInMap.Z + rotatedOffset.Z);
-        map.PlaceAnchoredObject(item.ItemModel, position, referenceItem.YawPitchRoll, Vec3.Zero);
-    }
+            position.Z + offset.Z);
 }

@@ -11,8 +11,6 @@ namespace tman.src.Alterations
     {
         public void Apply(CGameCtnChallenge map)
         {
-            new StraightToTheFinish().Apply(map);
-
             var finishes = map.AnchoredObjects.RemoveAll(InventoryUtility.IsFinish);
 
             var flagsDirectory = Path.Combine(
@@ -35,7 +33,7 @@ namespace tman.src.Alterations
             foreach (var flag in flags)
             {
                 var flagItemPath = flagItemPaths.FirstOrDefault(path => Path.GetFileName(path).Contains(flag.ItemModel.Id));
-                Placement.PlaceRelative(map, flag, new()
+                Placement.PlaceRelative(map, flag, new CGameCtnAnchoredObject()
                 {
                     ItemModel = EmbedUtility.ExtractIdent(flagItemPath)
                 });

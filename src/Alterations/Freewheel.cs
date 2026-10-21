@@ -15,8 +15,8 @@ namespace tman.src.Alterations
             var blocks = map.Blocks.Where(block => InventoryUtility.IsStart(block) || InventoryUtility.IsCheckpoint(block));
             foreach (var block in blocks)
             {
-                Placement.PlaceRelative(map, block, new() { Name = "GateSpecialNoEngine" }, new(0, -GridConstants.VerticalBlockSize, 0));
-                Placement.PlaceRelative(map, block, new() { Name = "GateSpecialTurbo" }, new(0, -GridConstants.VerticalBlockSize, 1));
+                Placement.PlaceRelative(map, block, new CGameCtnBlock() { Name = "GateSpecialNoEngine" }, new(0, -GridConstants.VerticalBlockSize, 0));
+                Placement.PlaceRelative(map, block, new CGameCtnBlock() { Name = "GateSpecialTurbo" }, new(0, -GridConstants.VerticalBlockSize, 1));
             }
             var items = map.AnchoredObjects.Where(item => InventoryUtility.IsStart(item) || InventoryUtility.IsCheckpoint(item));
             foreach (var item in items)
@@ -24,7 +24,7 @@ namespace tman.src.Alterations
                 Placement.PlaceRelative(
                     map,
                     item,
-                    new()
+                    new CGameCtnAnchoredObject()
                     {
                         ItemModel = new()
                         {
@@ -36,7 +36,7 @@ namespace tman.src.Alterations
                 Placement.PlaceRelative(
                     map,
                     item,
-                    new()
+                    new CGameCtnAnchoredObject()
                     {
                         ItemModel = new()
                         {
