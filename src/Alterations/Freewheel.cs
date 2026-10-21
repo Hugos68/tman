@@ -7,7 +7,6 @@ namespace tman.src.Alterations
     {
         public void Apply(CGameCtnChallenge map)
         {
-            new StartEffect("NoEngine", new(0, 0, 0)).Apply(map);
             new StartEffect("Turbo", new(0, 0, 0)).Apply(map);
             new StartEffect("NoEngine", new(0, 0, 2)).Apply(map);
             new CheckpointEffect("NoEngine", new(0, 0, -2)).Apply(map);

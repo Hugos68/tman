@@ -1,39 +1,14 @@
-using System.Linq;
 using GBX.NET;
 using GBX.NET.Engines.Game;
 using tman.src.Inventory;
-using tman.src.Positioning;
 
-namespace tman.src.Alterations
+namespace tman.src.Alterations;
+
+public class CheckpointEffect(string effect, Vec3 offset) : WaypointEffect(effect, offset)
 {
-    public partial class CheckpointEffect(string effect, Vec3 offset) : IAlteration
-    {
-        public void Apply(CGameCtnChallenge map)
-        {
-            var blocks = map.Blocks.Where(InventoryUtility.IsCheckpoint).ToList();
-            foreach (var block in blocks)
-            {
-                for (int i = 0; i < 4; i++)
-                {
-                    PlacementUtility.PlaceRelative(map, block, new CGameCtnBlock() { Name = $"GateExpandableSpecial{effect}" }, offset + new Vec3(0, GridConstants.VerticalBlockSize * i, 0));
-                }
-            }
-            var items = map.AnchoredObjects.Where(InventoryUtility.IsCheckpoint).ToList();
-            foreach (var item in items)
-            {
-                PlacementUtility.PlaceRelative(
-                    map,
-                    item,
-                    new CGameCtnAnchoredObject()
-                    {
-                        ItemModel = new()
-                        {
-                            Id = InventoryUtility.ItemCheckpointIdToItemEffectId(item.ItemModel.Id, effect),
-                            Author = item.ItemModel.Author,
-                            Collection = item.ItemModel.Collection
-                        }
-                    });
-            }
-        }
-    }
+    protected override bool Filter(CGameCtnBlock block) =>
+        InventoryUtility.IsCheckpoint(block);
+
+    protected override bool Filter(CGameCtnAnchoredObject item) =>
+        InventoryUtility.IsCheckpoint(item);
 }
