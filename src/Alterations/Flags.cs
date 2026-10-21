@@ -33,7 +33,7 @@ namespace tman.src.Alterations
             foreach (var flag in flags)
             {
                 var flagItemPath = flagItemPaths.FirstOrDefault(path => Path.GetFileName(path).Contains(flag.ItemModel.Id));
-                Placement.PlaceRelative(map, flag, new CGameCtnAnchoredObject()
+                PlacementUtility.PlaceRelative(map, flag, new CGameCtnAnchoredObject()
                 {
                     ItemModel = EmbedUtility.ExtractIdent(flagItemPath)
                 });

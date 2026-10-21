@@ -34,7 +34,7 @@ namespace tman.src.Alterations
             foreach (var stand in stands)
             {
                 var standItemPath = standItemPaths.FirstOrDefault(path => Path.GetFileName(path).Contains(stand.BlockModel.Id));
-                Placement.PlaceRelative(map, stand, new CGameCtnAnchoredObject()
+                PlacementUtility.PlaceRelative(map, stand, new CGameCtnAnchoredObject()
                 {
                     ItemModel = EmbedUtility.ExtractIdent(standItemPath)
                 });
