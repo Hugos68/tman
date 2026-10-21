@@ -58,9 +58,6 @@ public static class Placement
 
         block.Coord = referenceBlock.Coord;
         block.Direction = Direction.North;
-        block.Variant = referenceBlock.Variant;
-        block.SubVariant = referenceBlock.SubVariant;
-        block.IsFree = true;
         block.YawPitchRoll = new Vec3(yaw, 0f, 0f);
         block.AbsolutePositionInMap = new Vec3(
             position.X + X,
