@@ -9,6 +9,6 @@ var map = Gbx.Parse<CGameCtnChallenge>("c:\\Users\\hugok\\Documents\\Trackmania\
 
 var runner = new AlterationRunner(map);
 
-runner.Run(new AuthorRemoved(), new Freewheel());
+runner.Run(new AuthorRemoved(), new Flags());
 
-map.Save("c:\\Users\\hugok\\Documents\\Trackmania\\Maps\\Campaigns\\Fall 2026\\Fall 2026 - 01 Freewheel.Map.Gbx");
+map.Save("c:\\Users\\hugok\\Documents\\Trackmania\\Maps\\Campaigns\\Fall 2026\\Fall 2026 - 01 Flags.Map.Gbx");
