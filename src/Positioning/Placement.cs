@@ -34,20 +34,18 @@ public static class Placement
         CGameCtnBlock block,
         Vector3 offset)
     {
-        var positionOffset = referenceBlock.Direction switch
-        {
-            Direction.North => new(GridConstants.BlockSize, 0, 0),
-            Direction.East => new(GridConstants.BlockSize, 0, GridConstants.BlockSize),
-            Direction.South => new(0, 0, GridConstants.BlockSize),
-            Direction.West => Vector3.Zero,
-            _ => throw new ArgumentOutOfRangeException(nameof(referenceBlock))
-        };
-        var position = referenceBlock.AbsolutePositionInMap
-            ?? new Vec3(
-                referenceBlock.Coord.X * GridConstants.BlockSize + positionOffset.X,
-                (referenceBlock.Coord.Y - GroundRow(map)) * GridConstants.VerticalBlockSize,
-                referenceBlock.Coord.Z * GridConstants.BlockSize + positionOffset.Z);
+        var position = GetBlockPosition(referenceBlock, map);
 
+        static Vec3 GetBlockPosition(CGameCtnBlock block, CGameCtnChallenge map)
+        {
+            var x = block.Coord.X * GridConstants.BlockSize;
+            var y = (block.Coord.Y - GroundRow(map)) * GridConstants.VerticalBlockSize;
+            var z = block.Coord.Z * GridConstants.BlockSize;
+            if (block.Direction != Direction.West) x += GridConstants.BlockSize;
+            if (block.Direction == Direction.South) z += GridConstants.BlockSize;
+            return new(x, y, z);
+        }
+        
         (float x, float z) = referenceBlock.Direction switch
         {
             Direction.North => (offset.X, offset.Z),
