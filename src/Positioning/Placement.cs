@@ -3,6 +3,8 @@ using System;
 using System.Numerics;
 using GBX.NET;
 using GBX.NET.Engines.Game;
+using Microsoft.VisualBasic;
+using tman.src.Inventory;
 
 namespace tman.src.Positioning;
 
@@ -32,13 +34,21 @@ public static class Placement
         CGameCtnBlock block,
         Vector3 offset)
     {
-        Vec3 position = referenceBlock.AbsolutePositionInMap
+        var positionOffset = referenceBlock.Direction switch
+        {
+            Direction.North => new(GridConstants.BlockSize, 0, 0),
+            Direction.East => new(GridConstants.BlockSize, 0, GridConstants.BlockSize),
+            Direction.South => new(0, 0, GridConstants.BlockSize),
+            Direction.West => Vector3.Zero,
+            _ => throw new ArgumentOutOfRangeException(nameof(referenceBlock))
+        };
+        var position = referenceBlock.AbsolutePositionInMap
             ?? new Vec3(
-                referenceBlock.Coord.X * GridConstants.BlockSize + GridConstants.BlockSize,
+                referenceBlock.Coord.X * GridConstants.BlockSize + positionOffset.X,
                 (referenceBlock.Coord.Y - GroundRow(map)) * GridConstants.VerticalBlockSize,
-                referenceBlock.Coord.Z * GridConstants.BlockSize);
+                referenceBlock.Coord.Z * GridConstants.BlockSize + positionOffset.Z);
 
-        (float X, float Z) = referenceBlock.Direction switch
+        (float x, float z) = referenceBlock.Direction switch
         {
             Direction.North => (offset.X, offset.Z),
             Direction.East => (-offset.Z, offset.X),
@@ -46,7 +56,6 @@ public static class Placement
             Direction.West => (offset.Z, -offset.X),
             _ => throw new ArgumentOutOfRangeException(nameof(referenceBlock))
         };
-
         float yaw = referenceBlock.Direction switch
         {
             Direction.North => 0f,
@@ -55,15 +64,14 @@ public static class Placement
             Direction.West => MathF.PI / 2f,
             _ => throw new ArgumentOutOfRangeException(nameof(referenceBlock))
         };
-
         block.Coord = referenceBlock.Coord;
         block.Direction = Direction.North;
+        block.IsFree = true;
         block.YawPitchRoll = new Vec3(yaw, 0f, 0f);
         block.AbsolutePositionInMap = new Vec3(
-            position.X + X,
+            position.X + x,
             position.Y + offset.Y,
-            position.Z + Z);
-
+            position.Z + z);
         map.PlaceBlock(block);
     }
     public static void PlaceRelative(
@@ -91,12 +99,10 @@ public static class Placement
                 new Vector3(-offset.Z, offset.Y, offset.X),
             _ => offset
         };
-
         var position = new Vec3(
             referenceItem.AbsolutePositionInMap.X + rotatedOffset.X,
             referenceItem.AbsolutePositionInMap.Y + rotatedOffset.Y,
             referenceItem.AbsolutePositionInMap.Z + rotatedOffset.Z);
-
         map.PlaceAnchoredObject(item.ItemModel, position, referenceItem.YawPitchRoll, Vec3.Zero);
     }
 }
