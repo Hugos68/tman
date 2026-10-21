@@ -11,7 +11,7 @@ namespace tman.src.Alterations
     {
         public void Apply(CGameCtnChallenge map)
         {
-            new CheckpointsCleaned().Apply(map);
+            new StraightToTheFinish().Apply(map);
 
             var finishes = map.AnchoredObjects.RemoveAll(InventoryUtility.IsFinish);
 

@@ -5,7 +5,7 @@ using tman.src.Positioning;
 
 namespace tman.src.Alterations
 {
-    public class CheckpointsCleaned : IAlteration
+    public class StraightToTheFinish : IAlteration
     {
         private static readonly Dictionary<string, (string Name, DirectionOffset Rotation)> BlockReplacements = new()
         {
@@ -64,7 +64,7 @@ namespace tman.src.Alterations
         public void Apply(CGameCtnChallenge map)
         {
             RemoveCheckpointItems(map);
-            CleanCheckpointBlocks(map);
+            ReplaceCheckpointBlocks(map);
         }
 
         private static void RemoveCheckpointItems(CGameCtnChallenge map)
@@ -74,7 +74,7 @@ namespace tman.src.Alterations
                 obj => obj.ItemModel.Id.Contains("Checkpoint"));
         }
 
-        private static void CleanCheckpointBlocks(CGameCtnChallenge map)
+        private static void ReplaceCheckpointBlocks(CGameCtnChallenge map)
         {
             if (map.Blocks is null) return;
             map.Blocks.RemoveAll(block => block.BlockModel.Id == "GateCheckpoint");
