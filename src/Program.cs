@@ -79,27 +79,27 @@ rootCommand.SetAction(parseResult =>
             SafeSkippableChunks = true
         });
 
-        switch (alteration)
+        switch (alteration.ToLower())
         {
-            case "Checkpointless":
+            case "checkpointless":
                 new Checkpointless().Apply(map);
                 break;
-            case "Flags":
+            case "flags":
                 new Flags().Apply(map);
                 break;
-            case "Freewheel":
+            case "freewheel":
                 new Freewheel().Apply(map);
                 break;
-            case "Manslaughter":
+            case "manslaughter":
                 new Manslaughter().Apply(map);
                 break;
-            case "NoSteer":
+            case "nosteer":
                 new NoSteer().Apply(map);
                 break;
-            case "SlowMotion":
+            case "slowmotion":
                 new SlowMotion().Apply(map);
                 break;
-            case "StraightToTheFinish":
+            case "straighttothefinish":
                 new StraightToTheFinish().Apply(map);
                 break;
             default:
