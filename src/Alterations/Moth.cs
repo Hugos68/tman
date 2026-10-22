@@ -30,8 +30,6 @@ namespace tman.src.Alterations
             [("ShowLight4Spots", null)] = "FinishShowLight4Spots.Item.Gbx",
             [("ShowLightRamp4m", null)] = "FinishShowLightRamp4m.Item.Gbx",
             [("ShowLightRamp8m", null)] = "FinishShowLightRamp8m.Item.Gbx",
-            [("ShowTorch", null)] = "FinishShowTorch.Item.Gbx",
-            [("ShowTorchSmall", null)] = "FinishShowTorchSmall.Item.Gbx",
             [("ShowLights", 23)] = "FinishShowLightsV23.Item.Gbx",   // Light4Spots head
             [("ShowLights", 24)] = "FinishShowLightsV24.Item.Gbx",   // LightRamp4m bar
             [("ShowLights", 25)] = "FinishShowLightsV25.Item.Gbx",   // LightRamp8m bar
@@ -56,8 +54,9 @@ namespace tman.src.Alterations
         protected override void Run(CGameCtnChallenge map)
         {
             var mothDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "lights");
+            
             var carrierPaths = Directory.EnumerateFiles(mothDirectory, "*.Item.Gbx")
-                .ToDictionary(Path.GetFileName, path => path);
+                .ToDictionary(path => Path.GetFileName(path), path => path);
 
             var used = new HashSet<string>();
 
