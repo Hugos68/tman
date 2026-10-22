@@ -83,9 +83,10 @@ rootCommand.SetAction(parseResult =>
         Alteration alteration = alterationInput.ToLower() switch
         {
             "checkpointless" => new Checkpointless(),
-            "flags" => new Flags(),
+            "flags" => new Moth(),
             "freewheel" => new Freewheel(),
             "manslaughter" => new Manslaughter(),
+            "moth" => new Moth(),
             "nosteer" => new NoSteer(),
             "slowmotion" => new SlowMotion(),
             "straighttothefinish" => new StraightToTheFinish(),

@@ -25,7 +25,7 @@ namespace tman.src.Alterations
                 ApplicationConstants.ProjectDirectory,
                 "data",
                 "items",
-                "manslaughter");
+                "stands");
 
             var standItemPaths = Directory.EnumerateFiles(standsDirectory, "*.Item.Gbx");
 
