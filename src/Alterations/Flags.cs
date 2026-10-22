@@ -16,6 +16,7 @@ namespace tman.src.Alterations
             new WithoutValidation(),
             new WithoutInventory(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
             new CheckpointsCleaned(),
+            new MapNameEdited(name => name + " Flags")
         ];
 
         protected override void Run(CGameCtnChallenge map)

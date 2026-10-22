@@ -13,6 +13,7 @@ namespace tman.src.Alterations
             new CheckpointEffect("NoEngine", new(0, 0, -2)),
             new CheckpointEffect("Turbo", new(0, 0, 0)),
             new CheckpointEffect("NoEngine", new(0, 0, 2)),
+            new MapNameEdited(name => name + " Freewheel")
         ];
     }
 }
