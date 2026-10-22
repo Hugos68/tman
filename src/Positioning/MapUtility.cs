@@ -5,7 +5,7 @@ using GBX.NET.Engines.Game;
 
 namespace tman.src.Positioning;
 
-public static class PlacementUtility
+public static class MapUtility
 {
     public static int GroundRow(CGameCtnChallenge map) =>
         map.Collection.ToString() switch

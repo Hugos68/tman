@@ -44,7 +44,7 @@ namespace tman.src.Alterations
                 {
                     continue;
                 }
-                PlacementUtility.PlaceRelative(map, flag, new CGameCtnAnchoredObject()
+                MapUtility.PlaceRelative(map, flag, new CGameCtnAnchoredObject()
                 {
                     ItemModel = EmbedUtility.ExtractIdent(flagItemPath)
                 });

@@ -21,7 +21,7 @@ namespace tman.src.Alterations.Helpers
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    PlacementUtility.PlaceRelative(
+                    MapUtility.PlaceRelative(
                         map,
                         block,
                         new CGameCtnBlock { Name = $"GateExpandableSpecial{effect}" },
@@ -33,7 +33,7 @@ namespace tman.src.Alterations.Helpers
 
             foreach (var item in items)
             {
-                PlacementUtility.PlaceRelative(
+                MapUtility.PlaceRelative(
                     map,
                     item,
                     new CGameCtnAnchoredObject
