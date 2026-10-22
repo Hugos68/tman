@@ -45,7 +45,10 @@ rootCommand.SetAction(parseResult =>
         return 1;
     }
 
-    var map = Gbx.Parse<CGameCtnChallenge>(input.FullName);
+    var map = Gbx.Parse<CGameCtnChallenge>(input.FullName, new()
+    {
+        SafeSkippableChunks = true
+    });
 
     switch (alteration)
     {
