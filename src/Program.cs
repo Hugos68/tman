@@ -6,6 +6,7 @@ using GBX.NET;
 using GBX.NET.Engines.Game;
 using tman.src;
 using tman.src.Alterations;
+using tman.src.Application;
 
 ApplicationInitializer.Initialize();
 

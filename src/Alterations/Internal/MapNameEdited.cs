@@ -1,12 +1,13 @@
 using System;
 using GBX.NET.Engines.Game;
 
-namespace tman.src.Alterations.Internal;
-
-public class MapNameEdited(Func<string, string> edit) : Alteration
+namespace tman.src.Alterations.Internal
 {
-    protected override void Run(CGameCtnChallenge map)
+    public class MapNameEdited(Func<string, string> edit) : Alteration
     {
-        map.MapName = edit(map.MapName);
+        protected override void Run(CGameCtnChallenge map)
+        {
+            map.MapName = edit(map.MapName);
+        }
     }
 }

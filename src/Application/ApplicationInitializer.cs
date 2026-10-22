@@ -1,12 +1,13 @@
 using GBX.NET;
 using GBX.NET.LZO;
 
-namespace tman.src;
-
-public static class ApplicationInitializer
+namespace tman.src.Application
 {
-    public static void Initialize()
+    public static class ApplicationInitializer
     {
-        Gbx.LZO = new Lzo();
+        public static void Initialize()
+        {
+            Gbx.LZO = new Lzo();
+        }
     }
 }

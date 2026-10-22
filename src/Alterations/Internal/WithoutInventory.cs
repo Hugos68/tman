@@ -1,21 +1,22 @@
 using System;
 using GBX.NET.Engines.Game;
 
-namespace tman.src.Alterations.Internal;
-
-public class WithoutInventory(
-    Predicate<CGameCtnBlock>? blocks = null,
-    Predicate<CGameCtnAnchoredObject>? items = null) : Alteration
+namespace tman.src.Alterations.Internal
 {
-    protected override void Run(CGameCtnChallenge map)
+    public class WithoutInventory(
+        Predicate<CGameCtnBlock>? blocks = null,
+        Predicate<CGameCtnAnchoredObject>? items = null) : Alteration
     {
-        if (blocks is not null)
+        protected override void Run(CGameCtnChallenge map)
         {
-            map.Blocks?.RemoveAll(blocks);
-        }
-        if (items is not null)
-        {
-            map.AnchoredObjects?.RemoveAll(items);
+            if (blocks is not null)
+            {
+                map.Blocks?.RemoveAll(blocks);
+            }
+            if (items is not null)
+            {
+                map.AnchoredObjects?.RemoveAll(items);
+            }
         }
     }
 }
