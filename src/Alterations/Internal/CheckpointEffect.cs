@@ -1,9 +1,9 @@
 using GBX.NET;
 using GBX.NET.Engines.Game;
-using tman.src.Alterations.Helpers;
+using tman.src.Alterations.Internal;
 using tman.src.Inventory;
 
-namespace tman.src.Alterations.Helpers;
+namespace tman.src.Alterations.Internal;
 
 public class CheckpointEffect(string effect, Vec3 offset) : WaypointEffect(effect, offset)
 {

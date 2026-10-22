@@ -1,7 +1,7 @@
 using System;
 using GBX.NET.Engines.Game;
 
-namespace tman.src.Alterations.Helpers;
+namespace tman.src.Alterations.Internal;
 
 public class WithoutInventory(
     Predicate<CGameCtnBlock>? blocks = null,

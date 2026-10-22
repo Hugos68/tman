@@ -5,7 +5,7 @@ using GBX.NET.Engines.Game;
 using tman.src.Inventory;
 using tman.src.Positioning;
 
-namespace tman.src.Alterations.Helpers
+namespace tman.src.Alterations.Internal
 {
     public abstract class WaypointEffect(string effect, Vec3 offset) : Alteration
     {

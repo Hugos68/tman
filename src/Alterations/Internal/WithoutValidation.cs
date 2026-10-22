@@ -1,7 +1,7 @@
 using System.Xml.Linq;
 using GBX.NET.Engines.Game;
 
-namespace tman.src.Alterations.Helpers
+namespace tman.src.Alterations.Internal
 {
     public class WithoutValidation : Alteration
     {

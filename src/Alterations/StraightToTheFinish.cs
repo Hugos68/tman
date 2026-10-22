@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using tman.src.Alterations.Helpers;
+using tman.src.Alterations.Internal;
 namespace tman.src.Alterations
 {
     public class StraightToTheFinish : Alteration
