@@ -79,7 +79,7 @@ rootCommand.SetAction(parseResult =>
             SafeSkippableChunks = true
         });
 
-        Alteration alteration = alterationInput.ToLower() switch 
+        Alteration alteration = alterationInput.ToLower() switch
         {
             "checkpointless" => new Checkpointless(),
             "flags" => new Flags(),
@@ -90,7 +90,7 @@ rootCommand.SetAction(parseResult =>
             "straighttothefinish" => new StraightToTheFinish(),
             _ => throw new ArgumentException($"Unknown alteration: {alterationInput}"),
         };
-        
+
         alteration.Apply(map);
 
         var outputPath = output;
