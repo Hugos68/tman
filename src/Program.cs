@@ -86,3 +86,6 @@ rootCommand.SetAction(parseResult =>
 });
 
 return rootCommand.Parse(args).Invoke();
+
+
+// dotnet run Flags -i "C:\Users\hugok\Documents\Trackmania\Maps\My Maps\test.Map.Gbx" -o "C:\Users\hugok\Documents\Trackmania\Maps\My Maps\test Flags.Map.Gbx"
