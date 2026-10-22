@@ -1,18 +1,27 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using GBX.NET.Engines.Game;
+using tman.src.Alterations.Helpers;
 using tman.src.Application;
 using tman.src.Inventory;
 using tman.src.Positioning;
 
 namespace tman.src.Alterations
 {
-    public class Manslaughter : IAlteration
+    public class Manslaughter : Alteration
     {
-        public void Apply(CGameCtnChallenge map)
+        protected override IEnumerable<Alteration> PreappliedAlterations =>
+        [
+            new WithoutValidation(),
+            new WithoutInventory(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
+            new StraightToTheFinish(),
+        ];
+
+        protected override void Run(CGameCtnChallenge map)
         {
-            var finishes = map.AnchoredObjects.RemoveAll(InventoryUtility.IsFinish);
+            map.AnchoredObjects?.RemoveAll(InventoryUtility.IsFinish);
 
             var standsDirectory = Path.Combine(
                 ApplicationConstants.ProjectDirectory,
@@ -27,13 +36,17 @@ namespace tman.src.Alterations
                 EmbedUtility.Embed(map, path);
             }
 
-            var stands = map.Blocks
+            var stands = map.Blocks?
                 .Where(item => item.BlockModel.Id.Contains("Stand"))
-                .ToList();
+                .ToList() ?? [];
 
             foreach (var stand in stands)
             {
                 var standItemPath = standItemPaths.FirstOrDefault(path => Path.GetFileName(path).Contains(stand.BlockModel.Id));
+                if (standItemPath is null)
+                {
+                    continue;
+                }
                 PlacementUtility.PlaceRelative(map, stand, new CGameCtnAnchoredObject()
                 {
                     ItemModel = EmbedUtility.ExtractIdent(standItemPath)

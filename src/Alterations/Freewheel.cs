@@ -1,17 +1,18 @@
-using GBX.NET.Engines.Game;
-using tman.src;
+using System.Collections.Generic;
+using tman.src.Alterations.Helpers;
 
 namespace tman.src.Alterations
 {
-    public class Freewheel : IAlteration
+    public class Freewheel : Alteration
     {
-        public void Apply(CGameCtnChallenge map)
-        {
-            new StartEffect("Turbo", new(0, 0, 0)).Apply(map);
-            new StartEffect("NoEngine", new(0, 0, 2)).Apply(map);
-            new CheckpointEffect("NoEngine", new(0, 0, -2)).Apply(map);
-            new CheckpointEffect("Turbo", new(0, 0, 0)).Apply(map);
-            new CheckpointEffect("NoEngine", new(0, 0, 2)).Apply(map);
-        }
+        protected override IEnumerable<Alteration> PreappliedAlterations =>
+        [
+            new WithoutValidation(),
+            new StartEffect("Turbo", new(0, 0, 0)),
+            new StartEffect("NoEngine", new(0, 0, 2)),
+            new CheckpointEffect("NoEngine", new(0, 0, -2)),
+            new CheckpointEffect("Turbo", new(0, 0, 0)),
+            new CheckpointEffect("NoEngine", new(0, 0, 2)),
+        ];
     }
 }

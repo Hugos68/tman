@@ -1,12 +1,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using GBX.NET.Engines.Game;
+using tman.src.Alterations.Helpers;
+using tman.src.Inventory;
 using tman.src.Positioning;
 
 namespace tman.src.Alterations
 {
-    public class StraightToTheFinish : IAlteration
+    public class StraightToTheFinish : Alteration
     {
+        protected override IEnumerable<Alteration> PreappliedAlterations =>
+        [
+            new WithoutValidation(),
+            new WithoutInventory(items: InventoryUtility.IsFinish),
+        ];
+
         private static readonly Dictionary<string, (string Name, DirectionOffset Rotation)> BlockReplacements = new()
         {
             // Road Tech
@@ -75,26 +83,12 @@ namespace tman.src.Alterations
             ["OpenGrassRoadCheckpoint"] = ("OpenGrassRoadStraight", DirectionOffset.None),
         };
 
-        public void Apply(CGameCtnChallenge map)
+        protected override void Run(CGameCtnChallenge map)
         {
-            RemoveCheckpointItems(map);
-            ReplaceCheckpointBlocks(map);
-        }
-
-        private static void RemoveCheckpointItems(CGameCtnChallenge map)
-        {
-            if (map.AnchoredObjects is null) return;
-            map.AnchoredObjects.RemoveAll(
-                obj => obj.ItemModel.Id.Contains("Checkpoint"));
-        }
-
-        private static void ReplaceCheckpointBlocks(CGameCtnChallenge map)
-        {
-            if (map.Blocks is null) return;
-            map.Blocks.RemoveAll(block => block.BlockModel.Id == "GateCheckpoint");
-            var checkpointBlocks = map.Blocks
+            map.Blocks?.RemoveAll(block => block.BlockModel.Id == "GateCheckpoint");
+            var checkpointBlocks = map.Blocks?
                 .Where(block => block.BlockModel.Id.Contains("Checkpoint"))
-                .ToList();
+                .ToList() ?? [];
             foreach (var block in checkpointBlocks)
             {
                 if (!BlockReplacements.TryGetValue(block.BlockModel.Id, out var blockReplacement)) throw new KeyNotFoundException($"No replacement found for block ID '{block.BlockModel.Id}'");

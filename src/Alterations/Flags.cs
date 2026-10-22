@@ -1,18 +1,25 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using GBX.NET.Engines.Game;
+using tman.src.Alterations.Helpers;
 using tman.src.Application;
 using tman.src.Inventory;
 using tman.src.Positioning;
 
 namespace tman.src.Alterations
 {
-    public class Flags : IAlteration
+    public class Flags : Alteration
     {
-        public void Apply(CGameCtnChallenge map)
-        {
-            var finishes = map.AnchoredObjects.RemoveAll(InventoryUtility.IsFinish);
+        protected override IEnumerable<Alteration> PreappliedAlterations =>
+        [
+            new WithoutValidation(),
+            new WithoutInventory(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
+            new StraightToTheFinish(),
+        ];
 
+        protected override void Run(CGameCtnChallenge map)
+        {
             var flagsDirectory = Path.Combine(
                 ApplicationConstants.ProjectDirectory,
                 "data",
@@ -26,13 +33,17 @@ namespace tman.src.Alterations
                 EmbedUtility.Embed(map, path);
             }
 
-            var flags = map.AnchoredObjects
+            var flags = map.AnchoredObjects?
                 .Where(item => item.ItemModel.Id.Contains("Flag"))
-                .ToList();
+                .ToList() ?? [];
 
             foreach (var flag in flags)
             {
                 var flagItemPath = flagItemPaths.FirstOrDefault(path => Path.GetFileName(path).Contains(flag.ItemModel.Id));
+                if (flagItemPath is null)
+                {
+                    continue;
+                }
                 PlacementUtility.PlaceRelative(map, flag, new CGameCtnAnchoredObject()
                 {
                     ItemModel = EmbedUtility.ExtractIdent(flagItemPath)

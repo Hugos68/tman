@@ -1,17 +1,19 @@
 using System.Xml.Linq;
+using GBX.NET.Engines.Game;
 
-namespace tman.src.Alterations
+namespace tman.src.Alterations.Helpers
 {
-    public class WithoutValidation : IAlteration
+    public class WithoutValidation : Alteration
     {
-        public void Apply(GBX.NET.Engines.Game.CGameCtnChallenge map)
+        protected override void Run(CGameCtnChallenge map)
         {
             map.AuthorTime = new(-1);
             map.GoldTime = new(-1);
             map.SilverTime = new(-1);
             map.BronzeTime = new(-1);
-            map.ChallengeParameters.RaceValidateGhost = null;
-            map.Xml = RemoveValidationFromXml(map.Xml);
+            map.ChallengeParameters?.RaceValidateGhost = null;
+            if (map.Xml is not null)
+                map.Xml = RemoveValidationFromXml(map.Xml);
         }
 
         private static string RemoveValidationFromXml(string xml)

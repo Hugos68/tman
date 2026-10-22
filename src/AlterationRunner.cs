@@ -6,9 +6,9 @@ namespace tman.src
     {
         public static void Run(
             CGameCtnChallenge map,
-            params IAlteration[] alterations)
+            params Alteration[] alterations)
         {
-            foreach (IAlteration alteration in alterations)
+            foreach (Alteration alteration in alterations)
             {
                 alteration.Apply(map);
             }

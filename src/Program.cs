@@ -8,7 +8,7 @@ ApplicationInitializer.Initialize();
 
 var map = Gbx.Parse<CGameCtnChallenge>("c:\\Users\\hugok\\Documents\\Trackmania\\Maps\\Campaigns\\Fall 2026\\Egypt 2026.Map.Gbx");
 
-AlterationRunner.Run(map, new WithoutValidation(), new Freewheel(), new MapNameSuffix(" Freewheel"));
+AlterationRunner.Run(map, new Flags());
 
 map.Save("c:\\Users\\hugok\\Documents\\Trackmania\\Maps\\Campaigns\\Fall 2026\\Egypt 2026 Freewheel.Map.Gbx");
 
