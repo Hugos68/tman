@@ -25,7 +25,7 @@ namespace tman.src.Alterations.Internal
             ["RoadTechCheckpointTiltLeft"] = ("RoadTechTiltStraight", DirectionOffset.Half),
             ["RoadTechCheckpointTiltRight"] = ("RoadTechTiltStraight", DirectionOffset.None),
             ["RoadTechDiagRightCheckpoint"] = ("RoadTechDiagRightStraightX2", DirectionOffset.None),
-            ["RoadTechDiagLeftCheckpoint"] = ("RoadTechDiagLeftStraightX2", DirectionOffset.None),  
+            ["RoadTechDiagLeftCheckpoint"] = ("RoadTechDiagLeftStraightX2", DirectionOffset.None),
 
             // Road Dirt
             ["RoadDirtCheckpoint"] = ("RoadDirtStraight", DirectionOffset.None),

@@ -34,7 +34,7 @@ rootCommand.Options.Add(outputOption);
 
 rootCommand.SetAction(parseResult =>
 {
-    var alteration = parseResult.GetValue(alterationArgument)!;
+    var alterationInput = parseResult.GetValue(alterationArgument)!;
     var input = parseResult.GetValue(inputOption)!;
     var output = parseResult.GetValue(outputOption)!;
 
@@ -79,33 +79,19 @@ rootCommand.SetAction(parseResult =>
             SafeSkippableChunks = true
         });
 
-        switch (alteration.ToLower())
+        Alteration alteration = alterationInput.ToLower() switch 
         {
-            case "checkpointless":
-                new Checkpointless().Apply(map);
-                break;
-            case "flags":
-                new Flags().Apply(map);
-                break;
-            case "freewheel":
-                new Freewheel().Apply(map);
-                break;
-            case "manslaughter":
-                new Manslaughter().Apply(map);
-                break;
-            case "nosteer":
-                new NoSteer().Apply(map);
-                break;
-            case "slowmotion":
-                new SlowMotion().Apply(map);
-                break;
-            case "straighttothefinish":
-                new StraightToTheFinish().Apply(map);
-                break;
-            default:
-                Console.Error.WriteLine($"Unknown alteration: {alteration}");
-                return 1;
-        }
+            "checkpointless" => new Checkpointless(),
+            "flags" => new Flags(),
+            "freewheel" => new Freewheel(),
+            "manslaughter" => new Manslaughter(),
+            "nosteer" => new NoSteer(),
+            "slowmotion" => new SlowMotion(),
+            "straighttothefinish" => new StraightToTheFinish(),
+            _ => throw new ArgumentException($"Unknown alteration: {alterationInput}"),
+        };
+        
+        alteration.Apply(map);
 
         var outputPath = output;
 
