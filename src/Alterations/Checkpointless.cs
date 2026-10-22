@@ -14,10 +14,5 @@ namespace tman.src.Alterations
             new WithoutInventory(InventoryUtility.IsCheckpoint, InventoryUtility.IsCheckpoint),
             new StraightToTheFinish(),
         ];
-        protected override void Run(CGameCtnChallenge map)
-        {
-            map.Blocks?.RemoveAll(block => block.BlockModel.Id.Contains("Checkpoint"));
-            map.AnchoredObjects?.RemoveAll(obj => obj.ItemModel.Id.Contains("Checkpoint"));
-        }
     }
 }

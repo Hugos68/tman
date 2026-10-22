@@ -12,7 +12,9 @@ namespace tman.src.Alterations
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
             new WithoutValidation(),
-            new WithoutInventory(items: InventoryUtility.IsFinish),
+            new WithoutInventory(
+                items: InventoryUtility.IsFinish,
+                blocks: block => InventoryUtility.IsCheckpoint(block) && block.BlockModel.Id == "GateCheckpoint"),
         ];
 
         private static readonly Dictionary<string, (string Name, DirectionOffset Rotation)> BlockReplacements = new()
@@ -85,7 +87,6 @@ namespace tman.src.Alterations
 
         protected override void Run(CGameCtnChallenge map)
         {
-            map.Blocks?.RemoveAll(block => block.BlockModel.Id == "GateCheckpoint");
             var checkpointBlocks = map.Blocks?
                 .Where(block => block.BlockModel.Id.Contains("Checkpoint"))
                 .ToList() ?? [];

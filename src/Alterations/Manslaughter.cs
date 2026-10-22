@@ -21,8 +21,6 @@ namespace tman.src.Alterations
 
         protected override void Run(CGameCtnChallenge map)
         {
-            map.AnchoredObjects?.RemoveAll(InventoryUtility.IsFinish);
-
             var standsDirectory = Path.Combine(
                 ApplicationConstants.ProjectDirectory,
                 "data",
