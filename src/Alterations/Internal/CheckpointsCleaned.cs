@@ -24,6 +24,8 @@ namespace tman.src.Alterations.Internal
             ["RoadTechCheckpointSlopeDown"] = ("RoadTechSlopeStraight", DirectionOffset.Half),
             ["RoadTechCheckpointTiltLeft"] = ("RoadTechTiltStraight", DirectionOffset.Half),
             ["RoadTechCheckpointTiltRight"] = ("RoadTechTiltStraight", DirectionOffset.None),
+            ["RoadTechDiagRightCheckpoint"] = ("RoadTechDiagRightStraightX2", DirectionOffset.None),
+            ["RoadTechDiagLeftCheckpoint"] = ("RoadTechDiagLeftStraightX2", DirectionOffset.None),  
 
             // Road Dirt
             ["RoadDirtCheckpoint"] = ("RoadDirtStraight", DirectionOffset.None),
@@ -45,6 +47,9 @@ namespace tman.src.Alterations.Internal
             ["RoadIceCheckpointSlopeDown"] = ("RoadIceSlopeStraight", DirectionOffset.Half),
             ["RoadIceCheckpointTiltLeft"] = ("RoadIceTiltStraight", DirectionOffset.Half),
             ["RoadIceCheckpointTiltRight"] = ("RoadIceTiltStraight", DirectionOffset.None),
+
+            // Road Water
+            ["RoadWaterCheckpoint"] = ("RoadWaterStraight", DirectionOffset.None),
 
             // Platform Tech
             ["PlatformTechCheckpoint"] = ("PlatformTechBase", DirectionOffset.None),

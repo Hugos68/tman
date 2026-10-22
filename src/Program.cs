@@ -1,12 +1,11 @@
 ﻿
+using System;
+using System.IO;
+using System.CommandLine;
 using GBX.NET;
 using GBX.NET.Engines.Game;
 using tman.src;
 using tman.src.Alterations;
-using System.CommandLine;
-using System.IO;
-using System;
-
 
 ApplicationInitializer.Initialize();
 
@@ -15,19 +14,19 @@ var alterationArgument = new Argument<string>("alteration")
     Description = "The alteration to apply."
 };
 
-var inputOption = new Option<FileInfo>("--input", "-i")
+var inputOption = new Option<string>("--input", "-i")
 {
-    Description = "The input .Map.Gbx file.",
+    Description = "The input map file or wildcard pattern.",
     Required = true
 };
 
-var outputOption = new Option<FileInfo>("--output", "-o")
+var outputOption = new Option<string>("--output", "-o")
 {
-    Description = "The output map file.",
+    Description = "The output map file or wildcard pattern.",
     Required = true
 };
 
-var rootCommand = new RootCommand("Apply an alteration to a Trackmania map.");
+var rootCommand = new RootCommand("Apply an alteration to Trackmania maps.");
 
 rootCommand.Arguments.Add(alterationArgument);
 rootCommand.Options.Add(inputOption);
@@ -35,53 +34,101 @@ rootCommand.Options.Add(outputOption);
 
 rootCommand.SetAction(parseResult =>
 {
-    var alteration = parseResult.GetValue(alterationArgument);
+    var alteration = parseResult.GetValue(alterationArgument)!;
     var input = parseResult.GetValue(inputOption)!;
     var output = parseResult.GetValue(outputOption)!;
 
-    if (!input.Exists)
+    var inputDirectory = Path.GetDirectoryName(Path.GetFullPath(input))!;
+    var inputPattern = Path.GetFileName(input);
+    var isWildcard = inputPattern.Contains('*') || inputPattern.Contains('?');
+
+    if (!Directory.Exists(inputDirectory))
     {
-        Console.Error.WriteLine($"Input file not found: {input.FullName}");
+        Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
         return 1;
     }
 
-    var map = Gbx.Parse<CGameCtnChallenge>(input.FullName, new()
-    {
-        SafeSkippableChunks = true
-    });
+    var inputFiles = isWildcard
+        ? Directory.GetFiles(inputDirectory, inputPattern)
+        : File.Exists(input) ? [Path.GetFullPath(input)] : [];
 
-    switch (alteration)
+    if (inputFiles.Length == 0)
     {
-        case "Checkpointless":
-            new Checkpointless().Apply(map);
-            break;
-        case "Flags":
-            new Flags().Apply(map);
-            break;
-        case "Freewheel":
-            new Freewheel().Apply(map);
-            break;
-        case "Manslaughter":
-            new Manslaughter().Apply(map);
-            break;
-        case "NoSteer":
-            new NoSteer().Apply(map);
-            break;
-        case "SlowMotion":
-            new SlowMotion().Apply(map);
-            break;
-        case "StraightToTheFinish":
-            new StraightToTheFinish().Apply(map);
-            break;
-        default:
-            Console.Error.WriteLine($"Unknown alteration: {alteration}");
-            return 1;
+        Console.Error.WriteLine($"No input files found: {input}");
+        return 1;
     }
 
-    output.Directory?.Create();
-    map.Save(output.FullName);
+    if (isWildcard && !output.Contains('*'))
+    {
+        Console.Error.WriteLine(
+            "When using a wildcard input, the output path must contain '*'.");
+        return 1;
+    }
 
-    Console.WriteLine($"Applied {alteration}: {output.FullName}");
+    if (!isWildcard && inputFiles.Length == 1 && output.Contains('*'))
+    {
+        Console.Error.WriteLine(
+            "The output path cannot contain '*' when using a single input file.");
+        return 1;
+    }
+
+    foreach (var inputFile in inputFiles)
+    {
+        var map = Gbx.Parse<CGameCtnChallenge>(inputFile, new()
+        {
+            SafeSkippableChunks = true
+        });
+
+        switch (alteration)
+        {
+            case "Checkpointless":
+                new Checkpointless().Apply(map);
+                break;
+            case "Flags":
+                new Flags().Apply(map);
+                break;
+            case "Freewheel":
+                new Freewheel().Apply(map);
+                break;
+            case "Manslaughter":
+                new Manslaughter().Apply(map);
+                break;
+            case "NoSteer":
+                new NoSteer().Apply(map);
+                break;
+            case "SlowMotion":
+                new SlowMotion().Apply(map);
+                break;
+            case "StraightToTheFinish":
+                new StraightToTheFinish().Apply(map);
+                break;
+            default:
+                Console.Error.WriteLine($"Unknown alteration: {alteration}");
+                return 1;
+        }
+
+        var outputPath = output;
+
+        if (isWildcard)
+        {
+            const string extension = ".Map.Gbx";
+            var fileName = Path.GetFileName(inputFile);
+
+            var fileStem = fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase)
+                ? fileName[..^extension.Length]
+                : Path.GetFileNameWithoutExtension(fileName);
+
+            outputPath = outputPath.Replace("*", fileStem);
+        }
+
+        outputPath = Path.GetFullPath(outputPath);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
+
+        map.Save(outputPath);
+
+        Console.WriteLine($"Applied {alteration}: {outputPath}");
+    }
+
     return 0;
 });
 
