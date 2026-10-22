@@ -15,7 +15,7 @@ namespace tman.src.Alterations
         [
             new WithoutValidation(),
             new WithoutInventory(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
-            new StraightToTheFinish(),
+            new CheckpointsCleaned(),
         ];
 
         protected override void Run(CGameCtnChallenge map)
