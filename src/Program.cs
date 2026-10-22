@@ -114,7 +114,7 @@ rootCommand.SetAction(parseResult =>
 
         map.Save(outputPath);
 
-        Console.WriteLine($"Applied {alteration}: {outputPath}");
+        Console.WriteLine($"Applied {alterationInput}: {outputPath}");
     }
 
     return 0;
