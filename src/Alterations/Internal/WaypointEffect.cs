@@ -30,7 +30,7 @@ namespace tman.src.Alterations.Internal
             }
 
             var items = map.AnchoredObjects?.Where(Filter).ToList() ?? [];
-            
+
             foreach (var item in items)
             {
                 var defaultOffset = InventoryUtility.IsStart(item) ? new Vec3(0, 0, GridConstants.ItemStartZOffsetZ) : new Vec3(0, 0, 0);

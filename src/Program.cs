@@ -7,6 +7,6 @@ ApplicationInitializer.Initialize();
 
 var map = Gbx.Parse<CGameCtnChallenge>("c:\\Users\\hugok\\Documents\\Trackmania\\Maps\\Campaigns\\Fall 2026\\India 2026.Map.Gbx");
 
-new Freewheel().Apply(map);
+new SlowMotion().Apply(map);
 
-map.Save("c:\\Users\\hugok\\Documents\\Trackmania\\Maps\\Campaigns\\Fall 2026\\India 2026 Freewheel.Map.Gbx");
+map.Save("c:\\Users\\hugok\\Documents\\Trackmania\\Maps\\Campaigns\\Fall 2026\\India 2026 SlowMotion.Map.Gbx");
