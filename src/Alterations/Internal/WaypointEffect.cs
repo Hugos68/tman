@@ -33,7 +33,7 @@ namespace tman.src.Alterations.Internal
             
             foreach (var item in items)
             {
-                var defaultOffset = InventoryUtility.IsStart(item) ? new Vec3(0, 0, -11) : new Vec3(0, 0, 0);
+                var defaultOffset = InventoryUtility.IsStart(item) ? new Vec3(0, 0, GridConstants.ItemStartZOffsetZ) : new Vec3(0, 0, 0);
                 MapUtility.PlaceRelative(
                     map,
                     item,
