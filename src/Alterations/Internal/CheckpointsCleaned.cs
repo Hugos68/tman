@@ -10,7 +10,10 @@ namespace tman.src.Alterations.Internal
     {
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
-            new WithoutInventory(blocks: block => InventoryUtility.IsCheckpoint(block) && block.BlockModel.Id == "GateCheckpoint"),
+            new WithoutInventory(
+                blocks: block => InventoryUtility.IsCheckpoint(block) && block.BlockModel.Id == "GateCheckpoint",
+                items: InventoryUtility.IsCheckpoint
+            ),
         ];
 
         private static readonly Dictionary<string, (string Name, DirectionOffset Rotation)> BlockReplacements = new()
