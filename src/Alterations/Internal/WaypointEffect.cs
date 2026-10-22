@@ -30,9 +30,10 @@ namespace tman.src.Alterations.Internal
             }
 
             var items = map.AnchoredObjects?.Where(Filter).ToList() ?? [];
-
+            
             foreach (var item in items)
             {
+                var defaultOffset = InventoryUtility.IsStart(item) ? new Vec3(0, 0, -11) : new Vec3(0, 0, 0);
                 MapUtility.PlaceRelative(
                     map,
                     item,
@@ -40,12 +41,12 @@ namespace tman.src.Alterations.Internal
                     {
                         ItemModel = new()
                         {
-                            Id = InventoryUtility.ItemCheckpointIdToItemEffectId(item.ItemModel.Id, effect),
+                            Id = InventoryUtility.ItemWaypointIdToItemEffectId(item.ItemModel.Id, effect),
                             Author = item.ItemModel.Author,
                             Collection = item.ItemModel.Collection
                         }
                     },
-                    offset);
+                    defaultOffset + offset);
             }
         }
     }

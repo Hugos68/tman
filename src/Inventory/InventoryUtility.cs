@@ -13,14 +13,16 @@ namespace tman.src.Inventory
         public static bool IsStart(CGameCtnAnchoredObject item) => IsWaypoint(item) && item.ItemModel.Id.Contains("Start");
         public static bool IsFinish(CGameCtnBlock block) => IsWaypoint(block) && block.BlockModel.Id.Contains("Finish");
         public static bool IsFinish(CGameCtnAnchoredObject item) => IsWaypoint(item) && item.ItemModel.Id.Contains("Finish");
-        public static string ItemCheckpointIdToItemEffectId(string id, string effect)
+        public static string ItemWaypointIdToItemEffectId(string id, string effect)
         {
             return id
-                .Replace("Center", "", StringComparison.Ordinal)
+                .Replace("Start", "Special", StringComparison.Ordinal)
+                .Replace("Checkpoint", "Special", StringComparison.Ordinal)
+                .Replace("Finish", "Special", StringComparison.Ordinal)
                 .Replace("Left", "", StringComparison.Ordinal)
+                .Replace("Center", "", StringComparison.Ordinal)
                 .Replace("Right", "", StringComparison.Ordinal)
                 .Replace("v2", "", StringComparison.Ordinal)
-                .Replace("Checkpoint", "Special", StringComparison.Ordinal)
                 + effect;
         }
     }

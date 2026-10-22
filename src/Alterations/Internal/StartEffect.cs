@@ -1,6 +1,5 @@
 using GBX.NET;
 using GBX.NET.Engines.Game;
-using tman.src.Alterations.Internal;
 using tman.src.Inventory;
 
 namespace tman.src.Alterations.Internal;
