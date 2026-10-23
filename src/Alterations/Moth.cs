@@ -40,6 +40,17 @@ namespace tman.src.Alterations
             [("Show", 25)] = "FinishShowV25.Item.Gbx",
             [("Show", 35)] = "FinishShowV35.Item.Gbx",
             [("Show", 36)] = "FinishShowV36.Item.Gbx",
+            [("SnowLampSupportLampion", null)] = "FinishSnowLampSupportLampion.Item.Gbx",
+            [("SnowLampSupportLamp1", null)] = "FinishSnowLampSupportLamp1.Item.Gbx",
+            [("SnowLampSupportLamp2", null)] = "FinishSnowLampSupportLamp2.Item.Gbx",
+            [("SnowTemple16m", null)] = "FinishSnowTemple16m.Item.Gbx",
+            [("SnowTemple24m", null)] = "FinishSnowTemple24m.Item.Gbx",
+            [("SnowTemple32m", null)] = "FinishSnowTemple32m.Item.Gbx",
+            [("SnowTempleCross", null)] = "FinishSnowTempleCross.Item.Gbx",
+            [("SnowTempleDeadEnd", null)] = "FinishSnowTempleDeadEnd.Item.Gbx",
+            [("SnowTempleRoadCorner", null)] = "FinishSnowTempleRoadCorner.Item.Gbx",
+            [("SnowTempleRoadStraight", null)] = "FinishSnowTempleRoadStraight.Item.Gbx",
+            [("SnowTempleRoadTShaped", null)] = "FinishSnowTempleRoadTShaped.Item.Gbx",
         };
 
         private static readonly Dictionary<string, string> BlockCarriers = new()
