@@ -84,6 +84,7 @@ rootCommand.SetAction(parseResult =>
         {
             "checkpointless" => new Checkpointless(),
             "flags" => new Moth(),
+            "floorfinish" => new FloorFinish(),
             "freewheel" => new Freewheel(),
             "manslaughter" => new Manslaughter(),
             "moth" => new Moth(),
