@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using GBX.NET;
@@ -11,42 +12,26 @@ namespace tman.src.Positioning
 {
     public static class FloorFinishItem
     {
-        private static readonly Dictionary<string, (string Tile, float Bed)> OpenWater = new()
+        private static readonly Dictionary<string, (string[] Tiles, float Bed)> OpenWater = new()
         {
-            ["RedIsland"] = ("Water", 2.0f),
-            ["WhiteShore"] = ("Water", 2.0f),
-            ["BlueBay"] = ("Sea", 4.0f),
-            ["GreenCoast"] = ("Lake", 2.0f),
+            ["RedIsland"] = (["Water"], 2.0f),
+            ["WhiteShore"] = (["Water"], 2.0f),
+            ["BlueBay"] = (["Sea"], 4.0f),
+            ["GreenCoast"] = (["Lake"], 2.0f),
         };
 
         private const float Below = 0.1f;
         private const float Above = 0.4f;
-        private const float Cell = GridConstants.BlockSize;
+        private const float Cell = 32.0f;
+        private const float Grass = 2.0f;
 
-        public static byte[]? Build(CGameCtnChallenge map, string templatePath, string ident)
+        public static byte[]? Build(CGameCtnChallenge map, string templatePath, string footprintsPath, string ident)
         {
-            if (!OpenWater.TryGetValue(map.GetEnvironment(), out var water))
-            {
-                return null;
-            }
-
-            var groundRow = MapUtility.GroundRow(map);
-            var rows = new Dictionary<(int Y, int Z), SortedSet<int>>();
-            var blocks = (map.Blocks ?? []).Concat(map.BakedBlocks ?? []);
-            foreach (var block in blocks)
-            {
-                if (block.IsFree || block.BlockModel.Id != water.Tile)
-                {
-                    continue;
-                }
-                var key = (block.Coord.Y, block.Coord.Z);
-                if (!rows.TryGetValue(key, out var xs))
-                {
-                    rows[key] = xs = [];
-                }
-                xs.Add(block.Coord.X);
-            }
-            if (rows.Count == 0)
+            var collection = map.GetEnvironment();
+            var cells = collection == "Stadium"
+                ? FreeGrassCells(map, footprintsPath)
+                : OpenWaterCells(map, collection);
+            if (cells.Count == 0)
             {
                 return null;
             }
@@ -54,14 +39,22 @@ namespace tman.src.Positioning
             var vertices = new List<Vec3>();
             var triangles = new List<CPlugSurface.Mesh.Triangle>();
             int[][] quads = [[0, 3, 2, 1], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [1, 2, 6, 5], [0, 4, 7, 3]];
-            foreach (var ((cy, cz), xs) in rows)
+            foreach (var ((y, z), xs) in cells.OrderBy(c => c.Key))
             {
-                var bed = (cy - groundRow) * GridConstants.VerticalBlockSize + water.Bed;
-                var (y0, y1) = (bed - Below, bed + Above);
-                var (z0, z1) = (cz * Cell, (cz + 1) * Cell);
-                foreach (var (first, last) in Runs(xs))
+                var sorted = xs.Distinct().OrderBy(x => x).ToList();
+                var (y0, y1) = (y - Below, y + Above);
+                var (z0, z1) = (z * Cell, (z + 1) * Cell);
+                for (var i = 0; i < sorted.Count;)
                 {
-                    var (x0, x1) = (first * Cell, (last + 1) * Cell);
+                    var start = sorted[i];
+                    var end = start;
+                    while (i + 1 < sorted.Count && sorted[i + 1] == end + 1)
+                    {
+                        i++;
+                        end = sorted[i];
+                    }
+                    i++;
+                    var (x0, x1) = (start * Cell, (end + 1) * Cell);
                     var b = vertices.Count;
                     vertices.AddRange(
                     [
@@ -80,7 +73,7 @@ namespace tman.src.Positioning
             var item = gbx.Node;
             if (item.EntityModel is not CGameCommonItemEntityModel entity || entity.TriggerShape is not CPlugSurface trigger)
             {
-                throw new InvalidOperationException($"{templatePath} has no trigger surface");
+                throw new InvalidOperationException("the template has no trigger surface");
             }
             trigger.Surf = new CPlugSurface.Mesh
             {
@@ -96,26 +89,99 @@ namespace tman.src.Positioning
             return ms.ToArray();
         }
 
-        private static IEnumerable<(int First, int Last)> Runs(SortedSet<int> xs)
+        private static Dictionary<(float Y, int Z), List<int>> OpenWaterCells(CGameCtnChallenge map, string collection)
         {
-            int? first = null;
-            var last = 0;
-            foreach (var x in xs)
+            var rows = new Dictionary<(float, int), List<int>>();
+            if (!OpenWater.TryGetValue(collection, out var water))
             {
-                if (first is null || x != last + 1)
+                return rows;
+            }
+            var groundRow = MapUtility.GroundRow(map);
+            var seen = new HashSet<Int3>();
+            foreach (var block in (map.Blocks ?? []).Concat(map.BakedBlocks ?? []))
+            {
+                if (block.IsFree || !water.Tiles.Contains(block.BlockModel.Id) || !seen.Add(block.Coord))
                 {
-                    if (first is not null)
-                    {
-                        yield return (first.Value, last);
-                    }
-                    first = x;
+                    continue;
                 }
-                last = x;
+                var y = (block.Coord.Y - groundRow) * GridConstants.VerticalBlockSize + water.Bed;
+                Add(rows, (y, block.Coord.Z), block.Coord.X);
             }
-            if (first is not null)
+            return rows;
+        }
+
+        private static Dictionary<(float Y, int Z), List<int>> FreeGrassCells(CGameCtnChallenge map, string footprintsPath)
+        {
+            var rows = new Dictionary<(float, int), List<int>>();
+            var all = (map.Blocks ?? []).Concat(map.BakedBlocks ?? []).Where(b => !b.IsFree).ToList();
+            var grass = all.Where(b => b.BlockModel.Id == "Grass").ToList();
+            if (grass.Count == 0)
             {
-                yield return (first.Value, last);
+                return rows;
             }
+            var baseRow = grass.Min(b => b.Coord.Y);
+            var footprints = LoadFootprints(footprintsPath);
+            var occupied = new HashSet<(int X, int Z)>();
+            foreach (var block in map.Blocks ?? [])
+            {
+                if (block.IsFree || block.IsGhost || block.BlockModel.Id == "Grass" || !(block.IsGround || block.Coord.Y == baseRow))
+                {
+                    continue;
+                }
+                if (!footprints.TryGetValue(block.BlockModel.Id, out var footprint))
+                {
+                    footprint = (1, 1, [(0, 0)]);
+                }
+                foreach (var (ux, uz) in footprint.Cells)
+                {
+                    occupied.Add(Turn(block, ux, uz, footprint.SizeX, footprint.SizeZ));
+                }
+            }
+            var y = (baseRow - MapUtility.GroundRow(map)) * GridConstants.VerticalBlockSize + Grass;
+            foreach (var cell in grass.Select(b => (b.Coord.X, b.Coord.Z)).Distinct())
+            {
+                if (!occupied.Contains(cell))
+                {
+                    Add(rows, (y, cell.Z), cell.X);
+                }
+            }
+            return rows;
+        }
+
+        private static (int X, int Z) Turn(CGameCtnBlock block, int ux, int uz, int sizeX, int sizeZ)
+        {
+            var (x, z) = block.Direction switch
+            {
+                Direction.East => (sizeZ - 1 - uz, ux),
+                Direction.South => (sizeX - 1 - ux, sizeZ - 1 - uz),
+                Direction.West => (uz, sizeX - 1 - ux),
+                _ => (ux, uz),
+            };
+            return (block.Coord.X + x, block.Coord.Z + z);
+        }
+
+        private static Dictionary<string, (int SizeX, int SizeZ, (int, int)[] Cells)> LoadFootprints(string path)
+        {
+            var table = new Dictionary<string, (int, int, (int, int)[])>(StringComparer.OrdinalIgnoreCase);
+            foreach (var line in File.ReadLines(path).Skip(1))
+            {
+                var f = line.Split('\t');
+                var cells = f[3].Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(c => c.Split(','))
+                    .Select(c => (int.Parse(c[0], CultureInfo.InvariantCulture), int.Parse(c[1], CultureInfo.InvariantCulture)))
+                    .ToArray();
+                table[f[0]] = (int.Parse(f[1], CultureInfo.InvariantCulture), int.Parse(f[2], CultureInfo.InvariantCulture), cells);
+            }
+            return table;
+        }
+
+        private static void Add(Dictionary<(float, int), List<int>> rows, (float, int) key, int x)
+        {
+            if (!rows.TryGetValue(key, out var xs))
+            {
+                rows[key] = xs = [];
+            }
+            xs.Add(x);
         }
     }
 }

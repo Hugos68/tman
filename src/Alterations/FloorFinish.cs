@@ -21,17 +21,29 @@ namespace tman.src.Alterations
 
         protected override void Run(CGameCtnChallenge map)
         {
-            var templatePath = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "floor-finish", "FinishFloorTemplate.Item.Gbx");
+            var floorDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "floor");
             var ident = $"FinishFloor_{map.MapUid}.Item.Gbx";
-            var floorFinishItem = FloorFinishItem.Build(map, templatePath, ident);
-            if (floorFinishItem is null)
+
+            var bytes = FloorFinishItem.Build(
+                map,
+                Path.Combine(floorDirectory, "FinishFloorTemplate.Item.Gbx"),
+                Path.Combine(floorDirectory, "StadiumBlockFootprints.tsv"),
+                ident);
+            if (bytes is null)
             {
                 return;
             }
-            var itemPath = Path.Combine(Path.GetTempPath(), ident);
-            File.WriteAllBytes(itemPath, floorFinishItem);
-            EmbedUtility.Embed(map, itemPath);
-            map.PlaceAnchoredObject(EmbedUtility.ExtractIdent(itemPath), Vec3.Zero, Vec3.Zero, Vec3.Zero);
+
+            var generatedPath = Path.Combine(Path.GetTempPath(), ident);
+            File.WriteAllBytes(generatedPath, bytes);
+            EmbedUtility.Embed(map, generatedPath);
+
+            map.PlaceAnchoredObject(
+                EmbedUtility.ExtractIdent(generatedPath),
+                Vec3.Zero,
+                Vec3.Zero,
+                Vec3.Zero);
+            map.AnchoredObjects![^1].WaypointSpecialProperty = new() { Tag = "Goal", Order = 0 };
         }
     }
 }
