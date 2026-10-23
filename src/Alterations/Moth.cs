@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using GBX.NET.Engines.Game;
 using tman.src.Alterations.Internal;
 using tman.src.Application;
@@ -64,12 +65,24 @@ namespace tman.src.Alterations
 
         private static readonly string MothDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "moth");
 
+        private static readonly Regex VariantRegex = new(@"V(\d+)$", RegexOptions.Compiled);
+
         protected override void Run(CGameCtnChallenge map)
         {
             foreach (var (itemId, finishFile) in ItemFinishes)
             {
+                var match = VariantRegex.Match(itemId);
+                var model = match.Success
+                    ? itemId[..match.Index]
+                    : itemId;
+                int? variant = match.Success
+                    ? int.Parse(match.Groups[1].Value)
+                    : null;
+
                 var sources = map.AnchoredObjects?
-                    .Where(item => item.ItemModel.Id == itemId || item.ItemModel.Id.StartsWith(itemId + "V"))
+                    .Where(item =>
+                        item.ItemModel.Id == model &&
+                        (variant is null || Variant(item) == variant))
                     .ToList() ?? [];
 
                 if (sources.Count == 0)
@@ -79,7 +92,8 @@ namespace tman.src.Alterations
 
                 var finishPath = Path.Combine(MothDirectory, finishFile);
                 EmbedUtility.Embed(map, finishPath);
-                var finish = new CGameCtnAnchoredObject()
+
+                var finish = new CGameCtnAnchoredObject
                 {
                     ItemModel = EmbedUtility.ExtractIdent(finishPath)
                 };
@@ -103,9 +117,10 @@ namespace tman.src.Alterations
 
                 var finishPath = Path.Combine(MothDirectory, finishFile);
                 EmbedUtility.Embed(map, finishPath);
-                var finish = new CGameCtnAnchoredObject()
+
+                var finish = new CGameCtnAnchoredObject
                 {
-                    ItemModel = EmbedUtility.ExtractIdent(finishPath),
+                    ItemModel = EmbedUtility.ExtractIdent(finishPath)
                 };
 
                 foreach (var source in sources)
@@ -114,5 +129,8 @@ namespace tman.src.Alterations
                 }
             }
         }
+
+        private static int Variant(CGameCtnAnchoredObject item) =>
+            (item.Flags >> 8) & 0xFF;
     }
 }
