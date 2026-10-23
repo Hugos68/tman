@@ -65,7 +65,7 @@ namespace tman.src.Alterations
         protected override void Run(CGameCtnChallenge map)
         {
             var mothDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "lights");
-            
+
             var carrierPaths = Directory.EnumerateFiles(mothDirectory, "*.Item.Gbx")
                 .ToDictionary(path => Path.GetFileName(path), path => path);
 

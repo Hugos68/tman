@@ -19,14 +19,13 @@ namespace tman.src.Alterations.Internal
 
             foreach (var block in blocks)
             {
-                for (int i = 0; i < 4; i++)
-                {
-                    MapUtility.PlaceRelative(
-                        map,
-                        block,
-                        new CGameCtnBlock { Name = $"GateExpandableSpecial{effect}" },
-                        offset + new Vec3(0, GridConstants.VerticalBlockSize * i, 0));
-                }
+                var offsetY = block.BlockModel.Id == "GateSpecialCheckpoint" ? 0 : -GridConstants.VerticalBlockSize * 1.5f;
+                MapUtility.PlaceRelative(
+                    map,
+                    block,
+                    new CGameCtnBlock { Name = $"GateSpecial{effect}" },
+                    offset + new Vec3(0, offsetY, 0));
+
             }
 
             var items = map.AnchoredObjects?.Where(Filter).ToList() ?? [];
