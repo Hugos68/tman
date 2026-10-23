@@ -11,32 +11,31 @@ namespace tman.src.Positioning
 {
     public static class FloorFinishItem
     {
-        private static readonly Dictionary<string, (string[] Tiles, float Bed)> Water = new()
+        private static readonly Dictionary<string, (string Tile, float Bed)> OpenWater = new()
         {
-            ["RedIsland"] = (["Water", "WaterHill"], 2.0f),
-            ["WhiteShore"] = (["Water"], 2.0f),
-            ["BlueBay"] = (["Sea"], 4.0f),
-            ["GreenCoast"] = (["Lake"], 2.0f),
+            ["RedIsland"] = ("Water", 2.0f),
+            ["WhiteShore"] = ("Water", 2.0f),
+            ["BlueBay"] = ("Sea", 4.0f),
+            ["GreenCoast"] = ("Lake", 2.0f),
         };
 
         private const float Below = 0.1f;
         private const float Above = 0.4f;
+        private const float Cell = GridConstants.BlockSize;
 
         public static byte[]? Build(CGameCtnChallenge map, string templatePath, string ident)
         {
-            var collection = map.GetEnvironment();
-            if (!Water.TryGetValue(collection, out var water))
+            if (!OpenWater.TryGetValue(map.GetEnvironment(), out var water))
             {
                 return null;
             }
-            var groundRow = MapUtility.GroundRow(map);
 
-            // (cy, cz) -> the cx list of open-water cells
-            var rows = new Dictionary<(int Y, int Z), List<int>>();
-            var cells = 0;
-            foreach (var block in map.Blocks ?? [])
+            var groundRow = MapUtility.GroundRow(map);
+            var rows = new Dictionary<(int Y, int Z), SortedSet<int>>();
+            var blocks = (map.Blocks ?? []).Concat(map.BakedBlocks ?? []);
+            foreach (var block in blocks)
             {
-                if (block.IsFree || !water.Tiles.Contains(block.BlockModel.Id))
+                if (block.IsFree || block.BlockModel.Id != water.Tile)
                 {
                     continue;
                 }
@@ -46,32 +45,23 @@ namespace tman.src.Positioning
                     rows[key] = xs = [];
                 }
                 xs.Add(block.Coord.X);
-                cells++;
             }
-            if (cells == 0)
+            if (rows.Count == 0)
             {
                 return null;
             }
+
             var vertices = new List<Vec3>();
             var triangles = new List<CPlugSurface.Mesh.Triangle>();
             int[][] quads = [[0, 3, 2, 1], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [1, 2, 6, 5], [0, 4, 7, 3]];
-            foreach (var ((cy, cz), xs) in rows.OrderBy(r => r.Key.Y).ThenBy(r => r.Key.Z))
+            foreach (var ((cy, cz), xs) in rows)
             {
-                var sorted = xs.Distinct().OrderBy(x => x).ToList();
-                var yBed = (cy - groundRow) * GridConstants.VerticalBlockSize + water.Bed;
-                var (y0, y1) = (yBed - Below, yBed + Above);
-                var (z0, z1) = (cz * GridConstants.BlockSize, (cz + 1) * GridConstants.BlockSize);
-                for (var i = 0; i < sorted.Count;)
+                var bed = (cy - groundRow) * GridConstants.VerticalBlockSize + water.Bed;
+                var (y0, y1) = (bed - Below, bed + Above);
+                var (z0, z1) = (cz * Cell, (cz + 1) * Cell);
+                foreach (var (first, last) in Runs(xs))
                 {
-                    var start = sorted[i];
-                    var end = start;
-                    while (i + 1 < sorted.Count && sorted[i + 1] == end + 1)
-                    {
-                        i++;
-                        end = sorted[i];
-                    }
-                    i++;
-                    var (x0, x1) = (start * GridConstants.BlockSize, (end + 1) * GridConstants.BlockSize);
+                    var (x0, x1) = (first * Cell, (last + 1) * Cell);
                     var b = vertices.Count;
                     vertices.AddRange(
                     [
@@ -90,7 +80,7 @@ namespace tman.src.Positioning
             var item = gbx.Node;
             if (item.EntityModel is not CGameCommonItemEntityModel entity || entity.TriggerShape is not CPlugSurface trigger)
             {
-                throw new InvalidOperationException("the template has no CGameCommonItemEntityModel.TriggerShape surface");
+                throw new InvalidOperationException($"{templatePath} has no trigger surface");
             }
             trigger.Surf = new CPlugSurface.Mesh
             {
@@ -100,9 +90,32 @@ namespace tman.src.Positioning
                 GameplayMainDir = (trigger.Surf as CPlugSurface.Mesh)?.GameplayMainDir,
             };
             item.Ident = new Ident(ident, item.Ident.Collection, ident);
+
             using var ms = new MemoryStream();
             gbx.Save(ms);
             return ms.ToArray();
+        }
+
+        private static IEnumerable<(int First, int Last)> Runs(SortedSet<int> xs)
+        {
+            int? first = null;
+            var last = 0;
+            foreach (var x in xs)
+            {
+                if (first is null || x != last + 1)
+                {
+                    if (first is not null)
+                    {
+                        yield return (first.Value, last);
+                    }
+                    first = x;
+                }
+                last = x;
+            }
+            if (first is not null)
+            {
+                yield return (first.Value, last);
+            }
         }
     }
 }

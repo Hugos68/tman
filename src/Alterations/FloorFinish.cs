@@ -21,24 +21,17 @@ namespace tman.src.Alterations
 
         protected override void Run(CGameCtnChallenge map)
         {
-            var templatePath = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "floor", "FinishFloorTemplate.Item.Gbx");
+            var templatePath = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "floor-finish", "FinishFloorTemplate.Item.Gbx");
             var ident = $"FinishFloor_{map.MapUid}.Item.Gbx";
-
-            var bytes = FloorFinishItem.Build(map, templatePath, ident);
-            if (bytes is null)
+            var floorFinishItem = FloorFinishItem.Build(map, templatePath, ident);
+            if (floorFinishItem is null)
             {
-                return; // not a vista map, or no open-water cell: nothing to do
+                return;
             }
-            var generatedPath = Path.Combine(Path.GetTempPath(), ident);
-            File.WriteAllBytes(generatedPath, bytes);
-            EmbedUtility.Embed(map, generatedPath);
-            map.PlaceAnchoredObject(
-                EmbedUtility.ExtractIdent(generatedPath),
-                Vec3.Zero,
-                Vec3.Zero,
-                Vec3.Zero);
-            var placed = map.AnchoredObjects![^1];
-            placed.WaypointSpecialProperty = new() { Tag = "Goal", Order = 0 };
+            var itemPath = Path.Combine(Path.GetTempPath(), ident);
+            File.WriteAllBytes(itemPath, floorFinishItem);
+            EmbedUtility.Embed(map, itemPath);
+            map.PlaceAnchoredObject(EmbedUtility.ExtractIdent(itemPath), Vec3.Zero, Vec3.Zero, Vec3.Zero);
         }
     }
 }

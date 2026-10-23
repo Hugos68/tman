@@ -64,13 +64,10 @@ namespace tman.src.Alterations
 
         protected override void Run(CGameCtnChallenge map)
         {
-            var mothDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "lights");
-
+            var mothDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "moth");
             var carrierPaths = Directory.EnumerateFiles(mothDirectory, "*.Item.Gbx")
                 .ToDictionary(path => Path.GetFileName(path), path => path);
-
             var used = new HashSet<string>();
-
             var sources = map.AnchoredObjects?.ToList() ?? [];
             foreach (var source in sources)
             {
