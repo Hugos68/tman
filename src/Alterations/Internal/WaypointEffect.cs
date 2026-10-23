@@ -19,7 +19,7 @@ namespace tman.src.Alterations.Internal
 
             foreach (var block in blocks)
             {
-                var offsetY = block.BlockModel.Id == "GateSpecialCheckpoint" ? 0 : -GridConstants.VerticalBlockSize * 1.5f;
+                var offsetY = block.BlockModel.Id == "GateCheckpoint" ? 0 : -GridConstants.VerticalBlockSize * 1.75f;
                 MapUtility.PlaceRelative(
                     map,
                     block,
