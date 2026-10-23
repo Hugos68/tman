@@ -19,41 +19,41 @@ namespace tman.src.Alterations
             new MapNameEdited(name => name + " Moth")
         ];
 
-        private static readonly Dictionary<(string Model, int? Variant), string> ItemCarriers = new()
+        private static readonly Dictionary<string, string> ItemFinishes = new()
         {
-            [("Lamp", null)] = "FinishLamp.Item.Gbx",
-            [("LampB", null)] = "FinishLampB.Item.Gbx",
-            [("LampC", null)] = "FinishLampC.Item.Gbx",
-            [("LampSmall", null)] = "FinishLampSmall.Item.Gbx",
-            [("LampSmallB", null)] = "FinishLampSmallB.Item.Gbx",
-            [("LampSmallC", null)] = "FinishLampSmallC.Item.Gbx",
-            [("ShowLight4Spots", null)] = "FinishShowLight4Spots.Item.Gbx",
-            [("ShowLightRamp4m", null)] = "FinishShowLightRamp4m.Item.Gbx",
-            [("ShowLightRamp8m", null)] = "FinishShowLightRamp8m.Item.Gbx",
-            [("ShowLights", 23)] = "FinishShowLightsV23.Item.Gbx",   // Light4Spots head
-            [("ShowLights", 24)] = "FinishShowLightsV24.Item.Gbx",   // LightRamp4m bar
-            [("ShowLights", 25)] = "FinishShowLightsV25.Item.Gbx",   // LightRamp8m bar
-            [("ShowLights", 32)] = "FinishShowLightsV32.Item.Gbx",   // LightsFront
-            [("ShowLights", 33)] = "FinishShowLightsV33.Item.Gbx",
-            [("Show", 23)] = "FinishShowV23.Item.Gbx",
-            [("Show", 24)] = "FinishShowV24.Item.Gbx",
-            [("Show", 25)] = "FinishShowV25.Item.Gbx",
-            [("Show", 35)] = "FinishShowV35.Item.Gbx",
-            [("Show", 36)] = "FinishShowV36.Item.Gbx",
-            [("SnowLampSupportLampion", null)] = "FinishSnowLampSupportLampion.Item.Gbx",
-            [("SnowLampSupportLamp1", null)] = "FinishSnowLampSupportLamp1.Item.Gbx",
-            [("SnowLampSupportLamp2", null)] = "FinishSnowLampSupportLamp2.Item.Gbx",
-            [("SnowTemple16m", null)] = "FinishSnowTemple16m.Item.Gbx",
-            [("SnowTemple24m", null)] = "FinishSnowTemple24m.Item.Gbx",
-            [("SnowTemple32m", null)] = "FinishSnowTemple32m.Item.Gbx",
-            [("SnowTempleCross", null)] = "FinishSnowTempleCross.Item.Gbx",
-            [("SnowTempleDeadEnd", null)] = "FinishSnowTempleDeadEnd.Item.Gbx",
-            [("SnowTempleRoadCorner", null)] = "FinishSnowTempleRoadCorner.Item.Gbx",
-            [("SnowTempleRoadStraight", null)] = "FinishSnowTempleRoadStraight.Item.Gbx",
-            [("SnowTempleRoadTShaped", null)] = "FinishSnowTempleRoadTShaped.Item.Gbx",
+            ["Lamp"] = "FinishLamp.Item.Gbx",
+            ["LampB"] = "FinishLampB.Item.Gbx",
+            ["LampC"] = "FinishLampC.Item.Gbx",
+            ["LampSmall"] = "FinishLampSmall.Item.Gbx",
+            ["LampSmallB"] = "FinishLampSmallB.Item.Gbx",
+            ["LampSmallC"] = "FinishLampSmallC.Item.Gbx",
+            ["ShowLight4Spots"] = "FinishShowLight4Spots.Item.Gbx",
+            ["ShowLightRamp4m"] = "FinishShowLightRamp4m.Item.Gbx",
+            ["ShowLightRamp8m"] = "FinishShowLightRamp8m.Item.Gbx",
+            ["ShowLightsV23"] = "FinishShowLightsV23.Item.Gbx",
+            ["ShowLightsV24"] = "FinishShowLightsV24.Item.Gbx",
+            ["ShowLightsV25"] = "FinishShowLightsV25.Item.Gbx",
+            ["ShowLightsV32"] = "FinishShowLightsV32.Item.Gbx",
+            ["ShowLightsV33"] = "FinishShowLightsV33.Item.Gbx",
+            ["ShowV23"] = "FinishShowV23.Item.Gbx",
+            ["ShowV24"] = "FinishShowV24.Item.Gbx",
+            ["ShowV25"] = "FinishShowV25.Item.Gbx",
+            ["ShowV35"] = "FinishShowV35.Item.Gbx",
+            ["ShowV36"] = "FinishShowV36.Item.Gbx",
+            ["SnowLampSupportLampion"] = "FinishSnowLampSupportLampion.Item.Gbx",
+            ["SnowLampSupportLamp1"] = "FinishSnowLampSupportLamp1.Item.Gbx",
+            ["SnowLampSupportLamp2"] = "FinishSnowLampSupportLamp2.Item.Gbx",
+            ["SnowTemple16m"] = "FinishSnowTemple16m.Item.Gbx",
+            ["SnowTemple24m"] = "FinishSnowTemple24m.Item.Gbx",
+            ["SnowTemple32m"] = "FinishSnowTemple32m.Item.Gbx",
+            ["SnowTempleCross"] = "FinishSnowTempleCross.Item.Gbx",
+            ["SnowTempleDeadEnd"] = "FinishSnowTempleDeadEnd.Item.Gbx",
+            ["SnowTempleRoadCorner"] = "FinishSnowTempleRoadCorner.Item.Gbx",
+            ["SnowTempleRoadStraight"] = "FinishSnowTempleRoadStraight.Item.Gbx",
+            ["SnowTempleRoadTShaped"] = "FinishSnowTempleRoadTShaped.Item.Gbx",
         };
 
-        private static readonly Dictionary<string, string> BlockCarriers = new()
+        private static readonly Dictionary<string, string> BlockFinishes = new()
         {
             ["StageTechnicsLight"] = "FinishStageTechnicsLight.Item.Gbx",
             ["StageTechnicsLightDeadend"] = "FinishStageTechnicsLightDeadend.Item.Gbx",
@@ -62,57 +62,56 @@ namespace tman.src.Alterations
             ["StageTechnicsLightToStructure"] = "FinishStageTechnicsLightToStructure.Item.Gbx",
         };
 
+        private static readonly string MothDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "moth");
+
         protected override void Run(CGameCtnChallenge map)
         {
-            var mothDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "moth");
-            var carrierPaths = Directory.EnumerateFiles(mothDirectory, "*.Item.Gbx")
-                .ToDictionary(path => Path.GetFileName(path), path => path);
-            var used = new HashSet<string>();
-            var sources = map.AnchoredObjects?.ToList() ?? [];
-            foreach (var source in sources)
+            foreach (var (itemId, finishFile) in ItemFinishes)
             {
-                var carrierFile = CarrierFor(source.ItemModel.Id, Variant(source));
-                if (carrierFile is null || !carrierPaths.TryGetValue(carrierFile, out var carrierPath))
+                var sources = map.AnchoredObjects?
+                    .Where(item => item.ItemModel.Id == itemId || item.ItemModel.Id.StartsWith(itemId + "V"))
+                    .ToList() ?? [];
+
+                if (sources.Count == 0)
                 {
                     continue;
                 }
-                Embed(map, carrierPath, used);
-                MapUtility.PlaceRelative(map, source, Carrier(carrierPath));
+
+                var finishPath = Path.Combine(MothDirectory, finishFile);
+                EmbedUtility.Embed(map, finishPath);
+                var finish = new CGameCtnAnchoredObject()
+                {
+                    ItemModel = EmbedUtility.ExtractIdent(finishPath)
+                };
+
+                foreach (var source in sources)
+                {
+                    MapUtility.PlaceRelative(map, source, finish);
+                }
             }
 
-            foreach (var block in map.Blocks?.ToList() ?? [])
+            foreach (var (blockId, finishFile) in BlockFinishes)
             {
-                if (!BlockCarriers.TryGetValue(block.Name, out var carrierFile) || !carrierPaths.TryGetValue(carrierFile, out var carrierPath))
+                var sources = map.Blocks?
+                    .Where(block => block.Name == blockId)
+                    .ToList() ?? [];
+
+                if (sources.Count == 0)
                 {
                     continue;
                 }
-                Embed(map, carrierPath, used);
-                MapUtility.PlaceRelative(map, block, Carrier(carrierPath));
-            }
-        }
 
-        private static string? CarrierFor(string model, int variant)
-        {
-            if (ItemCarriers.TryGetValue((model, variant), out var byVariant))
-            {
-                return byVariant;
-            }
-            return ItemCarriers.TryGetValue((model, null), out var any) ? any : null;
-        }
+                var finishPath = Path.Combine(MothDirectory, finishFile);
+                EmbedUtility.Embed(map, finishPath);
+                var finish = new CGameCtnAnchoredObject()
+                {
+                    ItemModel = EmbedUtility.ExtractIdent(finishPath),
+                };
 
-        private static int Variant(CGameCtnAnchoredObject item) => (item.Flags >> 8) & 0xFF;
-
-        private static CGameCtnAnchoredObject Carrier(string carrierPath) => new()
-        {
-            ItemModel = EmbedUtility.ExtractIdent(carrierPath),
-            WaypointSpecialProperty = new() { Tag = "Goal", Order = 0 },
-        };
-
-        private static void Embed(CGameCtnChallenge map, string carrierPath, HashSet<string> used)
-        {
-            if (used.Add(carrierPath))
-            {
-                EmbedUtility.Embed(map, carrierPath);
+                foreach (var source in sources)
+                {
+                    MapUtility.PlaceRelative(map, source, finish);
+                }
             }
         }
     }

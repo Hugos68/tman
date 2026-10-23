@@ -1,3 +1,4 @@
+
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,36 +20,43 @@ namespace tman.src.Alterations
             new MapNameEdited(name => name + " Flags")
         ];
 
+        private static readonly Dictionary<string, string> ItemFinishes = new()
+        {
+            ["Flag8m"] = "FinishFlag8m.Item.Gbx",
+            ["Flag16m"] = "FinishFlag16m.Item.Gbx",
+        };
+
+        private static readonly string FlagsDirectory = Path.Combine(
+            ApplicationConstants.ProjectDirectory,
+            "data",
+            "items",
+            "flags");
+
         protected override void Run(CGameCtnChallenge map)
         {
-            var flagsDirectory = Path.Combine(
-                ApplicationConstants.ProjectDirectory,
-                "data",
-                "items",
-                "flags");
-
-            var flagItemPaths = Directory.EnumerateFiles(flagsDirectory, "*.Item.Gbx");
-
-            foreach (string path in flagItemPaths)
+            foreach (var (flagId, finishFile) in ItemFinishes)
             {
-                EmbedUtility.Embed(map, path);
-            }
+                var sources = map.AnchoredObjects?
+                    .Where(item => item.ItemModel.Id == flagId)
+                    .ToList() ?? [];
 
-            var flags = map.AnchoredObjects?
-                .Where(item => item.ItemModel.Id.Contains("Flag"))
-                .ToList() ?? [];
-
-            foreach (var flag in flags)
-            {
-                var flagItemPath = flagItemPaths.FirstOrDefault(path => Path.GetFileName(path).Contains(flag.ItemModel.Id));
-                if (flagItemPath is null)
+                if (sources.Count == 0)
                 {
                     continue;
                 }
-                MapUtility.PlaceRelative(map, flag, new CGameCtnAnchoredObject()
+
+                var finishPath = Path.Combine(FlagsDirectory, finishFile);
+                EmbedUtility.Embed(map, finishPath);
+
+                var finish = new CGameCtnAnchoredObject
                 {
-                    ItemModel = EmbedUtility.ExtractIdent(flagItemPath)
-                });
+                    ItemModel = EmbedUtility.ExtractIdent(finishPath)
+                };
+
+                foreach (var source in sources)
+                {
+                    MapUtility.PlaceRelative(map, source, finish);
+                }
             }
         }
     }

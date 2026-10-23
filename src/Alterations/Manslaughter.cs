@@ -1,3 +1,4 @@
+
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,36 +20,46 @@ namespace tman.src.Alterations
             new MapNameEdited(name => name + " Manslaughter")
         ];
 
+        private static readonly Dictionary<string, string> BlockFinishes = new()
+        {
+            ["StandCornerIn"] = "FinishStandCornerIn.Item.Gbx",
+            ["StandCornerOut"] = "FinishStandCornerOut.Item.Gbx",
+            ["StandDiagIn"] = "FinishStandDiagIn.Item.Gbx",
+            ["StandDiagOut"] = "FinishStandDiagOut.Item.Gbx",
+            ["StandStraight"] = "FinishStandStraight.Item.Gbx",
+        };
+
+        private static readonly string StandsDirectory = Path.Combine(
+            ApplicationConstants.ProjectDirectory,
+            "data",
+            "items",
+            "manslaughter");
+
         protected override void Run(CGameCtnChallenge map)
         {
-            var standsDirectory = Path.Combine(
-                ApplicationConstants.ProjectDirectory,
-                "data",
-                "items",
-                "manslaughter");
-
-            var standItemPaths = Directory.EnumerateFiles(standsDirectory, "*.Item.Gbx");
-
-            foreach (string path in standItemPaths)
+            foreach (var (standId, finishFile) in BlockFinishes)
             {
-                EmbedUtility.Embed(map, path);
-            }
+                var sources = map.Blocks?
+                    .Where(block => block.BlockModel.Id == standId)
+                    .ToList() ?? [];
 
-            var stands = map.Blocks?
-                .Where(item => item.BlockModel.Id.Contains("Stand"))
-                .ToList() ?? [];
-
-            foreach (var stand in stands)
-            {
-                var standItemPath = standItemPaths.FirstOrDefault(path => Path.GetFileName(path).Contains(stand.BlockModel.Id));
-                if (standItemPath is null)
+                if (sources.Count == 0)
                 {
                     continue;
                 }
-                MapUtility.PlaceRelative(map, stand, new CGameCtnAnchoredObject()
+
+                var finishPath = Path.Combine(StandsDirectory, finishFile);
+                EmbedUtility.Embed(map, finishPath);
+
+                var finish = new CGameCtnAnchoredObject
                 {
-                    ItemModel = EmbedUtility.ExtractIdent(standItemPath)
-                });
+                    ItemModel = EmbedUtility.ExtractIdent(finishPath)
+                };
+
+                foreach (var source in sources)
+                {
+                    MapUtility.PlaceRelative(map, source, finish);
+                }
             }
         }
     }
