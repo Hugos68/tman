@@ -8,10 +8,11 @@ namespace tman.src.Alterations
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
             new WithoutValidation(),
-            new StartEffect("Turbo", new(0, 0, 0)),
-            new StartEffect("NoEngine", new(0, 0, 3)),
-            new CheckpointEffect("Turbo", new(0, 0, 0)),
-            new CheckpointEffect("NoEngine", new(0, 0, 1)),
+            new StartEffect("Turbo", new(0, 0, 2)),
+            new StartEffect("NoEngine", new(0, 0, 4)),
+            new CheckpointEffect("NoEngine", new(0, 0,-2)),
+            new CheckpointEffect("Turbo", new(0, 0, 2)),
+            new CheckpointEffect("NoEngine", new(0, 0, 4)),
             new MapNameEdited(name => name + " Freewheel")
         ];
     }
