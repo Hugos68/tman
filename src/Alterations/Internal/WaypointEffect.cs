@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using GBX.NET;
 using GBX.NET.Engines.Game;
