@@ -26,7 +26,7 @@ namespace tman.src.Alterations
 
         protected override void Run(CGameCtnChallenge map)
         {
-            var floorDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "floor");
+            var floorDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "floor-finish");
             var ident = $"FinishFloor_{map.MapUid}.Item.Gbx";
 
             var bytes = FloorFinishItem.Build(
@@ -70,7 +70,7 @@ namespace tman.src.Alterations
         public static byte[]? Build(CGameCtnChallenge map, string templatePath, string footprintsPath, string ident)
         {
             var collection = map.GetEnvironment();
-            var cells = collection == "Stadium"
+            var cells = collection == "Stadium2020"
                 ? FreeGrassCells(map, footprintsPath)
                 : OpenWaterCells(map, collection);
             if (cells.Count == 0)
