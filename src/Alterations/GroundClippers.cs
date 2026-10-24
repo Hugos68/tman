@@ -1,17 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using GBX.NET;
-using GBX.NET.Engines.Game;
-using GBX.NET.Engines.GameData;
-using GBX.NET.Engines.Plug;
-using tman.src.Alterations.Internal;
-using tman.src.Application;
-using tman.src.Inventory;
-using tman.src.Positioning;
-
 namespace tman.src.Alterations
 {
     public class GroundClippers : Alteration
@@ -50,22 +36,13 @@ namespace tman.src.Alterations
             {
                 return;
             }
-
-            var y = (rows.Min() - MapUtility.GroundRow(map)) * GridConstants.VerticalBlockSize + floor.Bed;
-            var top = y - TopUnderFloor;
-            var box = new FinishPlane.Box(0, map.Size.X * GridConstants.BlockSize, 0, map.Size.Z * GridConstants.BlockSize, top - Thickness, top, top - 0.02f);
-            var ident = $"GroundClippers_{map.MapUid}.Item.Gbx";
-            var bytes = FinishPlane.Build(Path.Combine(ApplicationConstants.ProjectDirectory, "data", "inventory", "FinishPlaneTemplate.Item.Gbx"), ident, [box]);
-
-            var generatedPath = Path.Combine(Path.GetTempPath(), ident);
-            File.WriteAllBytes(generatedPath, bytes);
-            EmbedUtility.Embed(map, generatedPath);
-
-            map.PlaceAnchoredObject(
-                EmbedUtility.ExtractIdent(generatedPath),
-                Vec3.Zero,
-                Vec3.Zero,
-                Vec3.Zero);
+            var top = (rows.Min() - MapUtility.GroundRow(map)) * GridConstants.VerticalBlockSize + floor.Bed - TopUnderFloor;
+            var box = new FinishPlane.Box(0, map.Size.X * GridConstants.BlockSize, 0, map.Size.Z * GridConstants.BlockSize, top - Thickness, top, top);
+            FinishPlane.Place(
+                map,
+                Path.Combine(ApplicationConstants.ProjectDirectory, "data", "inventory", "FinishPlaneTemplate.Item.Gbx"),
+                $"GroundClippers_{map.MapUid}.Item.Gbx",
+                [box]);
         }
     }
 }

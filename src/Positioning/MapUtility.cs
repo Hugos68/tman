@@ -99,9 +99,9 @@ namespace tman.src.Positioning
             }
             var position = new Position(
                 new Vec3(
-                    block.Coord.X * GridConstants.BlockSize,
-                    (block.Coord.Y - GroundRow(map)) * GridConstants.VerticalBlockSize,
-                    block.Coord.Z * GridConstants.BlockSize));
+                    block.Coord.X * GridConstants.CellSize,
+                    (block.Coord.Y - GroundRow(map)) * GridConstants.CellHeight,
+                    block.Coord.Z * GridConstants.CellSize));
             position.AddPosition(new Position(
                 GetDirectionOffset(block.Direction, GetBlockSize(block)),
                 GetDirectionRotation(block.Direction)));
@@ -126,9 +126,9 @@ namespace tman.src.Positioning
             direction switch
             {
                 Direction.North => Vec3.Zero,
-                Direction.East => new(size.Z * GridConstants.BlockSize, 0, 0),
-                Direction.South => new(size.X * GridConstants.BlockSize, 0, size.Z * GridConstants.BlockSize),
-                Direction.West => new(0, 0, size.X * GridConstants.BlockSize),
+                Direction.East => new(size.Z * GridConstants.CellSize, 0, 0),
+                Direction.South => new(size.X * GridConstants.CellSize, 0, size.Z * GridConstants.CellSize),
+                Direction.West => new(0, 0, size.X * GridConstants.CellSize),
                 _ => throw new ArgumentOutOfRangeException(nameof(direction))
             };
 
