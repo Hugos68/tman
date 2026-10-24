@@ -24,6 +24,31 @@ namespace tman.src.Alterations
             new MapNameEdited(name => name + " Floor Finish")
         ];
 
+        private static readonly Dictionary<(string Block, int Variant), string> Cutouts = new()
+        {
+            [("DecoPlatformCurve3In", 0)] = "FloorFinishDecoPlatformCurve3In.Item.Gbx",
+            [("DecoPlatformSlopeBaseCurve1InFull", 0)] = "FloorFinishDecoPlatformSlopeBaseCurve1InFull.Item.Gbx",
+            [("DecoPlatformSlopeBaseCurve1Out", 128)] = "FloorFinishDecoPlatformSlopeBaseCurve1OutV128.Item.Gbx",
+            [("DecoWallCurve1Pillar", 0)] = "FloorFinishDecoWallCurve1Pillar.Item.Gbx",
+            [("DecoWallCurve2InPillar", 0)] = "FloorFinishDecoWallCurve2InPillar.Item.Gbx",
+            [("DecoWallCurve2Pillar", 0)] = "FloorFinishDecoWallCurve2Pillar.Item.Gbx",
+            [("DecoWallCurve3InPillar", 0)] = "FloorFinishDecoWallCurve3InPillar.Item.Gbx",
+            [("DecoWallCurve3OutPillar", 0)] = "FloorFinishDecoWallCurve3OutPillar.Item.Gbx",
+            [("DecoWallDiag1", 0)] = "FloorFinishDecoWallDiag1.Item.Gbx",
+            [("DecoWallDiag1Pillar", 0)] = "FloorFinishDecoWallDiag1Pillar.Item.Gbx",
+            [("SnowRoadPillarStraight", 0)] = "FloorFinishSnowRoadPillarStraight.Item.Gbx",
+            [("StructureBase", 0)] = "FloorFinishStructureBase.Item.Gbx",
+            [("StructurePillar", 0)] = "FloorFinishStructurePillar.Item.Gbx",
+            [("TrackWallBranchYShaped2X3Pillar", 64)] = "FloorFinishTrackWallBranchYShaped2X3PillarV64.Item.Gbx",
+            [("TrackWallChicaneX2LeftPillar", 64)] = "FloorFinishTrackWallChicaneX2LeftPillarV64.Item.Gbx",
+            [("TrackWallChicaneX3LeftPillar", 64)] = "FloorFinishTrackWallChicaneX3LeftPillarV64.Item.Gbx",
+            [("TrackWallChicaneX3RightPillar", 64)] = "FloorFinishTrackWallChicaneX3RightPillarV64.Item.Gbx",
+            [("TrackWallCurve1Pillar", 64)] = "FloorFinishTrackWallCurve1PillarV64.Item.Gbx",
+            [("TrackWallCurve2Pillar", 64)] = "FloorFinishTrackWallCurve2PillarV64.Item.Gbx",
+            [("TrackWallCurve3Pillar", 64)] = "FloorFinishTrackWallCurve3PillarV64.Item.Gbx",
+            [("TrackWallDeadendRoundPillar", 64)] = "FloorFinishTrackWallDeadendRoundPillarV64.Item.Gbx",
+        };
+
         protected override void Run(CGameCtnChallenge map)
         {
             var floorDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "floor-finish");
@@ -49,10 +74,31 @@ namespace tman.src.Alterations
                 Vec3.Zero,
                 Vec3.Zero);
             map.AnchoredObjects![^1].WaypointSpecialProperty = new() { Tag = "Goal", Order = 0 };
+
+            if (map.GetEnvironment() != "Stadium2020")
+            {
+                return;
+            }
+
+            var embedded = new HashSet<string>();
+            foreach (var block in (map.Blocks ?? []).Where(b => !b.IsFree && b.IsGround && b.BlockModel.Id != "Grass"))
+            {
+                if (!Cutouts.TryGetValue((block.BlockModel.Id, FloorFinishItem.Variant(block)), out var file))
+                {
+                    continue;
+                }
+                var path = Path.Combine(floorDirectory, "cutouts", file);
+                if (embedded.Add(file))
+                {
+                    EmbedUtility.Embed(map, path);
+                }
+                MapUtility.PlaceRelative(map, block, new CGameCtnAnchoredObject { ItemModel = EmbedUtility.ExtractIdent(path) });
+                map.AnchoredObjects![^1].WaypointSpecialProperty = new() { Tag = "Goal", Order = 0 };
+            }
         }
     }
 
-        public static class FloorFinishItem
+    public static class FloorFinishItem
     {
         private static readonly Dictionary<string, (string[] Tiles, float Bed)> OpenWater = new()
         {
@@ -62,18 +108,17 @@ namespace tman.src.Alterations
             ["GreenCoast"] = (["Lake"], 2.0f),
         };
 
-        private const float Below = 0.1f;
-        private const float Above = 0.4f;
         private const float Cell = 32.0f;
-        private const float Grass = 2.0f;
+
+        public static int Variant(CGameCtnBlock block) => (block.Flags & 0x3F) + 64 * ((block.Flags >> 21) & 0x7F);
 
         public static byte[]? Build(CGameCtnChallenge map, string templatePath, string footprintsPath, string ident)
         {
-            var collection = map.GetEnvironment();
-            var cells = collection == "Stadium2020"
-                ? FreeGrassCells(map, footprintsPath)
-                : OpenWaterCells(map, collection);
-            if (cells.Count == 0)
+            var environment = map.GetEnvironment();
+            var (rows, below, above) = environment == "Stadium2020"
+                ? (KeptGrassCells(map, footprintsPath), 0.0f, 1.0f)
+                : (OpenWaterCells(map, environment), 0.1f, 0.4f);
+            if (rows.Count == 0)
             {
                 return null;
             }
@@ -81,10 +126,10 @@ namespace tman.src.Alterations
             var vertices = new List<Vec3>();
             var triangles = new List<CPlugSurface.Mesh.Triangle>();
             int[][] quads = [[0, 3, 2, 1], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [1, 2, 6, 5], [0, 4, 7, 3]];
-            foreach (var ((y, z), xs) in cells.OrderBy(c => c.Key))
+            foreach (var ((y, z), xs) in rows.OrderBy(r => r.Key))
             {
                 var sorted = xs.Distinct().OrderBy(x => x).ToList();
-                var (y0, y1) = (y - Below, y + Above);
+                var (y0, y1) = (y - below, y + above);
                 var (z0, z1) = (z * Cell, (z + 1) * Cell);
                 for (var i = 0; i < sorted.Count;)
                 {
@@ -131,10 +176,10 @@ namespace tman.src.Alterations
             return ms.ToArray();
         }
 
-        private static Dictionary<(float Y, int Z), List<int>> OpenWaterCells(CGameCtnChallenge map, string collection)
+        private static Dictionary<(float Y, int Z), List<int>> OpenWaterCells(CGameCtnChallenge map, string environment)
         {
             var rows = new Dictionary<(float, int), List<int>>();
-            if (!OpenWater.TryGetValue(collection, out var water))
+            if (!OpenWater.TryGetValue(environment, out var water))
             {
                 return rows;
             }
@@ -146,73 +191,56 @@ namespace tman.src.Alterations
                 {
                     continue;
                 }
-                var y = (block.Coord.Y - groundRow) * GridConstants.VerticalBlockSize + water.Bed;
-                Add(rows, (y, block.Coord.Z), block.Coord.X);
+                Add(rows, ((block.Coord.Y - groundRow) * GridConstants.VerticalBlockSize + water.Bed, block.Coord.Z), block.Coord.X);
             }
             return rows;
         }
 
-        private static Dictionary<(float Y, int Z), List<int>> FreeGrassCells(CGameCtnChallenge map, string footprintsPath)
+        private static Dictionary<(float Y, int Z), List<int>> KeptGrassCells(CGameCtnChallenge map, string footprintsPath)
         {
             var rows = new Dictionary<(float, int), List<int>>();
-            var all = (map.Blocks ?? []).Concat(map.BakedBlocks ?? []).Where(b => !b.IsFree).ToList();
-            var grass = all.Where(b => b.BlockModel.Id == "Grass").ToList();
+            var grass = (map.Blocks ?? []).Concat(map.BakedBlocks ?? []).Where(b => !b.IsFree && b.BlockModel.Id == "Grass").Select(b => b.Coord).Distinct().ToList();
             if (grass.Count == 0)
             {
                 return rows;
             }
-            var baseRow = grass.Min(b => b.Coord.Y);
+            var baseRow = grass.Min(c => c.Y);
             var footprints = LoadFootprints(footprintsPath);
-            var occupied = new HashSet<(int X, int Z)>();
-            foreach (var block in map.Blocks ?? [])
+            var hidden = new HashSet<(int X, int Z)>();
+            foreach (var block in (map.Blocks ?? []).Where(b => !b.IsFree && b.IsGround && b.BlockModel.Id != "Grass"))
             {
-                if (block.IsFree || block.IsGhost || block.BlockModel.Id == "Grass" || !(block.IsGround || block.Coord.Y == baseRow))
+                var (sizeX, sizeZ, columns) = footprints.TryGetValue(block.BlockModel.Id, out var footprint) ? footprint : (1, 1, [(0, 0)]);
+                foreach (var (ux, uz) in columns)
                 {
-                    continue;
-                }
-                if (!footprints.TryGetValue(block.BlockModel.Id, out var footprint))
-                {
-                    footprint = (1, 1, [(0, 0)]);
-                }
-                foreach (var (ux, uz) in footprint.Cells)
-                {
-                    occupied.Add(Turn(block, ux, uz, footprint.SizeX, footprint.SizeZ));
+                    var (x, z) = block.Direction switch
+                    {
+                        Direction.East => (sizeZ - 1 - uz, ux),
+                        Direction.South => (sizeX - 1 - ux, sizeZ - 1 - uz),
+                        Direction.West => (uz, sizeX - 1 - ux),
+                        _ => (ux, uz),
+                    };
+                    hidden.Add((block.Coord.X + x, block.Coord.Z + z));
                 }
             }
-            var y = (baseRow - MapUtility.GroundRow(map)) * GridConstants.VerticalBlockSize + Grass;
-            foreach (var cell in grass.Select(b => (b.Coord.X, b.Coord.Z)).Distinct())
+            var y = (baseRow - MapUtility.GroundRow(map)) * GridConstants.VerticalBlockSize;
+            foreach (var cell in grass.Select(c => (c.X, c.Z)).Distinct().Where(c => !hidden.Contains(c)))
             {
-                if (!occupied.Contains(cell))
-                {
-                    Add(rows, (y, cell.Z), cell.X);
-                }
+                Add(rows, (y, cell.Z), cell.X);
             }
             return rows;
         }
 
-        private static (int X, int Z) Turn(CGameCtnBlock block, int ux, int uz, int sizeX, int sizeZ)
-        {
-            var (x, z) = block.Direction switch
-            {
-                Direction.East => (sizeZ - 1 - uz, ux),
-                Direction.South => (sizeX - 1 - ux, sizeZ - 1 - uz),
-                Direction.West => (uz, sizeX - 1 - ux),
-                _ => (ux, uz),
-            };
-            return (block.Coord.X + x, block.Coord.Z + z);
-        }
-
-        private static Dictionary<string, (int SizeX, int SizeZ, (int, int)[] Cells)> LoadFootprints(string path)
+        private static Dictionary<string, (int SizeX, int SizeZ, (int, int)[] Columns)> LoadFootprints(string path)
         {
             var table = new Dictionary<string, (int, int, (int, int)[])>(StringComparer.OrdinalIgnoreCase);
             foreach (var line in File.ReadLines(path).Skip(1))
             {
                 var f = line.Split('\t');
-                var cells = f[3].Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                var columns = f[6].Split(' ', StringSplitOptions.RemoveEmptyEntries)
                     .Select(c => c.Split(','))
                     .Select(c => (int.Parse(c[0], CultureInfo.InvariantCulture), int.Parse(c[1], CultureInfo.InvariantCulture)))
                     .ToArray();
-                table[f[0]] = (int.Parse(f[1], CultureInfo.InvariantCulture), int.Parse(f[2], CultureInfo.InvariantCulture), cells);
+                table[f[0]] = (int.Parse(f[1], CultureInfo.InvariantCulture), int.Parse(f[2], CultureInfo.InvariantCulture), columns);
             }
             return table;
         }

@@ -1,14 +1,20 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Numerics;
 using GBX.NET;
 using GBX.NET.Engines.Game;
+using tman.src.Application;
 
 namespace tman.src.Positioning
 {
     public static class MapUtility
     {
+        private static readonly Lazy<Dictionary<string, (int X, int Z)>> BlockSizes = new(LoadBlockSizes);
+
         public static int GroundRow(CGameCtnChallenge map) =>
-            map.Collection.ToString() switch
+            map.GetEnvironment() switch
             {
                 "RedIsland" or "WhiteShore" => 15,
                 "BlueBay" or "GreenCoast" => 5,
@@ -23,13 +29,11 @@ namespace tman.src.Positioning
         {
             var position = GetBlockPosition(reference, map);
             position.Move(ToVec3(offset));
-
             block.Coord = reference.Coord;
             block.Direction = Direction.North;
             block.IsFree = true;
             block.AbsolutePositionInMap = position.Coords;
             block.YawPitchRoll = position.YawPitchRoll;
-
             map.PlaceBlock(block);
         }
 
@@ -42,9 +46,7 @@ namespace tman.src.Positioning
             var position = new Position(
                 reference.AbsolutePositionInMap,
                 reference.YawPitchRoll);
-
             position.Move(ToVec3(offset));
-
             map.PlaceAnchoredObject(
                 item.ItemModel,
                 position.Coords,
@@ -60,7 +62,6 @@ namespace tman.src.Positioning
         {
             var position = GetBlockPosition(reference, map);
             position.Move(ToVec3(offset));
-
             map.PlaceAnchoredObject(
                 item.ItemModel,
                 position.Coords,
@@ -77,15 +78,12 @@ namespace tman.src.Positioning
             var position = new Position(
                 reference.AbsolutePositionInMap,
                 reference.YawPitchRoll);
-
             position.Move(ToVec3(offset));
-
             block.Coord = new(0, 0, 0);
             block.Direction = Direction.North;
             block.IsFree = true;
             block.AbsolutePositionInMap = position.Coords;
             block.YawPitchRoll = position.YawPitchRoll;
-
             map.PlaceBlock(block);
         }
 
@@ -99,27 +97,38 @@ namespace tman.src.Positioning
                     block.AbsolutePositionInMap,
                     block.YawPitchRoll);
             }
-
             var position = new Position(
                 new Vec3(
                     block.Coord.X * GridConstants.BlockSize,
                     (block.Coord.Y - GroundRow(map)) * GridConstants.VerticalBlockSize,
                     block.Coord.Z * GridConstants.BlockSize));
-
             position.AddPosition(new Position(
-                GetDirectionOffset(block.Direction),
+                GetDirectionOffset(block.Direction, GetBlockSize(block)),
                 GetDirectionRotation(block.Direction)));
-
             return position;
         }
 
-        private static Vec3 GetDirectionOffset(Direction direction) =>
+        private static (int X, int Z) GetBlockSize(CGameCtnBlock block) =>
+            BlockSizes.Value.TryGetValue(block.BlockModel.Id, out var size) ? size : (1, 1);
+
+        private static Dictionary<string, (int X, int Z)> LoadBlockSizes()
+        {
+            var sizes = new Dictionary<string, (int X, int Z)>(StringComparer.OrdinalIgnoreCase);
+            var path = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "BlockSizes.tsv");
+            foreach (var fields in File.ReadLines(path).Skip(1).Select(line => line.Split('\t')))
+            {
+                sizes[fields[0]] = (int.Parse(fields[1]), int.Parse(fields[2]));
+            }
+            return sizes;
+        }
+
+        private static Vec3 GetDirectionOffset(Direction direction, (int X, int Z) size) =>
             direction switch
             {
                 Direction.North => Vec3.Zero,
-                Direction.East => new(GridConstants.BlockSize, 0, 0),
-                Direction.South => new(GridConstants.BlockSize, 0, GridConstants.BlockSize),
-                Direction.West => new(0, 0, GridConstants.BlockSize),
+                Direction.East => new(size.Z * GridConstants.BlockSize, 0, 0),
+                Direction.South => new(size.X * GridConstants.BlockSize, 0, size.Z * GridConstants.BlockSize),
+                Direction.West => new(0, 0, size.X * GridConstants.BlockSize),
                 _ => throw new ArgumentOutOfRangeException(nameof(direction))
             };
 
