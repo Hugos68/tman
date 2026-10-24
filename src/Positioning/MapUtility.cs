@@ -6,6 +6,7 @@ using System.Numerics;
 using GBX.NET;
 using GBX.NET.Engines.Game;
 using tman.src.Application;
+using tman.src.Core;
 
 namespace tman.src.Positioning
 {

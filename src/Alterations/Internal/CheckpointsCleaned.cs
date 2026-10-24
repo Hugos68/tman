@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GBX.NET.Engines.Game;
+using tman.src.Core;
 using tman.src.Inventory;
 using tman.src.Positioning;
 

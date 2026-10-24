@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using tman.src.Alterations.Internal;
+using tman.src.Core;
 using tman.src.Inventory;
 
 namespace tman.src.Alterations

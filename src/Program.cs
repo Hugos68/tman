@@ -3,8 +3,8 @@ using System.CommandLine;
 using System.IO;
 using GBX.NET;
 using GBX.NET.Engines.Game;
-using tman.src;
 using tman.src.Application;
+using tman.src.Core;
 
 internal class Program
 {

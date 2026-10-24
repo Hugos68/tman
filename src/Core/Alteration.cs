@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using GBX.NET.Engines.Game;
 
-namespace tman.src
+namespace tman.src.Core
 {
     public abstract class Alteration
     {

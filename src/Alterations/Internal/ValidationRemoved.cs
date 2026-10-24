@@ -1,5 +1,6 @@
 using System.Xml.Linq;
 using GBX.NET.Engines.Game;
+using tman.src.Core;
 
 namespace tman.src.Alterations.Internal
 {
