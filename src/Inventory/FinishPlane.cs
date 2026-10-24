@@ -61,8 +61,8 @@ namespace tman.src.Inventory
             trigger.Surf = new CPlugSurface.Mesh
             {
                 Version = 7,
-                Vertices = vertices.ToArray(),
-                Triangles = triangles.ToArray(),
+                Vertices = [.. vertices],
+                Triangles = [.. triangles],
                 GameplayMainDir = (trigger.Surf as CPlugSurface.Mesh)?.GameplayMainDir,
             };
 
@@ -70,19 +70,19 @@ namespace tman.src.Inventory
             {
                 throw new InvalidOperationException($"{templatePath} has no indexed visual with a vertex stream");
             }
-            stream.Positions = positions.ToArray();
-            stream.Normals = normals.ToArray();
+            stream.Positions = [.. positions];
+            stream.Normals = [.. normals];
             foreach (var set in stream.UVs.Keys.DefaultIfEmpty(0).ToList())
             {
-                stream.UVs[set] = uvs.ToArray();
+                stream.UVs[set] = [.. uvs];
             }
             foreach (var set in stream.Colors.Keys.DefaultIfEmpty(0).ToList())
             {
-                stream.Colors[set] = Enumerable.Repeat(unchecked((int)0xFFFFFFFF), positions.Count).ToArray();
+                stream.Colors[set] = [.. Enumerable.Repeat(unchecked((int)0xFFFFFFFF), positions.Count)];
             }
             SetCount(stream, positions.Count);
             SetCount(visual, positions.Count);
-            visual.IndexBuffer!.Indices = indices.ToArray();
+            visual.IndexBuffer!.Indices = [.. indices];
             var min = positions.Aggregate((a, b) => new Vec3(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y), Math.Min(a.Z, b.Z)));
             var max = positions.Aggregate((a, b) => new Vec3(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y), Math.Max(a.Z, b.Z)));
             visual.BoundingBox = new BoxAligned(min.X, min.Y, min.Z, max.X, max.Y, max.Z);
