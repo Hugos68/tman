@@ -60,14 +60,14 @@ namespace tman.src.Alterations
         private static readonly Regex VariantRegex = new(@"V(\d+)$", RegexOptions.Compiled);
 
         private const float BedBelow = 0.1f;
-        private const float BedAbove = 0.4f;
+        private const float BedAbove = 1.15f;
         private const float GrassAbove = 1.0f;
         private const float IndicatorLift = 0.02f;
 
         protected override void Run(CGameCtnChallenge map)
         {
             var inventory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "inventory");
-            var footprints = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "information");
+            var footprints = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "footprints");
             var environment = map.GetEnvironment();
             var boxes = environment == "Stadium2020"
                 ? GrassBoxes(map, Path.Combine(footprints, "StadiumBlockFootprints.tsv"))
@@ -135,7 +135,7 @@ namespace tman.src.Alterations
             var groundRow = MapUtility.GroundRow(map);
             var footprints = LoadWaterFootprints(footprintsPath, environment);
             var cells = new Dictionary<(float Floor, int Z), List<int>>();
-            var squares = new Dictionary<(float Bed, int Z), List<int>>();
+            var squares = new Dictionary<(float Floor, int Z), List<int>>();
             var seen = new HashSet<Int3>();
             foreach (var block in (map.Blocks ?? []).Concat(map.BakedBlocks ?? []).Where(b => !b.IsFree))
             {
@@ -149,16 +149,14 @@ namespace tman.src.Alterations
                 }
                 else if (footprints.TryGetValue((block.BlockModel.Id, (uint)block.Flags & 0x0FE01FFF), out var deep))
                 {
-                    var k = 0;
                     for (var zi = 0; zi < 8; zi++)
                     {
                         for (var xi = 0; xi < 8; xi++)
                         {
-                            if ((deep.Mask & (1UL << (zi * 8 + xi))) == 0)
+                            if ((deep & (1UL << (zi * 8 + xi))) == 0)
                             {
                                 continue;
                             }
-                            var bed = deep.Beds[k++];
                             var (x, z) = block.Direction switch
                             {
                                 Direction.East => (7 - zi, xi),
@@ -166,7 +164,7 @@ namespace tman.src.Alterations
                                 Direction.West => (zi, 7 - xi),
                                 _ => (xi, zi),
                             };
-                            Add(squares, (floor + bed, block.Coord.Z * 8 + z), block.Coord.X * 8 + x);
+                            Add(squares, (floor, block.Coord.Z * 8 + z), block.Coord.X * 8 + x);
                         }
                     }
                 }
@@ -179,8 +177,9 @@ namespace tman.src.Alterations
                     boxes.Add(new FinishPlane.Box(x0 * MapConstants.CellSize, x1 * MapConstants.CellSize, z * MapConstants.CellSize, (z + 1) * MapConstants.CellSize, bed - BedBelow, bed + BedAbove, bed + IndicatorLift));
                 }
             }
-            foreach (var ((bed, z), xs) in squares)
+            foreach (var ((floor, z), xs) in squares)
             {
+                var bed = floor + water.Bed;
                 foreach (var (x0, x1) in Runs(xs))
                 {
                     boxes.Add(new FinishPlane.Box(x0 * MapConstants.SubcellSize, x1 * MapConstants.SubcellSize, z * MapConstants.SubcellSize, (z + 1) * MapConstants.SubcellSize, bed - BedBelow, bed + BedAbove, bed + IndicatorLift));
@@ -247,15 +246,14 @@ namespace tman.src.Alterations
             }
         }
 
-        private static Dictionary<(string Tile, uint Flags), (ulong Mask, float[] Beds)> LoadWaterFootprints(string path, string environment)
+        private static Dictionary<(string Tile, uint Flags), ulong> LoadWaterFootprints(string path, string environment)
         {
-            var table = new Dictionary<(string, uint), (ulong, float[])>();
+            var table = new Dictionary<(string, uint), ulong>();
             foreach (var f in File.ReadLines(path).Skip(1).Select(line => line.Split('\t')).Where(f => f[0] == environment))
             {
                 var flags = uint.Parse(f[2], NumberStyles.HexNumber, CultureInfo.InvariantCulture) & 0x0FE01FFF;
                 var mask = ulong.Parse(f[8], NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-                var beds = f[10].Split(',', StringSplitOptions.RemoveEmptyEntries).Select(v => float.Parse(v, CultureInfo.InvariantCulture)).ToArray();
-                table[(f[1], flags)] = (mask, beds);
+                table[(f[1], flags)] = mask;
             }
             return table;
         }
