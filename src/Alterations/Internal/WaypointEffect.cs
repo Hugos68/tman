@@ -18,7 +18,7 @@ namespace tman.src.Alterations.Internal
 
             foreach (var block in blocks)
             {
-                var offsetY = block.BlockModel.Id == "GateCheckpoint" ? 0 : -GridConstants.CellHeight * 1.75f;
+                var offsetY = block.BlockModel.Id == "GateCheckpoint" ? 0 : -MapConstants.CellHeight * 1.75f;
                 MapUtility.PlaceRelative(
                     map,
                     block,
@@ -31,7 +31,7 @@ namespace tman.src.Alterations.Internal
 
             foreach (var item in items)
             {
-                var defaultOffset = InventoryUtility.IsStart(item) ? new Vec3(0, 0, GridConstants.ItemStartZOffsetZ) : new Vec3(0, 0, 0);
+                var defaultOffset = InventoryUtility.IsStart(item) ? new Vec3(0, 0, MapConstants.ItemStartZOffsetZ) : new Vec3(0, 0, 0);
                 MapUtility.PlaceRelative(
                     map,
                     item,

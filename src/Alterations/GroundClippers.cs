@@ -1,3 +1,12 @@
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using GBX.NET.Engines.Game;
+using tman.src.Alterations.Internal;
+using tman.src.Application;
+using tman.src.Inventory;
+using tman.src.Positioning;
+
 namespace tman.src.Alterations
 {
     public class GroundClippers : Alteration
@@ -36,8 +45,8 @@ namespace tman.src.Alterations
             {
                 return;
             }
-            var top = (rows.Min() - MapUtility.GroundRow(map)) * GridConstants.VerticalBlockSize + floor.Bed - TopUnderFloor;
-            var box = new FinishPlane.Box(0, map.Size.X * GridConstants.BlockSize, 0, map.Size.Z * GridConstants.BlockSize, top - Thickness, top, top);
+            var top = (rows.Min() - MapUtility.GroundRow(map)) * MapConstants.CellHeight + floor.Bed - TopUnderFloor;
+            var box = new FinishPlane.Box(0, map.Size.X * MapConstants.CellSize, 0, map.Size.Z * MapConstants.CellSize, top - Thickness, top, top);
             FinishPlane.Place(
                 map,
                 Path.Combine(ApplicationConstants.ProjectDirectory, "data", "inventory", "FinishPlaneTemplate.Item.Gbx"),

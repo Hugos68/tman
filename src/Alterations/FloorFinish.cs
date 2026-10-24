@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using GBX.NET;
 using GBX.NET.Engines.Game;
 using tman.src.Alterations.Internal;
@@ -30,30 +31,32 @@ namespace tman.src.Alterations
             ["GreenCoast"] = (["Lake"], 2.0f),
         };
 
-        private static readonly Dictionary<(string Block, int Variant), string> Cutouts = new()
+        private static readonly Dictionary<string, string> Cutouts = new()
         {
-            [("DecoPlatformCurve3In", 0)] = "FloorFinishDecoPlatformCurve3In.Item.Gbx",
-            [("DecoPlatformSlopeBaseCurve1InFull", 0)] = "FloorFinishDecoPlatformSlopeBaseCurve1InFull.Item.Gbx",
-            [("DecoPlatformSlopeBaseCurve1Out", 128)] = "FloorFinishDecoPlatformSlopeBaseCurve1OutV128.Item.Gbx",
-            [("DecoWallCurve1Pillar", 0)] = "FloorFinishDecoWallCurve1Pillar.Item.Gbx",
-            [("DecoWallCurve2InPillar", 0)] = "FloorFinishDecoWallCurve2InPillar.Item.Gbx",
-            [("DecoWallCurve2Pillar", 0)] = "FloorFinishDecoWallCurve2Pillar.Item.Gbx",
-            [("DecoWallCurve3InPillar", 0)] = "FloorFinishDecoWallCurve3InPillar.Item.Gbx",
-            [("DecoWallCurve3OutPillar", 0)] = "FloorFinishDecoWallCurve3OutPillar.Item.Gbx",
-            [("DecoWallDiag1", 0)] = "FloorFinishDecoWallDiag1.Item.Gbx",
-            [("DecoWallDiag1Pillar", 0)] = "FloorFinishDecoWallDiag1Pillar.Item.Gbx",
-            [("SnowRoadPillarStraight", 0)] = "FloorFinishSnowRoadPillarStraight.Item.Gbx",
-            [("StructureBase", 0)] = "FloorFinishStructureBase.Item.Gbx",
-            [("StructurePillar", 0)] = "FloorFinishStructurePillar.Item.Gbx",
-            [("TrackWallBranchYShaped2X3Pillar", 64)] = "FloorFinishTrackWallBranchYShaped2X3PillarV64.Item.Gbx",
-            [("TrackWallChicaneX2LeftPillar", 64)] = "FloorFinishTrackWallChicaneX2LeftPillarV64.Item.Gbx",
-            [("TrackWallChicaneX3LeftPillar", 64)] = "FloorFinishTrackWallChicaneX3LeftPillarV64.Item.Gbx",
-            [("TrackWallChicaneX3RightPillar", 64)] = "FloorFinishTrackWallChicaneX3RightPillarV64.Item.Gbx",
-            [("TrackWallCurve1Pillar", 64)] = "FloorFinishTrackWallCurve1PillarV64.Item.Gbx",
-            [("TrackWallCurve2Pillar", 64)] = "FloorFinishTrackWallCurve2PillarV64.Item.Gbx",
-            [("TrackWallCurve3Pillar", 64)] = "FloorFinishTrackWallCurve3PillarV64.Item.Gbx",
-            [("TrackWallDeadendRoundPillar", 64)] = "FloorFinishTrackWallDeadendRoundPillarV64.Item.Gbx",
+            ["DecoPlatformCurve3In"] = "FloorFinishDecoPlatformCurve3In.Item.Gbx",
+            ["DecoPlatformSlopeBaseCurve1InFull"] = "FloorFinishDecoPlatformSlopeBaseCurve1InFull.Item.Gbx",
+            ["DecoPlatformSlopeBaseCurve1OutV128"] = "FloorFinishDecoPlatformSlopeBaseCurve1OutV128.Item.Gbx",
+            ["DecoWallCurve1Pillar"] = "FloorFinishDecoWallCurve1Pillar.Item.Gbx",
+            ["DecoWallCurve2InPillar"] = "FloorFinishDecoWallCurve2InPillar.Item.Gbx",
+            ["DecoWallCurve2Pillar"] = "FloorFinishDecoWallCurve2Pillar.Item.Gbx",
+            ["DecoWallCurve3InPillar"] = "FloorFinishDecoWallCurve3InPillar.Item.Gbx",
+            ["DecoWallCurve3OutPillar"] = "FloorFinishDecoWallCurve3OutPillar.Item.Gbx",
+            ["DecoWallDiag1"] = "FloorFinishDecoWallDiag1.Item.Gbx",
+            ["DecoWallDiag1Pillar"] = "FloorFinishDecoWallDiag1Pillar.Item.Gbx",
+            ["SnowRoadPillarStraight"] = "FloorFinishSnowRoadPillarStraight.Item.Gbx",
+            ["StructureBase"] = "FloorFinishStructureBase.Item.Gbx",
+            ["StructurePillar"] = "FloorFinishStructurePillar.Item.Gbx",
+            ["TrackWallBranchYShaped2X3PillarV64"] = "FloorFinishTrackWallBranchYShaped2X3PillarV64.Item.Gbx",
+            ["TrackWallChicaneX2LeftPillarV64"] = "FloorFinishTrackWallChicaneX2LeftPillarV64.Item.Gbx",
+            ["TrackWallChicaneX3LeftPillarV64"] = "FloorFinishTrackWallChicaneX3LeftPillarV64.Item.Gbx",
+            ["TrackWallChicaneX3RightPillarV64"] = "FloorFinishTrackWallChicaneX3RightPillarV64.Item.Gbx",
+            ["TrackWallCurve1PillarV64"] = "FloorFinishTrackWallCurve1PillarV64.Item.Gbx",
+            ["TrackWallCurve2PillarV64"] = "FloorFinishTrackWallCurve2PillarV64.Item.Gbx",
+            ["TrackWallCurve3PillarV64"] = "FloorFinishTrackWallCurve3PillarV64.Item.Gbx",
+            ["TrackWallDeadendRoundPillarV64"] = "FloorFinishTrackWallDeadendRoundPillarV64.Item.Gbx",
         };
+
+        private static readonly Regex VariantRegex = new(@"V(\d+)$", RegexOptions.Compiled);
 
         private const float BedBelow = 0.1f;
         private const float BedAbove = 0.4f;
@@ -81,19 +84,41 @@ namespace tman.src.Alterations
 
         private static void PlaceCutouts(CGameCtnChallenge map, string directory)
         {
-            var embedded = new HashSet<string>();
-            foreach (var block in (map.Blocks ?? []).Where(b => !b.IsFree && b.IsGround && b.BlockModel.Id != "Grass"))
+            foreach (var (blockId, cutoutFile) in Cutouts)
             {
-                if (!Cutouts.TryGetValue((block.BlockModel.Id, Variant(block)), out var file))
+                var match = VariantRegex.Match(blockId);
+                var model = match.Success
+                    ? blockId[..match.Index]
+                    : blockId;
+                int? variant = match.Success
+                    ? int.Parse(match.Groups[1].Value)
+                    : null;
+
+                var sources = map.Blocks?
+                    .Where(block =>
+                        !block.IsFree &&
+                        block.IsGround &&
+                        block.BlockModel.Id == model &&
+                        (variant is null || Variant(block) == variant))
+                    .ToList() ?? [];
+
+                if (sources.Count == 0)
                 {
                     continue;
                 }
-                var path = Path.Combine(directory, file);
-                if (embedded.Add(file))
+
+                var cutoutPath = Path.Combine(directory, cutoutFile);
+                EmbedUtility.Embed(map, cutoutPath);
+
+                var cutout = new CGameCtnAnchoredObject
                 {
-                    EmbedUtility.Embed(map, path);
+                    ItemModel = EmbedUtility.ExtractIdent(cutoutPath)
+                };
+
+                foreach (var source in sources)
+                {
+                    MapUtility.PlaceRelative(map, source, cutout);
                 }
-                MapUtility.PlaceRelative(map, block, new CGameCtnAnchoredObject { ItemModel = EmbedUtility.ExtractIdent(path) });
             }
         }
 
@@ -113,7 +138,7 @@ namespace tman.src.Alterations
             var seen = new HashSet<Int3>();
             foreach (var block in (map.Blocks ?? []).Concat(map.BakedBlocks ?? []).Where(b => !b.IsFree))
             {
-                var floor = (block.Coord.Y - groundRow) * GridConstants.CellHeight;
+                var floor = (block.Coord.Y - groundRow) * MapConstants.CellHeight;
                 if (water.Tiles.Contains(block.BlockModel.Id))
                 {
                     if (seen.Add(block.Coord))
@@ -150,14 +175,14 @@ namespace tman.src.Alterations
                 var bed = floor + water.Bed;
                 foreach (var (x0, x1) in Runs(xs))
                 {
-                    boxes.Add(new FinishPlane.Box(x0 * GridConstants.CellSize, x1 * GridConstants.CellSize, z * GridConstants.CellSize, (z + 1) * GridConstants.CellSize, bed - BedBelow, bed + BedAbove, bed + IndicatorLift));
+                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.CellSize, x1 * MapConstants.CellSize, z * MapConstants.CellSize, (z + 1) * MapConstants.CellSize, bed - BedBelow, bed + BedAbove, bed + IndicatorLift));
                 }
             }
             foreach (var ((bed, z), xs) in squares)
             {
                 foreach (var (x0, x1) in Runs(xs))
                 {
-                    boxes.Add(new FinishPlane.Box(x0 * GridConstants.SubcellSize, x1 * GridConstants.SubcellSize, z * GridConstants.SubcellSize, (z + 1) * GridConstants.SubcellSize, bed - BedBelow, bed + BedAbove, bed + IndicatorLift));
+                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.SubcellSize, x1 * MapConstants.SubcellSize, z * MapConstants.SubcellSize, (z + 1) * MapConstants.SubcellSize, bed - BedBelow, bed + BedAbove, bed + IndicatorLift));
                 }
             }
             return boxes;
@@ -188,7 +213,7 @@ namespace tman.src.Alterations
                     hidden.Add((block.Coord.X + x, block.Coord.Z + z));
                 }
             }
-            var y = (grass.Min(c => c.Y) - MapUtility.GroundRow(map)) * GridConstants.CellHeight;
+            var y = (grass.Min(c => c.Y) - MapUtility.GroundRow(map)) * MapConstants.CellHeight;
             var rows = new Dictionary<int, List<int>>();
             foreach (var (x, z) in grass.Select(c => (c.X, c.Z)).Distinct().Where(c => !hidden.Contains(c)))
             {
@@ -198,7 +223,7 @@ namespace tman.src.Alterations
             {
                 foreach (var (x0, x1) in Runs(xs))
                 {
-                    boxes.Add(new FinishPlane.Box(x0 * GridConstants.CellSize, x1 * GridConstants.CellSize, z * GridConstants.CellSize, (z + 1) * GridConstants.CellSize, y, y + GrassAbove, y + IndicatorLift));
+                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.CellSize, x1 * MapConstants.CellSize, z * MapConstants.CellSize, (z + 1) * MapConstants.CellSize, y, y + GrassAbove, y + IndicatorLift));
                 }
             }
             return boxes;

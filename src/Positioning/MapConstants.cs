@@ -1,6 +1,6 @@
 namespace tman.src.Positioning
 {
-    public static class GridConstants
+    public static class MapConstants
     {
         public const float CellSize = 32f;
         public const float SubcellSize = 4f;
