@@ -49,15 +49,17 @@ namespace tman.src.Alterations
             [("TrackWallDeadendRoundPillar", 64)] = "FloorFinishTrackWallDeadendRoundPillarV64.Item.Gbx",
         };
 
+        private static readonly string FloorFinishDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "floor-finish");
+        private static readonly string StadiumBlockFootprintsPath = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "StadiumBlockFootprints.tsv");
+
         protected override void Run(CGameCtnChallenge map)
         {
-            var floorDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "floor-finish");
             var ident = $"FinishFloor_{map.MapUid}.Item.Gbx";
 
             var bytes = FloorFinishItem.Build(
                 map,
-                Path.Combine(floorDirectory, "FinishFloorTemplate.Item.Gbx"),
-                Path.Combine(floorDirectory, "StadiumBlockFootprints.tsv"),
+                Path.Combine(FloorFinishDirectory, "FinishFloorTemplate.Item.Gbx"),
+                StadiumBlockFootprintsPath,
                 ident);
             if (bytes is null)
             {
@@ -87,7 +89,7 @@ namespace tman.src.Alterations
                 {
                     continue;
                 }
-                var path = Path.Combine(floorDirectory, "cutouts", file);
+                var path = Path.Combine(FloorFinishDirectory, "cutouts", file);
                 if (embedded.Add(file))
                 {
                     EmbedUtility.Embed(map, path);
