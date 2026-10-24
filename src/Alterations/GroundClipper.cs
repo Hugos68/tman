@@ -53,7 +53,7 @@ namespace tman.src.Alterations
 
             var y = (rows.Min() - MapUtility.GroundRow(map)) * GridConstants.VerticalBlockSize + floor.Bed;
             var top = y - TopUnderFloor;
-            var box = new FinishPlane.Box(0, map.Size.X * 32f, 0, map.Size.Z * 32f, top - Thickness, top, top - 0.02f);
+            var box = new FinishPlane.Box(0, map.Size.X * GridConstants.BlockSize, 0, map.Size.Z * GridConstants.BlockSize, top - Thickness, top, top - 0.02f);
             var ident = $"GroundClippers_{map.MapUid}.Item.Gbx";
             var bytes = FinishPlane.Build(Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "FinishPlaneTemplate.Item.Gbx"), ident, [box]);
 
