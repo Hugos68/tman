@@ -72,8 +72,14 @@ namespace tman.src.Inventory
             }
             stream.Positions = positions.ToArray();
             stream.Normals = normals.ToArray();
-            stream.UVs = new SortedDictionary<int, Vec2[]> { [0] = uvs.ToArray() };
-            stream.Colors = new SortedDictionary<int, int[]> { [0] = Enumerable.Repeat(unchecked((int)0xFFFFFFFF), positions.Count).ToArray() };
+            foreach (var set in stream.UVs.Keys.DefaultIfEmpty(0).ToList())
+            {
+                stream.UVs[set] = uvs.ToArray();
+            }
+            foreach (var set in stream.Colors.Keys.DefaultIfEmpty(0).ToList())
+            {
+                stream.Colors[set] = Enumerable.Repeat(unchecked((int)0xFFFFFFFF), positions.Count).ToArray();
+            }
             SetCount(stream, positions.Count);
             SetCount(visual, positions.Count);
             visual.IndexBuffer!.Indices = indices.ToArray();
