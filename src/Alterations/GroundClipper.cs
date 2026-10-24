@@ -55,7 +55,7 @@ namespace tman.src.Alterations
             var top = y - TopUnderFloor;
             var box = new FinishPlane.Box(0, map.Size.X * GridConstants.BlockSize, 0, map.Size.Z * GridConstants.BlockSize, top - Thickness, top, top - 0.02f);
             var ident = $"GroundClippers_{map.MapUid}.Item.Gbx";
-            var bytes = FinishPlane.Build(Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "FinishPlaneTemplate.Item.Gbx"), ident, [box]);
+            var bytes = FinishPlane.Build(Path.Combine(ApplicationConstants.ProjectDirectory, "data", "inventory", "FinishPlaneTemplate.Item.Gbx"), ident, [box]);
 
             var generatedPath = Path.Combine(Path.GetTempPath(), ident);
             File.WriteAllBytes(generatedPath, bytes);

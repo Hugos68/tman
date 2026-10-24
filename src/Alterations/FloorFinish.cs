@@ -47,11 +47,11 @@ namespace tman.src.Alterations
 
         protected override void Run(CGameCtnChallenge map)
         {
-            var floorDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "floor-finish");
+            var floorDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "inventory", "floor-finish");
             var footprintsDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "footprints");
             var ident = $"FinishFloor_{map.MapUid}.Item.Gbx";
 
-            var bytes = FinishPlane.Build(map, Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "FinishPlaneTemplate.Item.Gbx"), footprintsDirectory, ident);
+            var bytes = FinishPlane.Build(map, Path.Combine(ApplicationConstants.ProjectDirectory, "data", "inventory", "FinishPlaneTemplate.Item.Gbx"), footprintsDirectory, ident);
             if (bytes is null)
             {
                 return;
@@ -79,7 +79,7 @@ namespace tman.src.Alterations
                 {
                     continue;
                 }
-                var path = Path.Combine(floorDirectory, "cutouts", file);
+                var path = Path.Combine(floorDirectory, file);
                 if (embedded.Add(file))
                 {
                     EmbedUtility.Embed(map, path);

@@ -63,7 +63,7 @@ namespace tman.src.Alterations
             ["StageTechnicsLightToStructure"] = "FinishStageTechnicsLightToStructure.Item.Gbx",
         };
 
-        private static readonly string MothDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "moth");
+        private static readonly string MothDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "inventory", "moth");
 
         private static readonly Regex VariantRegex = new(@"V(\d+)$", RegexOptions.Compiled);
 
