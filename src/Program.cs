@@ -86,6 +86,7 @@ rootCommand.SetAction(parseResult =>
             "flags" => new Flags(),
             "floorfinish" => new FloorFinish(),
             "freewheel" => new Freewheel(),
+            "groundclippers" => new GroundClippers(),
             "manslaughter" => new Manslaughter(),
             "moth" => new Moth(),
             "nosteer" => new NoSteer(),
