@@ -32,7 +32,7 @@ namespace tman.src.Alterations
 
         private static readonly string StandsDirectory = Path.Combine(
             ApplicationConstants.ProjectDirectory,
-            "data",
+            "assets",
             "items",
             "manslaughter");
 

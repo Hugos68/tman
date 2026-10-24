@@ -63,12 +63,11 @@ namespace tman.src.Alterations
         private const float BedBelow = 0.1f;
         private const float BedAbove = 1.15f;
         private const float GrassAbove = 1.0f;
-        private const float IndicatorLift = 0.02f;
 
         protected override void Run(CGameCtnChallenge map)
         {
-            var inventory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "inventory");
-            var footprints = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "information");
+            var inventory = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "data");
+            var footprints = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "data");
             var environment = map.GetEnvironment();
             var boxes = environment == "Stadium2020"
                 ? GrassBoxes(map, Path.Combine(footprints, "StadiumBlockFootprints.tsv"))
@@ -121,7 +120,7 @@ namespace tman.src.Alterations
 
                 foreach (var source in sources)
                 {
-                    MapUtility.PlaceRelative(map, source, cutout, new(0, IndicatorLift, 0));
+                    MapUtility.PlaceRelative(map, source, cutout);
                 }
             }
         }
@@ -177,7 +176,7 @@ namespace tman.src.Alterations
                 var bed = floor + water.Bed;
                 foreach (var (x0, x1) in Runs(xs))
                 {
-                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.CellSize, x1 * MapConstants.CellSize, z * MapConstants.CellSize, (z + 1) * MapConstants.CellSize, bed - BedBelow, bed + BedAbove, bed + IndicatorLift));
+                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.CellSize, x1 * MapConstants.CellSize, z * MapConstants.CellSize, (z + 1) * MapConstants.CellSize, bed - BedBelow, bed + BedAbove));
                 }
             }
             foreach (var ((floor, z), xs) in squares)
@@ -185,7 +184,7 @@ namespace tman.src.Alterations
                 var bed = floor + water.Bed;
                 foreach (var (x0, x1) in Runs(xs))
                 {
-                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.SubcellSize, x1 * MapConstants.SubcellSize, z * MapConstants.SubcellSize, (z + 1) * MapConstants.SubcellSize, bed - BedBelow, bed + BedAbove, bed + IndicatorLift));
+                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.SubcellSize, x1 * MapConstants.SubcellSize, z * MapConstants.SubcellSize, (z + 1) * MapConstants.SubcellSize, bed - BedBelow, bed + BedAbove));
                 }
             }
             return boxes;
@@ -226,7 +225,7 @@ namespace tman.src.Alterations
             {
                 foreach (var (x0, x1) in Runs(xs))
                 {
-                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.CellSize, x1 * MapConstants.CellSize, z * MapConstants.CellSize, (z + 1) * MapConstants.CellSize, y, y + GrassAbove, y + IndicatorLift));
+                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.CellSize, x1 * MapConstants.CellSize, z * MapConstants.CellSize, (z + 1) * MapConstants.CellSize, y, y + GrassAbove));
                 }
             }
             return boxes;
@@ -246,11 +245,11 @@ namespace tman.src.Alterations
                 if (f[7] == "ramp")
                 {
                     var side = f[9] switch { "N" => FinishPlane.Side.North, "S" => FinishPlane.Side.South, "W" => FinishPlane.Side.West, _ => FinishPlane.Side.East };
-                    ramps.Add(new FinishPlane.Ramp(x0, x1, z0, z1, floor, float.Parse(f[8], CultureInfo.InvariantCulture), BedBelow, BedAbove, IndicatorLift, side));
+                    ramps.Add(new FinishPlane.Ramp(x0, x1, z0, z1, floor, float.Parse(f[8], CultureInfo.InvariantCulture), BedBelow, BedAbove, side));
                     continue;
                 }
                 var (below, above) = f[7] == "grass" ? (0f, GrassAbove) : (BedBelow, BedAbove);
-                boxes.Add(new FinishPlane.Box(x0, x1, z0, z1, floor - below, floor + above, floor + IndicatorLift));
+                boxes.Add(new FinishPlane.Box(x0, x1, z0, z1, floor - below, floor + above));
             }
         }
 

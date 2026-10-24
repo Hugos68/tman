@@ -29,7 +29,7 @@ namespace tman.src.Alterations
 
         private static readonly string FlagsDirectory = Path.Combine(
             ApplicationConstants.ProjectDirectory,
-            "data",
+            "assets",
             "items",
             "flags");
 

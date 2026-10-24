@@ -50,10 +50,10 @@ namespace tman.src.Alterations
                 return;
             }
             var top = (rows.Min() - MapUtility.GroundRow(map)) * MapConstants.CellHeight + floor.Bed - TopUnderFloor;
-            var box = new FinishPlane.Box(-Margin, map.Size.X * MapConstants.CellSize + Margin, -Margin, map.Size.Z * MapConstants.CellSize + Margin, top - Thickness, top, top);
+            var box = new FinishPlane.Box(-Margin, map.Size.X * MapConstants.CellSize + Margin, -Margin, map.Size.Z * MapConstants.CellSize + Margin, top - Thickness, top);
             FinishPlane.Place(
                 map,
-                Path.Combine(ApplicationConstants.ProjectDirectory, "data", "inventory", "FinishPlaneTemplate.Item.Gbx"),
+                Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "inventory", "FinishPlaneTemplate.Item.Gbx"),
                 $"GroundClippers_{map.MapUid}.Item.Gbx",
                 [box]);
         }
