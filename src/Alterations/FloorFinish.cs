@@ -63,7 +63,7 @@ namespace tman.src.Alterations
         private const float BedBelow = 0.1f;
         private const float BedAbove = 1.15f;
         private const float GrassAbove = 1.0f;
-        private const float IndicatorLift = 0.02f;
+        private const float IndicatorLift = 0.1f;
 
         protected override void Run(CGameCtnChallenge map)
         {
@@ -120,7 +120,7 @@ namespace tman.src.Alterations
 
                 foreach (var source in sources)
                 {
-                    MapUtility.PlaceRelative(map, source, cutout);
+                    MapUtility.PlaceRelative(map, source, cutout, new(0, IndicatorLift, 0));
                 }
             }
         }
