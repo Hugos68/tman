@@ -14,29 +14,32 @@ It provides a reusable way to modify .Map.Gbx files through composable alteratio
 
 - **Batch-friendly** — integrate map generation into scripts and other automated workflows.
 
-## Usage
-
-Pass a map to tman along with the alterations you want to apply and an output path.
-
-dotnet run -- "Straight to the Finish" \
-  -i "input.Map.Gbx" \
-  -o "output.Map.Gbx"
-
 The example applies the Straight to the Finish alteration to the input map and writes the result to the specified output file.
 
-## Alterations
+## Supported Alterations
 
-Alterations define individual modifications that can be applied to a map. They can be combined to build more complex transformations from smaller, reusable operations.
+tman currently supports the following alterations:
 
-Examples of potential alteration categories include:
+| Alteration | Description |
+| --- | --- |
+| `Checkpointless` | Applies the Checkpointless alteration. |
+| `Flags` | Applies the Flags alteration. |
+| `Floor Finish` | Applies the FloorFinish alteration. |
+| `Freewheel` | Applies the Freewheel alteration. |
+| `Ground Clippers` | Applies the GroundClippers alteration. |
+| `Manslaughter` | Applies the Manslaughter alteration. |
+| `Moth` | Applies the Moth alteration. |
+| `No Steer` | Applies the NoSteer alteration. |
+| `Slow Motion` | Applies the SlowMotion alteration. |
+| `Straight to the Finish` | Applies the StraightToTheFinish alteration. |
 
-Waypoints — modify start, checkpoint, and finish behavior.
+Alteration names are case-insensitive. Each alteration can be selected by passing its name as the first argument:
 
-Blocks and items — place, replace, or modify map elements.
-
-Map properties — change metadata and other map settings.
-
-The available alterations and their specific behavior depend on the implementation.
+```bash
+dotnet run -- "Checkpointless" \
+  -i "input.Map.Gbx" \
+  -o "output.Map.Gbx"
+```
 
 ## Development
 

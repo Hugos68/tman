@@ -80,18 +80,18 @@ rootCommand.SetAction(parseResult =>
             SafeSkippableChunks = true
         });
 
-        Alteration alteration = alterationInput.ToLower() switch
+        Alteration alteration = alterationInput switch
         {
-            "checkpointless" => new Checkpointless(),
-            "flags" => new Flags(),
-            "floorfinish" => new FloorFinish(),
-            "freewheel" => new Freewheel(),
-            "groundclippers" => new GroundClippers(),
-            "manslaughter" => new Manslaughter(),
-            "moth" => new Moth(),
-            "nosteer" => new NoSteer(),
-            "slowmotion" => new SlowMotion(),
-            "straighttothefinish" => new StraightToTheFinish(),
+            "Checkpointless" => new Checkpointless(),
+            "Flags" => new Flags(),
+            "Floor Finish" => new FloorFinish(),
+            "Freewheel" => new Freewheel(),
+            "Ground Clippers" => new GroundClippers(),
+            "Manslaughter" => new Manslaughter(),
+            "Moth" => new Moth(),
+            "NoSteer" => new NoSteer(),
+            "Slow Motion" => new SlowMotion(),
+            "Straight To The Finish" => new StraightToTheFinish(),
             _ => throw new ArgumentException($"Unknown alteration: {alterationInput}"),
         };
 
