@@ -55,6 +55,7 @@ namespace tman.src.Alterations
             ["TrackWallCurve2PillarV64"] = "FloorFinishTrackWallCurve2PillarV64.Item.Gbx",
             ["TrackWallCurve3PillarV64"] = "FloorFinishTrackWallCurve3PillarV64.Item.Gbx",
             ["TrackWallDeadendRoundPillarV64"] = "FloorFinishTrackWallDeadendRoundPillarV64.Item.Gbx",
+            ["TrackWallStraightPillar"] = "FloorFinishTrackWallStraightPillar.Item.Gbx",
         };
 
         private static readonly Regex VariantRegex = new(@"V(\d+)$", RegexOptions.Compiled);
