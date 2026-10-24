@@ -114,7 +114,7 @@ namespace tman.src.Positioning
         private static Dictionary<string, (int X, int Z)> LoadBlockSizes()
         {
             var sizes = new Dictionary<string, (int X, int Z)>(StringComparer.OrdinalIgnoreCase);
-            var path = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "BlockSizes.tsv");
+            var path = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "footprints", "BlockSizes.tsv");
             foreach (var fields in File.ReadLines(path).Skip(1).Select(line => line.Split('\t')))
             {
                 sizes[fields[0]] = (int.Parse(fields[1]), int.Parse(fields[2]));

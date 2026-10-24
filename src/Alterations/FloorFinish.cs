@@ -52,9 +52,10 @@ namespace tman.src.Alterations
         protected override void Run(CGameCtnChallenge map)
         {
             var floorDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "floor-finish");
+            var footprintsDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "footprints");
             var ident = $"FinishFloor_{map.MapUid}.Item.Gbx";
 
-            var bytes = FloorFinishItem.Build(map, Path.Combine(floorDirectory, "FinishFloorTemplate.Item.Gbx"), floorDirectory, ident);
+            var bytes = FloorFinishItem.Build(map, Path.Combine(floorDirectory, "FinishFloorTemplate.Item.Gbx"), footprintsDirectory, ident);
             if (bytes is null)
             {
                 return;
@@ -69,7 +70,6 @@ namespace tman.src.Alterations
                 Vec3.Zero,
                 Vec3.Zero,
                 Vec3.Zero);
-            map.AnchoredObjects![^1].WaypointSpecialProperty = new() { Tag = "Goal", Order = 0 };
 
             if (map.GetEnvironment() != "Stadium2020")
             {
@@ -89,25 +89,24 @@ namespace tman.src.Alterations
                     EmbedUtility.Embed(map, path);
                 }
                 MapUtility.PlaceRelative(map, block, new CGameCtnAnchoredObject { ItemModel = EmbedUtility.ExtractIdent(path) });
-                map.AnchoredObjects![^1].WaypointSpecialProperty = new() { Tag = "Goal", Order = 0 };
-            }
+                }
         }
     }
 
     public static class FloorFinishItem
     {
-        private static readonly Dictionary<string, (string[] Tiles, float Bed, float Surface)> OpenWater = new()
+        private static readonly Dictionary<string, (string[] Tiles, float Bed)> OpenWater = new()
         {
-            ["RedIsland"] = (["Water"], 2.0f, 7.7f),
-            ["WhiteShore"] = (["Water"], 2.0f, 7.0f),
-            ["BlueBay"] = (["Sea"], 4.0f, 7.0f),
-            ["GreenCoast"] = (["Lake"], 2.0f, 7.2f),
+            ["RedIsland"] = (["Water"], 2.0f),
+            ["WhiteShore"] = (["Water"], 2.0f),
+            ["BlueBay"] = (["Sea"], 4.0f),
+            ["GreenCoast"] = (["Lake"], 2.0f),
         };
 
         private const float Cell = 32.0f;
         private const float Square = 4.0f;
-        private const float TopUnderSurface = 2.5f;
         private const float BedBelow = 0.1f;
+        private const float BedAbove = 0.4f;
         private const float GrassAbove = 1.0f;
         private const float IndicatorLift = 0.02f;
 
@@ -115,12 +114,12 @@ namespace tman.src.Alterations
 
         public static int Variant(CGameCtnBlock block) => (block.Flags & 0x3F) + 64 * ((block.Flags >> 21) & 0x7F);
 
-        public static byte[]? Build(CGameCtnChallenge map, string templatePath, string floorDirectory, string ident)
+        public static byte[]? Build(CGameCtnChallenge map, string templatePath, string footprintsDirectory, string ident)
         {
             var environment = map.GetEnvironment();
             var boxes = environment == "Stadium2020"
-                ? GrassBoxes(map, Path.Combine(floorDirectory, "StadiumBlockFootprints.tsv"))
-                : WaterBoxes(map, environment, Path.Combine(floorDirectory, "WaterFootprints.tsv"));
+                ? GrassBoxes(map, Path.Combine(footprintsDirectory, "StadiumBlockFootprints.tsv"))
+                : WaterBoxes(map, environment, Path.Combine(footprintsDirectory, "WaterFootprints.tsv"));
             if (boxes.Count == 0)
             {
                 return null;
@@ -249,14 +248,14 @@ namespace tman.src.Alterations
             {
                 foreach (var (x0, x1) in Runs(xs))
                 {
-                    boxes.Add(new Box(x0 * Cell, x1 * Cell, z * Cell, (z + 1) * Cell, floor + water.Bed - BedBelow, floor + water.Surface - TopUnderSurface, floor + water.Bed));
+                    boxes.Add(new Box(x0 * Cell, x1 * Cell, z * Cell, (z + 1) * Cell, floor + water.Bed - BedBelow, floor + water.Bed + BedAbove, floor + water.Bed));
                 }
             }
-            foreach (var ((bed, floor, z), xs) in squares)
+            foreach (var ((bed, _, z), xs) in squares)
             {
                 foreach (var (x0, x1) in Runs(xs))
                 {
-                    boxes.Add(new Box(x0 * Square, x1 * Square, z * Square, (z + 1) * Square, bed - BedBelow, Math.Max(floor + water.Surface - TopUnderSurface, bed - BedBelow + 0.3f), bed));
+                    boxes.Add(new Box(x0 * Square, x1 * Square, z * Square, (z + 1) * Square, bed - BedBelow, bed + BedAbove, bed));
                 }
             }
             return boxes;
