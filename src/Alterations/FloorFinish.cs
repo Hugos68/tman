@@ -85,7 +85,7 @@ namespace tman.src.Alterations
                     EmbedUtility.Embed(map, path);
                 }
                 MapUtility.PlaceRelative(map, block, new CGameCtnAnchoredObject { ItemModel = EmbedUtility.ExtractIdent(path) });
-                }
+            }
         }
     }
 }
