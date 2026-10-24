@@ -5,7 +5,6 @@ using System.CommandLine;
 using GBX.NET;
 using GBX.NET.Engines.Game;
 using tman.src;
-using tman.src.Alterations;
 using tman.src.Application;
 
 ApplicationInitializer.Initialize();
@@ -80,24 +79,14 @@ rootCommand.SetAction(parseResult =>
             SafeSkippableChunks = true
         });
 
-        Alteration alteration = alterationInput.ToLower() switch
+        var type = typeof(Alteration).Assembly.GetType($"tman.src.Alterations.{alterationInput}");
+
+        if (type is null || !typeof(Alteration).IsAssignableFrom(type))
         {
-            "CarDesert" => new CarDesert(),
-            "CarRally" => new CarRally(),
-            "CarSnow" => new CarSnow(),
-            "CarSport" => new CarSport(),
-            "Checkpointless" => new Checkpointless(),
-            "Flags" => new Flags(),
-            "Floor Finish" => new FloorFinish(),
-            "Freewheel" => new Freewheel(),
-            "Ground Clippers" => new GroundClippers(),
-            "Manslaughter" => new Manslaughter(),
-            "Moth" => new Moth(),
-            "NoSteer" => new NoSteer(),
-            "SlowMotion" => new SlowMotion(),
-            "StraightToTheFinish" => new StraightToTheFinish(),
-            _ => throw new ArgumentException($"Unknown alteration: {alterationInput}"),
-        };
+            throw new ArgumentException($"Unknown alteration: {alterationInput}");
+        }
+
+        var alteration = (Alteration)Activator.CreateInstance(type)!;
 
         alteration.Apply(map);
 
