@@ -51,11 +51,12 @@ namespace tman.src.Alterations
 
         protected override void Run(CGameCtnChallenge map)
         {
-            var floorDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "floor-finish");
+            var itemDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items");
+            var floorDirectory = Path.Combine(itemDirectory, "floor-finish");
             var footprintsDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "footprints");
             var ident = $"FinishFloor_{map.MapUid}.Item.Gbx";
 
-            var bytes = FloorFinishItem.Build(map, Path.Combine(floorDirectory, "FinishFloorTemplate.Item.Gbx"), footprintsDirectory, ident);
+            var bytes = FloorFinishItem.Build(map, Path.Combine(itemDirectory, "FinishPlaneTemplate.Item.Gbx"), footprintsDirectory, ident);
             if (bytes is null)
             {
                 return;
