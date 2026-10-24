@@ -22,17 +22,20 @@ tman currently supports the following alterations:
 
 | Alteration | Description |
 | --- | --- |
-
+| `CarDesert` | Replaces the car with the Desert Car. |
+| `CarRally` | Replaces the car with the Rally Car. |
+| `CarSnow` | Replaces the car with the Snow Car. |
+| `CarSport` | Replaces the car with the Sport Car. |
 | `Checkpointless` | Applies the Checkpointless alteration. |
 | `Flags` | Applies the Flags alteration. |
 | `Floor Finish` | Applies the FloorFinish alteration. |
 | `Freewheel` | Applies the Freewheel alteration. |
-| `Ground Clippers` | Applies the GroundClippers alteration. |
+| `GroundClippers` | Applies the GroundClippers alteration. |
 | `Manslaughter` | Applies the Manslaughter alteration. |
 | `Moth` | Applies the Moth alteration. |
-| `No Steer` | Applies the NoSteer alteration. |
-| `Slow Motion` | Applies the SlowMotion alteration. |
-| `Straight to the Finish` | Applies the StraightToTheFinish alteration. |
+| `NoSteer` | Applies the NoSteer alteration. |
+| `SlowMotion` | Applies the SlowMotion alteration. |
+| `StraightToTheFinish` | Applies the StraightToTheFinish alteration. |
 
 Alteration names are case-insensitive. Each alteration can be selected by passing its name as the first argument:
 
