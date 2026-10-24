@@ -68,11 +68,12 @@ namespace tman.src.Alterations
         protected override void Run(CGameCtnChallenge map)
         {
             var inventory = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "inventory");
-            var information = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "information");
+            var footprints = Path.Combine(ApplicationConstants.ProjectDirectory, "data", "information");
             var environment = map.GetEnvironment();
             var boxes = environment == "Stadium2020"
-                ? GrassBoxes(map, Path.Combine(information, "StadiumBlockFootprints.tsv"))
-                : WaterBoxes(map, environment, Path.Combine(information, "WaterFootprints.tsv"));
+                ? GrassBoxes(map, Path.Combine(footprints, "StadiumBlockFootprints.tsv"))
+                : WaterBoxes(map, environment, Path.Combine(footprints, "WaterFootprints.tsv"));
+            boxes.AddRange(OuterRing(map, environment, Path.Combine(footprints, "OuterTerrain.tsv")));
             if (boxes.Count == 0)
             {
                 return;
@@ -228,6 +229,25 @@ namespace tman.src.Alterations
                 }
             }
             return boxes;
+        }
+
+        private static IEnumerable<FinishPlane.Box> OuterRing(CGameCtnChallenge map, string environment, string path)
+        {
+            var collection = environment == "Stadium2020" ? "Stadium" : environment;
+            var decoration = environment == "Stadium2020" ? Regex.Replace(map.Decoration.Id, "(Day|Night|Sunrise|Sunset)$", "") : "Base64x64";
+            foreach (var f in File.ReadLines(path).Skip(1).Select(line => line.Split('\t')).Where(f => f[0] == collection && f[1] == decoration))
+            {
+                var floor = float.Parse(f[6], CultureInfo.InvariantCulture);
+                var (below, above) = f[7] == "grass" ? (0f, GrassAbove) : (BedBelow, BedAbove);
+                yield return new FinishPlane.Box(
+                    float.Parse(f[2], CultureInfo.InvariantCulture),
+                    float.Parse(f[3], CultureInfo.InvariantCulture),
+                    float.Parse(f[4], CultureInfo.InvariantCulture),
+                    float.Parse(f[5], CultureInfo.InvariantCulture),
+                    floor - below,
+                    floor + above,
+                    floor + IndicatorLift);
+            }
         }
 
         private static IEnumerable<(int X0, int X1)> Runs(List<int> xs)

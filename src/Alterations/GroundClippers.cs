@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using GBX.NET;
 using GBX.NET.Engines.Game;
 using tman.src.Alterations.Internal;
 using tman.src.Application;
@@ -31,6 +33,7 @@ namespace tman.src.Alterations
 
         private const float TopUnderFloor = 0.15f;
         private const float Thickness = 1.0f;
+        private const float Margin = 6 * MapConstants.CellSize;
 
         protected override void Run(CGameCtnChallenge map)
         {
@@ -47,7 +50,7 @@ namespace tman.src.Alterations
                 return;
             }
             var top = (rows.Min() - MapUtility.GroundRow(map)) * MapConstants.CellHeight + floor.Bed - TopUnderFloor;
-            var box = new FinishPlane.Box(0, map.Size.X * MapConstants.CellSize, 0, map.Size.Z * MapConstants.CellSize, top - Thickness, top, top);
+            var box = new FinishPlane.Box(-Margin, map.Size.X * MapConstants.CellSize + Margin, -Margin, map.Size.Z * MapConstants.CellSize + Margin, top - Thickness, top, top);
             FinishPlane.Place(
                 map,
                 Path.Combine(ApplicationConstants.ProjectDirectory, "data", "inventory", "FinishPlaneTemplate.Item.Gbx"),

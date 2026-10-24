@@ -11,7 +11,7 @@ namespace tman.src.Inventory
 {
     public static class FinishPlane
     {
-        private const float IndicatorTile = 4.0f;
+        private const float IndicatorTile = 8.0f;
 
         public readonly record struct Box(float X0, float X1, float Z0, float Z1, float Y0, float Y1, float Indicator);
 
@@ -61,8 +61,8 @@ namespace tman.src.Inventory
             trigger.Surf = new CPlugSurface.Mesh
             {
                 Version = 7,
-                Vertices = [.. vertices],
-                Triangles = [.. triangles],
+                Vertices = vertices.ToArray(),
+                Triangles = triangles.ToArray(),
                 GameplayMainDir = (trigger.Surf as CPlugSurface.Mesh)?.GameplayMainDir,
             };
 
@@ -70,19 +70,13 @@ namespace tman.src.Inventory
             {
                 throw new InvalidOperationException($"{templatePath} has no indexed visual with a vertex stream");
             }
-            stream.Positions = [.. positions];
-            stream.Normals = [.. normals];
-            foreach (var set in stream.UVs.Keys.DefaultIfEmpty(0).ToList())
-            {
-                stream.UVs[set] = [.. uvs];
-            }
-            foreach (var set in stream.Colors.Keys.DefaultIfEmpty(0).ToList())
-            {
-                stream.Colors[set] = [.. Enumerable.Repeat(unchecked((int)0xFFFFFFFF), positions.Count)];
-            }
+            stream.Positions = positions.ToArray();
+            stream.Normals = normals.ToArray();
+            stream.UVs = new SortedDictionary<int, Vec2[]> { [0] = uvs.ToArray() };
+            stream.Colors = new SortedDictionary<int, int[]> { [0] = Enumerable.Repeat(unchecked((int)0xFFFFFFFF), positions.Count).ToArray() };
             SetCount(stream, positions.Count);
             SetCount(visual, positions.Count);
-            visual.IndexBuffer!.Indices = [.. indices];
+            visual.IndexBuffer!.Indices = indices.ToArray();
             var min = positions.Aggregate((a, b) => new Vec3(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y), Math.Min(a.Z, b.Z)));
             var max = positions.Aggregate((a, b) => new Vec3(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y), Math.Max(a.Z, b.Z)));
             visual.BoundingBox = new BoxAligned(min.X, min.Y, min.Z, max.X, max.Y, max.Z);
