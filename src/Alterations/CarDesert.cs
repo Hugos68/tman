@@ -8,7 +8,7 @@ namespace tman.src.Alterations
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
             new ValidationRemoved(),
-            new CarChange("CarDesert"),
+            new CarChange(Car.Desert),
             new MapNameEdited(name => name + " Car Desert")
         ];
 
