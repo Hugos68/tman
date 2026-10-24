@@ -12,7 +12,7 @@ It provides a reusable way to modify .Map.Gbx files through composable alteratio
 
 - **Automated map editing** — apply changes without manually editing each map in the Trackmania editor.
 
--- **Batch-friendly** — integrate map generation into scripts and other automated workflows.
+- **Batch-friendly** — integrate map generation into scripts and other automated workflows.
 
 ## Usage
 
