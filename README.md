@@ -28,7 +28,7 @@ tman currently supports the following alterations:
 | `CarSport` | Replaces the car with the Sport Car. |
 | `Checkpointless` | Applies the Checkpointless alteration. |
 | `Flags` | Applies the Flags alteration. |
-| `Floor Finish` | Applies the FloorFinish alteration. |
+| `FloorFinish` | Applies the FloorFinish alteration. |
 | `Freewheel` | Applies the Freewheel alteration. |
 | `GroundClippers` | Applies the GroundClippers alteration. |
 | `Manslaughter` | Applies the Manslaughter alteration. |
