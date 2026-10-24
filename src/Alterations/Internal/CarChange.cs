@@ -1,23 +1,9 @@
 
-using System;
+using System.Collections.Generic;
 using GBX.NET.Engines.Game;
 
 namespace tman.src.Alterations.Internal
 {
-    public class CarChange(Car car) : Alteration
-    {
-        protected override void Run(CGameCtnChallenge map)
-        {
-            map.PlayerModel = new(car switch
-            {
-                Car.Desert => "CarDesert",
-                Car.Rally => "CarRally",
-                Car.Snow => "CarSnow",
-                Car.Sport => "CarSport",
-                _ => throw new ArgumentException($"Unknown car: {car}")
-            }, 10003, "");
-        }
-    }
 
     public enum Car
     {
@@ -25,5 +11,21 @@ namespace tman.src.Alterations.Internal
         Rally,
         Snow,
         Sport
+    }
+
+    public class CarChange(Car car) : Alteration
+    {
+        private readonly Dictionary<Car, string> CarStrings = new()
+        {
+            { Car.Desert, "CarDesert" },
+            { Car.Rally, "CarRally" },
+            { Car.Snow, "CarSnow" },
+            { Car.Sport, "CarSport" }
+        };
+
+        protected override void Run(CGameCtnChallenge map)
+        {
+            map.PlayerModel = new(CarStrings[car], 10003, "");
+        }
     }
 }

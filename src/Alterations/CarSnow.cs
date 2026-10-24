@@ -9,7 +9,7 @@ namespace tman.src.Alterations
         [
             new ValidationRemoved(),
             new CarChange(Car.Snow),
-            new MapNameEdited(name => name + " Car Snow")
+            new MapNameEdited(name => name + " Snow Car")
         ];
 
     }
