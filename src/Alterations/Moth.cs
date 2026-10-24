@@ -14,8 +14,8 @@ namespace tman.src.Alterations
     {
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
-            new WithoutValidation(),
-            new WithoutInventory(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
+            new ValidationRemoved(),
+            new InventoryRemoved(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
             new CheckpointsCleaned(),
             new MapNameEdited(name => name + " Moth")
         ];

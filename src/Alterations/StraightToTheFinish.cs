@@ -6,7 +6,7 @@ namespace tman.src.Alterations
     {
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
-            new WithoutValidation(),
+            new ValidationRemoved(),
             new CheckpointsCleaned(),
             new MapNameEdited(name => name + " Straight to the Finish")
         ];

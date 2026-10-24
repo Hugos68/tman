@@ -9,8 +9,8 @@ namespace tman.src.Alterations
 
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
-            new WithoutValidation(),
-            new WithoutInventory(InventoryUtility.IsCheckpoint, InventoryUtility.IsCheckpoint),
+            new ValidationRemoved(),
+            new InventoryRemoved(InventoryUtility.IsCheckpoint, InventoryUtility.IsCheckpoint),
             new MapNameEdited(name => name + " Checkpointless")
         ];
     }

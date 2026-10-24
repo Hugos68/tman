@@ -22,6 +22,7 @@ tman currently supports the following alterations:
 
 | Alteration | Description |
 | --- | --- |
+
 | `Checkpointless` | Applies the Checkpointless alteration. |
 | `Flags` | Applies the Flags alteration. |
 | `Floor Finish` | Applies the FloorFinish alteration. |

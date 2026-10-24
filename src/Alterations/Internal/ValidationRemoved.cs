@@ -3,7 +3,7 @@ using GBX.NET.Engines.Game;
 
 namespace tman.src.Alterations.Internal
 {
-    public class WithoutValidation : Alteration
+    public class ValidationRemoved : Alteration
     {
         protected override void Run(CGameCtnChallenge map)
         {

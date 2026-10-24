@@ -82,6 +82,10 @@ rootCommand.SetAction(parseResult =>
 
         Alteration alteration = alterationInput switch
         {
+            "Car Desert" => new CarDesert(),
+            "Car Rally" => new CarRally(),
+            "Car Snow" => new CarSnow(),
+            "Car Sport" => new CarSport(),
             "Checkpointless" => new Checkpointless(),
             "Flags" => new Flags(),
             "Floor Finish" => new FloorFinish(),

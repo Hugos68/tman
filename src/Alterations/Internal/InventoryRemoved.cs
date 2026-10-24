@@ -3,7 +3,7 @@ using GBX.NET.Engines.Game;
 
 namespace tman.src.Alterations.Internal
 {
-    public class WithoutInventory(
+    public class InventoryRemoved(
         Predicate<CGameCtnBlock>? blocks = null,
         Predicate<CGameCtnAnchoredObject>? items = null) : Alteration
     {
