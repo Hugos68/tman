@@ -19,7 +19,7 @@ namespace tman.src.Alterations.Internal
 
         private static readonly Dictionary<string, (string Name, DirectionOffset Rotation)> BlockReplacements = new()
         {
-           // Open Dirt Road
+            // Open Dirt Road
             ["OpenDirtRoadCheckpoint"] = ("OpenDirtRoadStraight", DirectionOffset.None),
             ["OpenDirtRoadCheckpointSlope2Down"] = ("OpenDirtRoadSlope2Straight", DirectionOffset.Half),
             ["OpenDirtRoadCheckpointSlope2Left"] = ("OpenDirtRoadSlope2Straight", DirectionOffset.Quarter),
