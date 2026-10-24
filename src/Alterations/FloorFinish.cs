@@ -63,7 +63,7 @@ namespace tman.src.Alterations
         private const float BedBelow = 0.1f;
         private const float BedAbove = 1.15f;
         private const float GrassAbove = 1.0f;
-        private const float IndicatorLift = 0.1f;
+        private const float IndicatorLift = 0.02f;
 
         protected override void Run(CGameCtnChallenge map)
         {
@@ -73,12 +73,13 @@ namespace tman.src.Alterations
             var boxes = environment == "Stadium2020"
                 ? GrassBoxes(map, Path.Combine(footprints, "StadiumBlockFootprints.tsv"))
                 : WaterBoxes(map, environment, Path.Combine(footprints, "WaterFootprints.tsv"));
-            boxes.AddRange(OuterRing(map, environment, Path.Combine(footprints, "OuterTerrain.tsv")));
+            var ramps = new List<FinishPlane.Ramp>();
+            OuterRing(map, environment, Path.Combine(footprints, "OuterTerrain.tsv"), boxes, ramps);
             if (boxes.Count == 0)
             {
                 return;
             }
-            FinishPlane.Place(map, Path.Combine(inventory, "FinishPlaneTemplate.Item.Gbx"), $"FinishFloor_{map.MapUid}.Item.Gbx", boxes);
+            FinishPlane.Place(map, Path.Combine(inventory, "FinishPlaneTemplate.Item.Gbx"), $"FinishFloor_{map.MapUid}.Item.Gbx", boxes, ramps);
             if (environment == "Stadium2020")
             {
                 PlaceCutouts(map, Path.Combine(inventory, "floor-finish"));
@@ -231,22 +232,25 @@ namespace tman.src.Alterations
             return boxes;
         }
 
-        private static IEnumerable<FinishPlane.Box> OuterRing(CGameCtnChallenge map, string environment, string path)
+        private static void OuterRing(CGameCtnChallenge map, string environment, string path, List<FinishPlane.Box> boxes, List<FinishPlane.Ramp> ramps)
         {
             var collection = environment == "Stadium2020" ? "Stadium" : environment;
             var decoration = environment == "Stadium2020" ? Regex.Replace(map.Decoration.Id, "(Day|Night|Sunrise|Sunset)$", "") : "Base64x64";
             foreach (var f in File.ReadLines(path).Skip(1).Select(line => line.Split('\t')).Where(f => f[0] == collection && f[1] == decoration))
             {
+                var x0 = float.Parse(f[2], CultureInfo.InvariantCulture);
+                var x1 = float.Parse(f[3], CultureInfo.InvariantCulture);
+                var z0 = float.Parse(f[4], CultureInfo.InvariantCulture);
+                var z1 = float.Parse(f[5], CultureInfo.InvariantCulture);
                 var floor = float.Parse(f[6], CultureInfo.InvariantCulture);
+                if (f[7] == "ramp")
+                {
+                    var side = f[9] switch { "N" => FinishPlane.Side.North, "S" => FinishPlane.Side.South, "W" => FinishPlane.Side.West, _ => FinishPlane.Side.East };
+                    ramps.Add(new FinishPlane.Ramp(x0, x1, z0, z1, floor, float.Parse(f[8], CultureInfo.InvariantCulture), BedBelow, BedAbove, IndicatorLift, side));
+                    continue;
+                }
                 var (below, above) = f[7] == "grass" ? (0f, GrassAbove) : (BedBelow, BedAbove);
-                yield return new FinishPlane.Box(
-                    float.Parse(f[2], CultureInfo.InvariantCulture),
-                    float.Parse(f[3], CultureInfo.InvariantCulture),
-                    float.Parse(f[4], CultureInfo.InvariantCulture),
-                    float.Parse(f[5], CultureInfo.InvariantCulture),
-                    floor - below,
-                    floor + above,
-                    floor + IndicatorLift);
+                boxes.Add(new FinishPlane.Box(x0, x1, z0, z1, floor - below, floor + above, floor + IndicatorLift));
             }
         }
 
