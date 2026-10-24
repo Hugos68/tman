@@ -22,29 +22,29 @@ namespace tman.src.Alterations.Internal
             // Open Dirt Road
             ["OpenDirtRoadCheckpoint"] = ("OpenDirtRoadStraight", DirectionOffset.None),
             ["OpenDirtRoadCheckpointSlope2Down"] = ("OpenDirtRoadSlope2Straight", DirectionOffset.Half),
-            ["OpenDirtRoadCheckpointSlope2Left"] = ("OpenDirtRoadSlope2Straight", DirectionOffset.Quarter),
-            ["OpenDirtRoadCheckpointSlope2Right"] = ("OpenDirtRoadSlope2Straight", DirectionOffset.ThreeQuarters),
+            ["OpenDirtRoadCheckpointSlope2Left"] = ("OpenDirtRoadStraightTilt2", DirectionOffset.Quarter),
+            ["OpenDirtRoadCheckpointSlope2Right"] = ("OpenDirtRoadStraightTilt2", DirectionOffset.ThreeQuarters),
             ["OpenDirtRoadCheckpointSlope2Up"] = ("OpenDirtRoadSlope2Straight", DirectionOffset.None),
 
             // Open Grass Road
             ["OpenGrassRoadCheckpoint"] = ("OpenGrassRoadStraight", DirectionOffset.None),
             ["OpenGrassRoadCheckpointSlope2Down"] = ("OpenGrassRoadSlope2Straight", DirectionOffset.Half),
-            ["OpenGrassRoadCheckpointSlope2Left"] = ("OpenGrassRoadSlope2Straight", DirectionOffset.Quarter),
-            ["OpenGrassRoadCheckpointSlope2Right"] = ("OpenGrassRoadSlope2Straight", DirectionOffset.ThreeQuarters),
+            ["OpenGrassRoadCheckpointSlope2Left"] = ("OpenGrassRoadStraightTilt2", DirectionOffset.Quarter),
+            ["OpenGrassRoadCheckpointSlope2Right"] = ("OpenGrassRoadStraightTilt2", DirectionOffset.ThreeQuarters),
             ["OpenGrassRoadCheckpointSlope2Up"] = ("OpenGrassRoadSlope2Straight", DirectionOffset.None),
 
             // Open Ice Road
             ["OpenIceRoadCheckpoint"] = ("OpenIceRoadStraight", DirectionOffset.None),
             ["OpenIceRoadCheckpointSlope2Down"] = ("OpenIceRoadSlope2Straight", DirectionOffset.Half),
-            ["OpenIceRoadCheckpointSlope2Left"] = ("OpenIceRoadSlope2Straight", DirectionOffset.Quarter),
-            ["OpenIceRoadCheckpointSlope2Right"] = ("OpenIceRoadSlope2Straight", DirectionOffset.ThreeQuarters),
+            ["OpenIceRoadCheckpointSlope2Left"] = ("OpenIceRoadStraightTilt2", DirectionOffset.Quarter),
+            ["OpenIceRoadCheckpointSlope2Right"] = ("OpenIceRoadStraightTilt2", DirectionOffset.ThreeQuarters),
             ["OpenIceRoadCheckpointSlope2Up"] = ("OpenIceRoadSlope2Straight", DirectionOffset.None),
 
             // Open Tech Road
             ["OpenTechRoadCheckpoint"] = ("OpenTechRoadStraight", DirectionOffset.None),
             ["OpenTechRoadCheckpointSlope2Down"] = ("OpenTechRoadSlope2Straight", DirectionOffset.Half),
-            ["OpenTechRoadCheckpointSlope2Left"] = ("OpenTechRoadSlope2Straight", DirectionOffset.Quarter),
-            ["OpenTechRoadCheckpointSlope2Right"] = ("OpenTechRoadSlope2Straight", DirectionOffset.ThreeQuarters),
+            ["OpenTechRoadCheckpointSlope2Left"] = ("OpenTechRoadStraightTilt2", DirectionOffset.Quarter),
+            ["OpenTechRoadCheckpointSlope2Right"] = ("OpenTechRoadStraightTilt2", DirectionOffset.ThreeQuarters),
             ["OpenTechRoadCheckpointSlope2Up"] = ("OpenTechRoadSlope2Straight", DirectionOffset.None),
 
             // Platform Dirt
@@ -54,9 +54,9 @@ namespace tman.src.Alterations.Internal
             ["PlatformDirtCheckpointSlope2Right"] = ("PlatformDirtSlope2Straight", DirectionOffset.ThreeQuarters),
             ["PlatformDirtCheckpointSlope2Up"] = ("PlatformDirtSlope2Straight", DirectionOffset.None),
             ["PlatformDirtWallCheckpointDown"] = ("PlatformDirtWallStraight4", DirectionOffset.Quarter),
-            ["PlatformDirtWallCheckpointLeft"] = ("PlatformDirtWallStraight4", DirectionOffset.Quarter), // the standing deck = the 32 m wall on the same side (approx: the deck's thick ends differ)
-            ["PlatformDirtWallCheckpointRight"] = ("PlatformDirtWallStraight4", DirectionOffset.Quarter), // the standing deck = the 32 m wall on the same side (approx: the deck's thick ends differ)
-            ["PlatformDirtWallCheckpointUp"] = ("PlatformDirtWallStraight4", DirectionOffset.Quarter), // the standing deck = the 32 m wall on the same side (approx: the deck's thick ends differ)
+            ["PlatformDirtWallCheckpointLeft"] = ("PlatformDirtWallStraight4", DirectionOffset.Quarter),
+            ["PlatformDirtWallCheckpointRight"] = ("PlatformDirtWallStraight4", DirectionOffset.Quarter),
+            ["PlatformDirtWallCheckpointUp"] = ("PlatformDirtWallStraight4", DirectionOffset.Quarter),
 
             // Platform Grass
             ["PlatformGrassCheckpoint"] = ("PlatformGrassBase", DirectionOffset.None),
@@ -65,9 +65,9 @@ namespace tman.src.Alterations.Internal
             ["PlatformGrassCheckpointSlope2Right"] = ("PlatformGrassSlope2Straight", DirectionOffset.ThreeQuarters),
             ["PlatformGrassCheckpointSlope2Up"] = ("PlatformGrassSlope2Straight", DirectionOffset.None),
             ["PlatformGrassWallCheckpointDown"] = ("PlatformGrassWallStraight4", DirectionOffset.Quarter),
-            ["PlatformGrassWallCheckpointLeft"] = ("PlatformGrassWallStraight4", DirectionOffset.Quarter), // the standing deck = the 32 m wall on the same side (approx: the deck's thick ends differ)
-            ["PlatformGrassWallCheckpointRight"] = ("PlatformGrassWallStraight4", DirectionOffset.Quarter), // the standing deck = the 32 m wall on the same side (approx: the deck's thick ends differ)
-            ["PlatformGrassWallCheckpointUp"] = ("PlatformGrassWallStraight4", DirectionOffset.Quarter), // the standing deck = the 32 m wall on the same side (approx: the deck's thick ends differ)
+            ["PlatformGrassWallCheckpointLeft"] = ("PlatformGrassWallStraight4", DirectionOffset.Quarter),
+            ["PlatformGrassWallCheckpointRight"] = ("PlatformGrassWallStraight4", DirectionOffset.Quarter),
+            ["PlatformGrassWallCheckpointUp"] = ("PlatformGrassWallStraight4", DirectionOffset.Quarter),
 
             // Platform Ice
             ["PlatformIceCheckpoint"] = ("PlatformIceBase", DirectionOffset.None),
@@ -76,9 +76,9 @@ namespace tman.src.Alterations.Internal
             ["PlatformIceCheckpointSlope2Right"] = ("PlatformIceSlope2Straight", DirectionOffset.ThreeQuarters),
             ["PlatformIceCheckpointSlope2Up"] = ("PlatformIceSlope2Straight", DirectionOffset.None),
             ["PlatformIceWallCheckpointDown"] = ("PlatformIceWallStraight4", DirectionOffset.Quarter),
-            ["PlatformIceWallCheckpointLeft"] = ("PlatformIceWallStraight4", DirectionOffset.Quarter), // the standing deck = the 32 m wall on the same side (approx: the deck's thick ends differ)
-            ["PlatformIceWallCheckpointRight"] = ("PlatformIceWallStraight4", DirectionOffset.Quarter), // the standing deck = the 32 m wall on the same side (approx: the deck's thick ends differ)
-            ["PlatformIceWallCheckpointUp"] = ("PlatformIceWallStraight4", DirectionOffset.Quarter), // the standing deck = the 32 m wall on the same side (approx: the deck's thick ends differ)
+            ["PlatformIceWallCheckpointLeft"] = ("PlatformIceWallStraight4", DirectionOffset.Quarter),
+            ["PlatformIceWallCheckpointRight"] = ("PlatformIceWallStraight4", DirectionOffset.Quarter),
+            ["PlatformIceWallCheckpointUp"] = ("PlatformIceWallStraight4", DirectionOffset.Quarter),
 
             // Platform Plastic
             ["PlatformPlasticCheckpoint"] = ("PlatformPlasticBase", DirectionOffset.None),
@@ -87,9 +87,9 @@ namespace tman.src.Alterations.Internal
             ["PlatformPlasticCheckpointSlope2Right"] = ("PlatformPlasticSlope2Straight", DirectionOffset.ThreeQuarters),
             ["PlatformPlasticCheckpointSlope2Up"] = ("PlatformPlasticSlope2Straight", DirectionOffset.None),
             ["PlatformPlasticWallCheckpointDown"] = ("PlatformPlasticWallStraight4", DirectionOffset.Quarter),
-            ["PlatformPlasticWallCheckpointLeft"] = ("PlatformPlasticWallStraight4", DirectionOffset.Quarter), // the standing deck = the 32 m wall on the same side (approx: the deck's thick ends differ)
-            ["PlatformPlasticWallCheckpointRight"] = ("PlatformPlasticWallStraight4", DirectionOffset.Quarter), // the standing deck = the 32 m wall on the same side (approx: the deck's thick ends differ)
-            ["PlatformPlasticWallCheckpointUp"] = ("PlatformPlasticWallStraight4", DirectionOffset.Quarter), // the standing deck = the 32 m wall on the same side (approx: the deck's thick ends differ)
+            ["PlatformPlasticWallCheckpointLeft"] = ("PlatformPlasticWallStraight4", DirectionOffset.Quarter),
+            ["PlatformPlasticWallCheckpointRight"] = ("PlatformPlasticWallStraight4", DirectionOffset.Quarter),
+            ["PlatformPlasticWallCheckpointUp"] = ("PlatformPlasticWallStraight4", DirectionOffset.Quarter),
 
             // Platform Tech
             ["PlatformTechCheckpoint"] = ("PlatformTechBase", DirectionOffset.None),
@@ -98,9 +98,9 @@ namespace tman.src.Alterations.Internal
             ["PlatformTechCheckpointSlope2Right"] = ("PlatformTechSlope2Straight", DirectionOffset.ThreeQuarters),
             ["PlatformTechCheckpointSlope2Up"] = ("PlatformTechSlope2Straight", DirectionOffset.None),
             ["PlatformTechWallCheckpointDown"] = ("PlatformTechWallStraight4", DirectionOffset.Quarter),
-            ["PlatformTechWallCheckpointLeft"] = ("PlatformTechWallStraight4", DirectionOffset.Quarter), // the standing deck = the 32 m wall on the same side (approx: the deck's thick ends differ)
-            ["PlatformTechWallCheckpointRight"] = ("PlatformTechWallStraight4", DirectionOffset.Quarter), // the standing deck = the 32 m wall on the same side (approx: the deck's thick ends differ)
-            ["PlatformTechWallCheckpointUp"] = ("PlatformTechWallStraight4", DirectionOffset.Quarter), // the standing deck = the 32 m wall on the same side (approx: the deck's thick ends differ)
+            ["PlatformTechWallCheckpointLeft"] = ("PlatformTechWallStraight4", DirectionOffset.Quarter),
+            ["PlatformTechWallCheckpointRight"] = ("PlatformTechWallStraight4", DirectionOffset.Quarter),
+            ["PlatformTechWallCheckpointUp"] = ("PlatformTechWallStraight4", DirectionOffset.Quarter),
 
             // Platform Water
             ["PlatformWaterCheckpoint"] = ("PlatformWaterBase", DirectionOffset.None),
@@ -131,10 +131,10 @@ namespace tman.src.Alterations.Internal
             // Road Ice With Wall
             ["RoadIceWithWallCheckpointLeft"] = ("RoadIceWithWallStraight", DirectionOffset.None),
             ["RoadIceWithWallCheckpointRight"] = ("RoadIceWithWallStraight", DirectionOffset.Half),
-            ["RoadIceWithWallDiagLeftCheckpointLeft"] = ("RoadIceWithWallDiagLeftSwitchLeft", DirectionOffset.None), // closest surface, not exact
-            ["RoadIceWithWallDiagLeftCheckpointRight"] = ("RoadIceWithWallDiagLeftSwitchLeft", DirectionOffset.None), // closest surface, not exact
-            ["RoadIceWithWallDiagRightCheckpointLeft"] = ("RoadIceWithWallDiagRightSwitchLeft", DirectionOffset.None), // closest surface, not exact
-            ["RoadIceWithWallDiagRightCheckpointRight"] = ("RoadIceWithWallDiagRightSwitchLeft", DirectionOffset.None), // closest surface, not exact
+            ["RoadIceWithWallDiagLeftCheckpointLeft"] = ("RoadIceWithWallDiagLeftSwitchLeft", DirectionOffset.None),
+            ["RoadIceWithWallDiagLeftCheckpointRight"] = ("RoadIceWithWallDiagLeftSwitchLeft", DirectionOffset.None),
+            ["RoadIceWithWallDiagRightCheckpointLeft"] = ("RoadIceWithWallDiagRightSwitchLeft", DirectionOffset.None),
+            ["RoadIceWithWallDiagRightCheckpointRight"] = ("RoadIceWithWallDiagRightSwitchLeft", DirectionOffset.None),
 
             // Road Tech
             ["RoadTechCheckpoint"] = ("RoadTechStraight", DirectionOffset.None),
