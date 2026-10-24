@@ -1,118 +1,161 @@
-﻿
-using System;
-using System.IO;
+﻿using System;
 using System.CommandLine;
+using System.IO;
 using GBX.NET;
 using GBX.NET.Engines.Game;
 using tman.src;
 using tman.src.Application;
 
-ApplicationInitializer.Initialize();
-
-var alterationArgument = new Argument<string>("alteration")
+internal class Program
 {
-    Description = "The alteration to apply."
-};
-
-var inputOption = new Option<string>("--input", "-i")
-{
-    Description = "The input map file or wildcard pattern.",
-    Required = true
-};
-
-var outputOption = new Option<string>("--output", "-o")
-{
-    Description = "The output map file or wildcard pattern.",
-    Required = true
-};
-
-var rootCommand = new RootCommand("Apply an alteration to Trackmania maps.");
-
-rootCommand.Arguments.Add(alterationArgument);
-rootCommand.Options.Add(inputOption);
-rootCommand.Options.Add(outputOption);
-
-rootCommand.SetAction(parseResult =>
-{
-    var alterationInput = parseResult.GetValue(alterationArgument)!;
-    var input = parseResult.GetValue(inputOption)!;
-    var output = parseResult.GetValue(outputOption)!;
-
-    var inputDirectory = Path.GetDirectoryName(Path.GetFullPath(input))!;
-    var inputPattern = Path.GetFileName(input);
-    var isWildcard = inputPattern.Contains('*') || inputPattern.Contains('?');
-
-    if (!Directory.Exists(inputDirectory))
+    private static int Main(string[] args)
     {
-        Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
-        return 1;
+        ApplicationInitializer.Initialize();
+
+        var alterationArgument = new Argument<string>("alteration")
+        {
+            Description = "The alteration to apply."
+        };
+
+        var inputOption = new Option<string>("--input", "-i")
+        {
+            Description = "The input map file or wildcard pattern.",
+            Required = true
+        };
+
+        var outputOption = new Option<string>("--output", "-o")
+        {
+            Description = "The output map file or wildcard pattern.",
+            Required = true
+        };
+
+        var rootCommand = new RootCommand("Apply an alteration to Trackmania maps.");
+
+        rootCommand.Arguments.Add(alterationArgument);
+        rootCommand.Options.Add(inputOption);
+        rootCommand.Options.Add(outputOption);
+
+        rootCommand.SetAction(parseResult =>
+        {
+            var userAlteration = parseResult.GetValue(alterationArgument)!;
+            var userInput = parseResult.GetValue(inputOption)!;
+            var userOutput = parseResult.GetValue(outputOption)!;
+
+            try
+            {
+                var alteration = CreateAlteration(userAlteration);
+                var inputFiles = GetInputFiles(userInput);
+
+                ValidatePaths(userInput, userOutput);
+
+                foreach (var inputFile in inputFiles)
+                {
+                    ApplyAlteration(alteration, inputFile, userOutput, inputFiles.Length > 1);
+                }
+
+                return 0;
+            }
+            catch (Exception exception) when (
+                exception is ArgumentException or
+                DirectoryNotFoundException or
+                FileNotFoundException or
+                IOException or
+                UnauthorizedAccessException)
+            {
+                Console.Error.WriteLine(exception.Message);
+                return 1;
+            }
+        });
+
+        return rootCommand.Parse(args).Invoke();
     }
 
-    var inputFiles = isWildcard
-        ? Directory.GetFiles(inputDirectory, inputPattern)
-        : File.Exists(input) ? [Path.GetFullPath(input)] : [];
-
-    if (inputFiles.Length == 0)
+    private static Alteration CreateAlteration(string name)
     {
-        Console.Error.WriteLine($"No input files found: {input}");
-        return 1;
+        var type = typeof(Alteration).Assembly.GetType($"tman.src.Alterations.{name}", throwOnError: false, ignoreCase: true);
+
+        if (type is null ||
+            type.IsAbstract ||
+            !typeof(Alteration).IsAssignableFrom(type))
+        {
+            throw new ArgumentException($"Unknown alteration: {name}");
+        }
+
+        return (Alteration)(Activator.CreateInstance(type)
+            ?? throw new ArgumentException($"Could not create alteration: {name}"));
     }
 
-    if (isWildcard && !output.Contains('*'))
+    private static string[] GetInputFiles(string input)
     {
-        Console.Error.WriteLine(
-            "When using a wildcard input, the output path must contain '*'.");
-        return 1;
+        var fullPath = Path.GetFullPath(input);
+        var directory = Path.GetDirectoryName(fullPath)!;
+        var pattern = Path.GetFileName(fullPath);
+
+        if (!Directory.Exists(directory))
+        {
+            throw new DirectoryNotFoundException(
+                $"Input directory not found: {directory}");
+        }
+
+        var isWildcard = pattern.Contains('*') || pattern.Contains('?');
+
+        var files = isWildcard
+            ? Directory.GetFiles(directory, pattern)
+            : File.Exists(fullPath) ? [fullPath] : [];
+
+        if (files.Length == 0)
+        {
+            throw new FileNotFoundException($"No input files found: {input}");
+        }
+
+        return files;
     }
 
-    if (!isWildcard && inputFiles.Length == 1 && output.Contains('*'))
+    private static void ValidatePaths(string input, string output)
     {
-        Console.Error.WriteLine(
-            "The output path cannot contain '*' when using a single input file.");
-        return 1;
+        var fileName = Path.GetFileName(input);
+        var isWildcard = fileName.Contains('*') || fileName.Contains('?');
+
+        if (isWildcard && !output.Contains('*'))
+        {
+            throw new ArgumentException(
+                "When using a wildcard input, the output path must contain '*'.");
+        }
+
+        if (!isWildcard && output.Contains('*'))
+        {
+            throw new ArgumentException(
+                "The output path cannot contain '*' when using a single input file.");
+        }
     }
 
-    foreach (var inputFile in inputFiles)
+    private static void ApplyAlteration(
+        Alteration alteration,
+        string input,
+        string output,
+        bool multipleFiles)
     {
-        var map = Gbx.Parse<CGameCtnChallenge>(inputFile, new()
+        var map = Gbx.Parse<CGameCtnChallenge>(input, new()
         {
             SafeSkippableChunks = true
         });
 
-        var type = typeof(Alteration).Assembly.GetType($"tman.src.Alterations.{alterationInput}");
-
-        if (type is null || !typeof(Alteration).IsAssignableFrom(type))
-        {
-            throw new ArgumentException($"Unknown alteration: {alterationInput}");
-        }
-
-        var alteration = (Alteration)Activator.CreateInstance(type)!;
-
         alteration.Apply(map);
 
-        var outputPath = output;
+        const string extension = ".Map.Gbx";
+        var fileName = Path.GetFileName(input);
 
-        if (isWildcard)
-        {
-            const string extension = ".Map.Gbx";
-            var fileName = Path.GetFileName(inputFile);
+        var fileStem = fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase)
+            ? fileName[..^extension.Length]
+            : Path.GetFileNameWithoutExtension(fileName);
 
-            var fileStem = fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase)
-                ? fileName[..^extension.Length]
-                : Path.GetFileNameWithoutExtension(fileName);
+        var outputPath = Path.GetFullPath(
+            multipleFiles ? output.Replace("*", fileStem) : output);
 
-            outputPath = outputPath.Replace("*", fileStem);
-        }
-
-        outputPath = Path.GetFullPath(outputPath);
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
 
         map.Save(outputPath);
 
-        Console.WriteLine($"Applied {alterationInput}: {outputPath}");
+        Console.WriteLine($"Applied {alteration.GetType().Name}: {outputPath}");
     }
-
-    return 0;
-});
-
-return rootCommand.Parse(args).Invoke();
+}
