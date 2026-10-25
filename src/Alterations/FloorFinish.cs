@@ -22,7 +22,7 @@ namespace tman.src.Alterations
             new LightmapRemoved(),
             new InventoryRemoved(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
             new CheckpointsCleaned(),
-            new MapNameEdited(name => name + " Floor Finish")
+            new MapNameEdited(name => name + " Pure Floor-fin")
         ];
 
         private static readonly Dictionary<string, (string[] Tiles, float Bed)> OpenWater = new()
