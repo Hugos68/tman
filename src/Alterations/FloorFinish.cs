@@ -19,10 +19,10 @@ namespace tman.src.Alterations
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
             new ValidationRemoved(),
-            new LightmapRemoved(),
             new InventoryRemoved(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
             new CheckpointsCleaned(),
-            new MapNameEdited(name => name + " Pure Floor-fin")
+            new LightmapRemoved(),
+            new MapNameEdited(name => name + " Floor Finish")
         ];
 
         private static readonly Dictionary<string, (string[] Tiles, float Bed)> OpenWater = new()
@@ -62,19 +62,19 @@ namespace tman.src.Alterations
         private static readonly Regex VariantRegex = new(@"V(\d+)$", RegexOptions.Compiled);
 
         private const float BedBelow = 0.1f;
-        private const float BedAbove = 1.15f;
-        private const float GrassAbove = 1.0f;
+        private const float BedAbove = 0.3f;
+        private const float GrassAbove = 0.3f;
 
         protected override void Run(CGameCtnChallenge map)
         {
             var inventory = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "inventory");
-            var data = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "data");
+            var footprints = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "data");
             var environment = map.GetEnvironment();
             var boxes = environment == "Stadium2020"
-                ? GrassBoxes(map, Path.Combine(data, "StadiumBlockFootprints.tsv"))
-                : WaterBoxes(map, environment, Path.Combine(data, "WaterFootprints.tsv"));
+                ? GrassBoxes(map, Path.Combine(footprints, "StadiumBlockFootprints.tsv"))
+                : WaterBoxes(map, environment, Path.Combine(footprints, "WaterFootprints.tsv"));
             var ramps = new List<FinishPlane.Ramp>();
-            OuterRing(map, environment, Path.Combine(data, "OuterTerrain.tsv"), boxes, ramps);
+            OuterRing(map, environment, Path.Combine(footprints, "OuterTerrain.tsv"), boxes, ramps);
             if (boxes.Count == 0)
             {
                 return;
@@ -250,7 +250,8 @@ namespace tman.src.Alterations
                     continue;
                 }
                 var (below, above) = f[7] == "grass" ? (0f, GrassAbove) : (BedBelow, BedAbove);
-                boxes.Add(new FinishPlane.Box(x0, x1, z0, z1, floor - below, floor + above));
+                var top = f[7] == "band" ? float.Parse(f[8], CultureInfo.InvariantCulture) : floor;
+                boxes.Add(new FinishPlane.Box(x0, x1, z0, z1, floor - below, top + above));
             }
         }
 
