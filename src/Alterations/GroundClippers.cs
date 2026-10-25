@@ -17,7 +17,7 @@ namespace tman.src.Alterations
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
             new ValidationRemoved(),
-new LightmapRemoved(),
+            new LightmapRemoved(),
             new InventoryRemoved(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
             new CheckpointsCleaned(),
             new MapNameEdited(name => name + " Ground Clippers")
@@ -54,7 +54,7 @@ new LightmapRemoved(),
             var box = new FinishPlane.Box(-Margin, map.Size.X * MapConstants.CellSize + Margin, -Margin, map.Size.Z * MapConstants.CellSize + Margin, top - Thickness, top);
             FinishPlane.Place(
                 map,
-                Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "inventory", "FinishPlaneTemplate.Item.Gbx"),
+                Path.Combine(ApplicationConstants.ProjectDirectory, "data", "inventory", "FinishPlaneTemplate.Item.Gbx"),
                 $"GroundClippers_{map.MapUid}.Item.Gbx",
                 [box]);
         }

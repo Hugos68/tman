@@ -22,31 +22,17 @@ namespace tman.src.Inventory
         public static void Place(CGameCtnChallenge map, string templatePath, string ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps)
         {
             var path = Path.Combine(Path.GetTempPath(), ident);
-            File.WriteAllBytes(path, Build(templatePath, ident, boxes, ramps));
+            File.WriteAllBytes(path, Build(templatePath, ident, map.MapInfo.Collection, boxes, ramps));
             EmbedUtility.Embed(map, path);
             map.PlaceAnchoredObject(EmbedUtility.ExtractIdent(path), Vec3.Zero, Vec3.Zero, Vec3.Zero);
         }
 
-        public static byte[] Build(string templatePath, string ident, IReadOnlyList<Box> boxes) => Build(templatePath, ident, boxes, []);
-
-        public static byte[] Build(string templatePath, string ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps)
+        public static byte[] Build(string templatePath, string ident, Id collection, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps)
         {
-            var vertices = new List<Vec3>();
-            var triangles = new List<CPlugSurface.Mesh.Triangle>();
-            int[][] quads = [[0, 3, 2, 1], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [1, 2, 6, 5], [0, 4, 7, 3]];
-            foreach (var (x0, x1, z0, z1, y0, y1) in Merge(boxes))
+            var bodies = new List<Vec3[]>();
+            foreach (var b in Merge(boxes))
             {
-                var b = vertices.Count;
-                vertices.AddRange(
-                [
-                    new(x0, y0, z0), new(x1, y0, z0), new(x1, y1, z0), new(x0, y1, z0),
-                    new(x0, y0, z1), new(x1, y0, z1), new(x1, y1, z1), new(x0, y1, z1),
-                ]);
-                foreach (var q in quads)
-                {
-                    triangles.Add(new(new Int3(b + q[0], b + q[1], b + q[2]), 0, 0, 0));
-                    triangles.Add(new(new Int3(b + q[0], b + q[2], b + q[3]), 0, 0, 0));
-                }
+                bodies.Add(Body(b.X0, b.X1, b.Z0, b.Z1, (x, z) => b.Y0, (x, z) => b.Y1));
             }
             foreach (var r in ramps)
             {
@@ -58,37 +44,95 @@ namespace tman.src.Inventory
                     _ => (x - r.X0) / (r.X1 - r.X0),
                 };
                 float Y(float x, float z, float offset) => r.YInner + (r.YOuter - r.YInner) * T(x, z) + offset;
-                (float X, float Z)[] corners = [(r.X0, r.Z0), (r.X1, r.Z0), (r.X1, r.Z0), (r.X0, r.Z0), (r.X0, r.Z1), (r.X1, r.Z1), (r.X1, r.Z1), (r.X0, r.Z1)];
-                var b = vertices.Count;
-                for (var k = 0; k < corners.Length; k++)
-                {
-                    vertices.Add(new(corners[k].X, Y(corners[k].X, corners[k].Z, k is 2 or 3 or 6 or 7 ? r.Above : -r.Below), corners[k].Z));
-                }
-                foreach (var q in quads)
-                {
-                    triangles.Add(new(new Int3(b + q[0], b + q[1], b + q[2]), 0, 0, 0));
-                    triangles.Add(new(new Int3(b + q[0], b + q[2], b + q[3]), 0, 0, 0));
-                }
+                bodies.Add(Body(r.X0, r.X1, r.Z0, r.Z1, (x, z) => Y(x, z, -r.Below), (x, z) => Y(x, z, r.Above)));
+            }
+            if (bodies.Count == 0)
+            {
+                throw new InvalidOperationException("no boxes");
             }
 
             var gbx = Gbx.Parse<CGameItemModel>(templatePath);
             var item = gbx.Node;
-            if (item.EntityModel is not CGameCommonItemEntityModel entity || entity.TriggerShape is not CPlugSurface trigger)
+            if (item.EntityModelEdition is not CGameCommonItemEntityModelEdition edition || edition.MeshCrystal is not CPlugCrystal crystal)
             {
-                throw new InvalidOperationException($"{templatePath} has no trigger surface");
+                throw new InvalidOperationException($"{templatePath} is not a mesh-modeler item");
             }
-            trigger.Surf = new CPlugSurface.Mesh
+            var geometry = crystal.Layers.OfType<CPlugCrystal.GeometryLayer>().First();
+            var trigger = crystal.Layers.OfType<CPlugCrystal.TriggerLayer>().First();
+            if (geometry.Crystal is null || trigger.Crystal is null || crystal.Materials.Count < 2)
             {
-                Version = 7,
-                Vertices = vertices.ToArray(),
-                Triangles = triangles.ToArray(),
-                GameplayMainDir = (trigger.Surf as CPlugSurface.Mesh)?.GameplayMainDir,
-            };
+                throw new InvalidOperationException($"{templatePath} has no geometry + trigger layers with two materials");
+            }
+            var glass = bodies.SelectMany(b => new[] { Face(b, 3, 7, 6, 2), Face(b, 0, 1, 5, 4) }).ToList();
+            var prism = bodies.SelectMany(b => new[] { Face(b, 3, 7, 6, 2), Face(b, 0, 1, 5, 4), Face(b, 4, 0, 3, 7), Face(b, 1, 5, 6, 2), Face(b, 4, 5, 1, 0), Face(b, 3, 2, 6, 7) }).ToList();
+            Fill(geometry.Crystal, glass, crystal.Materials[0], true);
+            Fill(trigger.Crystal, prism, crystal.Materials[1], false);
+            geometry.IsVisible = true;
+            geometry.Collidable = false;
+            var smoothing = crystal.Chunks.Get<CPlugCrystal.Chunk09003007>();
+            if (smoothing is not null)
+            {
+                smoothing.U01 = Enumerable.Repeat(2, geometry.Crystal.Faces.Length).ToArray();
+            }
 
-            item.Ident = new Ident(ident, item.Ident.Collection, ident);
+            item.Ident = new Ident(ident, collection, ident);
             using var ms = new MemoryStream();
             gbx.Save(ms);
             return ms.ToArray();
+        }
+
+        private static Vec3[] Body(float x0, float x1, float z0, float z1, Func<float, float, float> bottom, Func<float, float, float> top) =>
+        [
+            new Vec3(x0, bottom(x0, z0), z0), new Vec3(x1, bottom(x1, z0), z0), new Vec3(x1, top(x1, z0), z0), new Vec3(x0, top(x0, z0), z0),
+            new Vec3(x0, bottom(x0, z1), z1), new Vec3(x1, bottom(x1, z1), z1), new Vec3(x1, top(x1, z1), z1), new Vec3(x0, top(x0, z1), z1),
+        ];
+
+        private static Vec3[] Face(Vec3[] body, int a, int b, int c, int d)
+        {
+            Vec3[] p = [body[a], body[b], body[c], body[d]];
+            var centre = body.Aggregate((u, v) => u + v) / body.Length;
+            var n = Vec3.GetCrossProduct(p[1] - p[0], p[2] - p[0]);
+            return Vec3.GetDotProduct((p[0] + p[2]) / 2 - centre, n) < 0 ? [p[3], p[2], p[1], p[0]] : p;
+        }
+
+        private static void Fill(CPlugCrystal.Crystal crystal, List<Vec3[]> faces, CPlugCrystal.Material material, bool lightmap)
+        {
+            var group = crystal.Groups[0];
+            var positions = new List<Vec3>();
+            var up = faces.Where(f => Vec3.GetCrossProduct(f[1] - f[0], f[2] - f[0]).Y > 0).SelectMany(f => f).ToList();
+            var down = faces.Where(f => Vec3.GetCrossProduct(f[1] - f[0], f[2] - f[0]).Y < 0).SelectMany(f => f).ToList();
+            (Vec2 Min, float Scale) Island(List<Vec3> corners)
+            {
+                if (corners.Count == 0)
+                {
+                    return (Vec2.Zero, 1);
+                }
+                var min = new Vec2(corners.Min(v => v.X), corners.Min(v => v.Z));
+                var extent = Math.Max(Math.Max(corners.Max(v => v.X) - min.X, corners.Max(v => v.Z) - min.Y), 1e-3f);
+                return (min, 0.48f / extent);
+            }
+            var upIsland = Island(up);
+            var downIsland = Island(down);
+            Vec2[] texCoords = [new Vec2(4, 4), new Vec2(4, 0), new Vec2(0, 0), new Vec2(0, 4)];
+            var result = new CPlugCrystal.Face[faces.Count];
+            for (var i = 0; i < faces.Count; i++)
+            {
+                var f = faces[i];
+                var facesUp = Vec3.GetCrossProduct(f[1] - f[0], f[2] - f[0]).Y > 0;
+                var island = facesUp ? upIsland : downIsland;
+                var origin = facesUp ? new Vec2(0.01f, 0.01f) : new Vec2(0.51f, 0.01f);
+                var vertices = new CPlugCrystal.Vertex[f.Length];
+                for (var k = 0; k < f.Length; k++)
+                {
+                    var lm = lightmap ? new Vec2(origin.X + (f[k].X - island.Min.X) * island.Scale, origin.Y + (f[k].Z - island.Min.Y) * island.Scale) : Vec2.Zero;
+                    vertices[k] = new CPlugCrystal.Vertex(positions.Count, texCoords[k % 4], lm);
+                    positions.Add(f[k]);
+                }
+                result[i] = new CPlugCrystal.Face(vertices, group, material, null);
+            }
+            crystal.Positions = positions.ToArray();
+            crystal.Edges = [];
+            crystal.Faces = result;
         }
 
         private static List<Box> Merge(IReadOnlyList<Box> boxes)
@@ -122,5 +166,6 @@ namespace tman.src.Inventory
             }
             return result;
         }
+
     }
 }

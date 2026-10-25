@@ -67,22 +67,22 @@ namespace tman.src.Alterations
 
         protected override void Run(CGameCtnChallenge map)
         {
-            var inventoryFolder = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "inventory");
-            var dataFolder = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "data");
+            var inventory = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "inventory");
+            var data = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "data");
             var environment = map.GetEnvironment();
             var boxes = environment == "Stadium2020"
-                ? GrassBoxes(map, Path.Combine(dataFolder, "StadiumBlockFootprints.tsv"))
-                : WaterBoxes(map, environment, Path.Combine(dataFolder, "WaterFootprints.tsv"));
+                ? GrassBoxes(map, Path.Combine(data, "StadiumBlockFootprints.tsv"))
+                : WaterBoxes(map, environment, Path.Combine(data, "WaterFootprints.tsv"));
             var ramps = new List<FinishPlane.Ramp>();
-            OuterRing(map, environment, Path.Combine(dataFolder, "OuterTerrain.tsv"), boxes, ramps);
+            OuterRing(map, environment, Path.Combine(data, "OuterTerrain.tsv"), boxes, ramps);
             if (boxes.Count == 0)
             {
                 return;
             }
-            FinishPlane.Place(map, Path.Combine(inventoryFolder, "FinishPlaneTemplate.Item.Gbx"), $"FinishFloor_{map.MapUid}.Item.Gbx", boxes, ramps);
+            FinishPlane.Place(map, Path.Combine(inventory, "FinishPlaneTemplate.Item.Gbx"), $"FinishFloor_{map.MapUid}.Item.Gbx", boxes, ramps);
             if (environment == "Stadium2020")
             {
-                PlaceCutouts(map, Path.Combine(inventoryFolder, "floor-finish"));
+                PlaceCutouts(map, Path.Combine(inventory, "floor-finish"));
             }
         }
 
