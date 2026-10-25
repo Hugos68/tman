@@ -16,6 +16,7 @@ namespace tman.src.Alterations
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
             new ValidationRemoved(),
+            new LightmapRemoved(),
             new InventoryRemoved(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
             new CheckpointsCleaned(),
             new MapNameEdited(name => name + " Manslaughter")

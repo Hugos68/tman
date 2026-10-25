@@ -9,6 +9,7 @@ namespace tman.src.Alterations
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
             new ValidationRemoved(),
+            new LightmapRemoved(),
             new StartEffect("Turbo", new(0, 0, 2)),
             new StartEffect("NoEngine", new(0, 0, 4)),
             new CheckpointEffect("NoEngine", new(0, 0,-2)),

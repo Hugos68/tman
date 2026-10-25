@@ -11,6 +11,7 @@ namespace tman.src.Alterations
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
             new ValidationRemoved(),
+            new LightmapRemoved(),
             new InventoryRemoved(InventoryUtility.IsCheckpoint, InventoryUtility.IsCheckpoint),
             new MapNameEdited(name => name + " Checkpointless")
         ];

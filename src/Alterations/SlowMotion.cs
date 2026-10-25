@@ -9,6 +9,7 @@ namespace tman.src.Alterations
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
             new ValidationRemoved(),
+            new LightmapRemoved(),
             new StartEffect("SlowMotion", new(0,0,0)),
             new CheckpointEffect("SlowMotion", new(0, 0, 0)),
             new MapNameEdited(name => name + " SlowMotion")
