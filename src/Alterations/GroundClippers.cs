@@ -56,7 +56,7 @@ namespace tman.src.Alterations
                 map,
                 Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "FinishPlaneTemplate.Item.Gbx"),
                 $"GroundClippers_{map.MapUid}.Item.Gbx",
-                [box]);
+                [box], false);
         }
     }
 }
