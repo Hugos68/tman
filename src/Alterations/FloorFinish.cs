@@ -25,12 +25,12 @@ namespace tman.src.Alterations
             new MapNameEdited(name => name + " Floor Finish")
         ];
 
-        private static readonly Dictionary<string, (string[] Tiles, float Level)> OpenWater = new()
+        private static readonly Dictionary<string, (string[] Tiles, float Bottom, float Top)> OpenWater = new()
         {
-            ["RedIsland"] = (["Water"], -3.7f),
-            ["WhiteShore"] = (["Water"], -3.7f),
-            ["BlueBay"] = (["Sea"], 5.1f),
-            ["GreenCoast"] = (["Lake"], -3.7f),
+            ["RedIsland"] = (["Water"], -13.6f, -3.7f),
+            ["WhiteShore"] = (["Water"], -13.6f, -3.7f),
+            ["BlueBay"] = (["Sea"], -10.1f, 5.1f),
+            ["GreenCoast"] = (["Lake"], -13.6f, -3.7f),
         };
 
         private static readonly Dictionary<string, string> Cutouts = new()
@@ -171,14 +171,14 @@ namespace tman.src.Alterations
             {
                 foreach (var (x0, x1) in Runs(xs))
                 {
-                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.CellSize, x1 * MapConstants.CellSize, z * MapConstants.CellSize, (z + 1) * MapConstants.CellSize, water.Level - Thickness, water.Level));
+                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.CellSize, x1 * MapConstants.CellSize, z * MapConstants.CellSize, (z + 1) * MapConstants.CellSize, water.Bottom, water.Top));
                 }
             }
             foreach (var (z, xs) in squares)
             {
                 foreach (var (x0, x1) in Runs(xs))
                 {
-                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.SubcellSize, x1 * MapConstants.SubcellSize, z * MapConstants.SubcellSize, (z + 1) * MapConstants.SubcellSize, water.Level - Thickness, water.Level));
+                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.SubcellSize, x1 * MapConstants.SubcellSize, z * MapConstants.SubcellSize, (z + 1) * MapConstants.SubcellSize, water.Bottom, water.Top));
                 }
             }
             return boxes;
@@ -229,7 +229,7 @@ namespace tman.src.Alterations
         {
             var collection = environment == "Stadium2020" ? "Stadium" : environment;
             var decoration = environment == "Stadium2020" ? Regex.Replace(map.Decoration.Id, "(Day|Night|Sunrise|Sunset)$", "") : "Base64x64";
-            var level = OpenWater.TryGetValue(environment, out var water) ? water.Level : (float?)null;
+            var band = OpenWater.TryGetValue(environment, out var water) ? (water.Bottom, water.Top) : ((float, float)?)null;
             foreach (var f in File.ReadLines(path).Skip(1).Select(line => line.Split('\t')).Where(f => f[0] == collection && f[1] == decoration))
             {
                 var x0 = float.Parse(f[2], CultureInfo.InvariantCulture);
@@ -237,7 +237,7 @@ namespace tman.src.Alterations
                 var z0 = float.Parse(f[4], CultureInfo.InvariantCulture);
                 var z1 = float.Parse(f[5], CultureInfo.InvariantCulture);
                 var floor = float.Parse(f[6], CultureInfo.InvariantCulture);
-                var (y0, y1) = level is { } fixedLevel ? (fixedLevel - Thickness, fixedLevel) : (floor, floor + Thickness);
+                var (y0, y1) = band ?? (floor, floor + Thickness);
                 boxes.Add(new FinishPlane.Box(x0, x1, z0, z1, y0, y1));
             }
         }
