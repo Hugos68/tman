@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Text.Json;
 using GBX.NET;
 using GBX.NET.Engines.Game;
 using tman.src.Alterations.Internal;
@@ -22,7 +21,8 @@ namespace tman.src.Alterations
             new LightmapRemoved(),
             new InventoryRemoved(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
             new CheckpointsCleaned(),
-            new ConditionalAlteration(map => map.GetEnvironment() == "Stadium2020",
+            new ConditionalAlteration(
+                map => map.GetEnvironment() == "Stadium2020", 
                 new ItemFinishes(new Dictionary<string, string>
                     {
                         ["DecoPlatformCurve3In"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishDecoPlatformCurve3In.Item.Gbx"),
@@ -48,9 +48,8 @@ namespace tman.src.Alterations
                         ["TrackWallDeadendRoundPillarV64"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishTrackWallDeadendRoundPillarV64.Item.Gbx"),
                         ["TrackWallStraightPillar"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishTrackWallStraightPillar.Item.Gbx"),
                     },
-                    blockPredicate: block => !block.IsFree && block.IsGround
-                )),
-            new MapNameEdited(name => name + " Pure Floor-fin"),
+                    blockPredicate: block => !block.IsFree & block.IsGround)),
+            new MapNameEdited(name => name + " Floor Finish"),
         ];
 
         private static readonly Dictionary<string, (string[] Tiles, float Bottom, float Top)> OpenWater = new()
@@ -60,23 +59,29 @@ namespace tman.src.Alterations
             ["BlueBay"] = (["Sea"], -10.1f, 5.1f),
             ["GreenCoast"] = (["Lake"], -13.6f, -3.7f),
         };
-
+        
         private const float Thickness = 0.3f;
+
+        private const int Ring = 16;
 
         protected override void Run(CGameCtnChallenge map)
         {
-            var inventory = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items");
-            var data = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "data");
+            var assets = Path.Combine(ApplicationConstants.ProjectDirectory, "assets");
             var environment = map.GetEnvironment();
             var boxes = environment == "Stadium2020"
-                ? GrassBoxes(map, Path.Combine(data, "StadiumBlockFootprints.tsv"))
-                : WaterBoxes(map, environment, Path.Combine(data, "WaterFootprints.tsv"));
-            OuterRing(map, environment, Path.Combine(data, "OuterTerrain.tsv"), boxes);
+                ? GrassBoxes(map, Path.Combine(assets, "data", "Blocks.json"))
+                : WaterBoxes(map, environment, Path.Combine(assets, "data", "WaterFootprints.json"));
             if (boxes.Count == 0)
             {
                 return;
             }
-            FinishPlane.Place(map, Path.Combine(inventory, "FinishPlaneTemplate.Item.Gbx"), $"FinishFloor_{map.MapUid}.Item.Gbx", boxes, environment == "Stadium2020");
+            FinishPlane.Place(map, Path.Combine(assets, "items", "floor-finish", "FinishPlaneTemplate.Item.Gbx"), $"FinishFloor_{map.MapUid}.Item.Gbx", boxes, environment == "Stadium2020");
+            if (environment == "Stadium2020" && map.Decoration.Id.StartsWith("48x48"))
+            {
+                var path = Path.Combine(assets, "items", "floor-finish", "FinishStadiumPenaltyGrass.Item.Gbx");
+                EmbedUtility.Embed(map, path);
+                map.PlaceAnchoredObject(EmbedUtility.ExtractIdent(path), new Vec3(0, GrassLevel(map), 0), Vec3.Zero, Vec3.Zero);
+            }
         }
 
         private static List<FinishPlane.Box> WaterBoxes(CGameCtnChallenge map, string environment, string footprintsPath)
@@ -135,10 +140,17 @@ namespace tman.src.Alterations
                     boxes.Add(new FinishPlane.Box(x0 * MapConstants.SubcellSize, x1 * MapConstants.SubcellSize, z * MapConstants.SubcellSize, (z + 1) * MapConstants.SubcellSize, water.Bottom, water.Top));
                 }
             }
+            var width = map.Size.X * MapConstants.CellSize;
+            var depth = map.Size.Z * MapConstants.CellSize;
+            var margin = Ring * MapConstants.CellSize;
+            boxes.Add(new FinishPlane.Box(-margin, width + margin, -margin, 0, water.Bottom, water.Top));
+            boxes.Add(new FinishPlane.Box(-margin, width + margin, depth, depth + margin, water.Bottom, water.Top));
+            boxes.Add(new FinishPlane.Box(-margin, 0, 0, depth, water.Bottom, water.Top));
+            boxes.Add(new FinishPlane.Box(width, width + margin, 0, depth, water.Bottom, water.Top));
             return boxes;
         }
 
-        private static List<FinishPlane.Box> GrassBoxes(CGameCtnChallenge map, string footprintsPath)
+        private static List<FinishPlane.Box> GrassBoxes(CGameCtnChallenge map, string blocksPath)
         {
             var boxes = new List<FinishPlane.Box>();
             var grass = (map.Blocks ?? []).Concat(map.BakedBlocks ?? []).Where(b => !b.IsFree && b.BlockModel.Id == "Grass").Select(b => b.Coord).Distinct().ToList();
@@ -146,12 +158,12 @@ namespace tman.src.Alterations
             {
                 return boxes;
             }
-            var footprints = LoadBlockFootprints(footprintsPath);
+            var blocks = Blocks.Load(blocksPath);
             var hidden = new HashSet<(int X, int Z)>();
             foreach (var block in (map.Blocks ?? []).Where(b => !b.IsFree && b.IsGround && b.BlockModel.Id != "Grass"))
             {
-                var (sizeX, sizeZ, columns) = footprints.TryGetValue(block.BlockModel.Id, out var footprint) ? footprint : (1, 1, [(0, 0)]);
-                foreach (var (ux, uz) in columns)
+                var (sizeX, sizeZ, cells) = blocks.TryGetValue(block.BlockModel.Id, out var info) ? (info.SizeX, info.SizeZ, info.Footprint) : (1, 1, [(0, 0)]);
+                foreach (var (ux, uz) in cells)
                 {
                     var (x, z) = block.Direction switch
                     {
@@ -163,7 +175,7 @@ namespace tman.src.Alterations
                     hidden.Add((block.Coord.X + x, block.Coord.Z + z));
                 }
             }
-            var y = (grass.Min(c => c.Y) - MapUtility.GroundRow(map)) * MapConstants.CellHeight;
+            var y = GrassLevel(map);
             var rows = new Dictionary<int, List<int>>();
             foreach (var (x, z) in grass.Select(c => (c.X, c.Z)).Distinct().Where(c => !hidden.Contains(c)))
             {
@@ -179,22 +191,8 @@ namespace tman.src.Alterations
             return boxes;
         }
 
-        private static void OuterRing(CGameCtnChallenge map, string environment, string path, List<FinishPlane.Box> boxes)
-        {
-            var collection = environment == "Stadium2020" ? "Stadium" : environment;
-            var decoration = environment == "Stadium2020" ? Regex.Replace(map.Decoration.Id, "(Day|Night|Sunrise|Sunset)$", "") : "Base64x64";
-            var band = OpenWater.TryGetValue(environment, out var water) ? (water.Bottom, water.Top) : ((float, float)?)null;
-            foreach (var f in File.ReadLines(path).Skip(1).Select(line => line.Split('\t')).Where(f => f[0] == collection && f[1] == decoration))
-            {
-                var x0 = float.Parse(f[2], CultureInfo.InvariantCulture);
-                var x1 = float.Parse(f[3], CultureInfo.InvariantCulture);
-                var z0 = float.Parse(f[4], CultureInfo.InvariantCulture);
-                var z1 = float.Parse(f[5], CultureInfo.InvariantCulture);
-                var floor = float.Parse(f[6], CultureInfo.InvariantCulture);
-                var (y0, y1) = band ?? (floor, floor + Thickness);
-                boxes.Add(new FinishPlane.Box(x0, x1, z0, z1, y0, y1));
-            }
-        }
+        private static float GrassLevel(CGameCtnChallenge map) =>
+            ((map.Blocks ?? []).Concat(map.BakedBlocks ?? []).Where(b => !b.IsFree && b.BlockModel.Id == "Grass").Min(b => b.Coord.Y) - MapUtility.GroundRow(map)) * MapConstants.CellHeight;
 
         private static IEnumerable<(int X0, int X1)> Runs(List<int> xs)
         {
@@ -216,25 +214,13 @@ namespace tman.src.Alterations
         private static Dictionary<(string Tile, uint Flags), ulong> LoadWaterFootprints(string path, string environment)
         {
             var table = new Dictionary<(string, uint), ulong>();
-            foreach (var f in File.ReadLines(path).Skip(1).Select(line => line.Split('\t')).Where(f => f[0] == environment))
+            var footprints = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, Dictionary<string, string>>>>(File.ReadAllText(path)) ?? new();
+            foreach (var (tile, masks) in footprints.TryGetValue(environment, out var tiles) ? tiles : new())
             {
-                var flags = uint.Parse(f[2], NumberStyles.HexNumber, CultureInfo.InvariantCulture) & 0x0FE01FFF;
-                var mask = ulong.Parse(f[8], NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-                table[(f[1], flags)] = mask;
-            }
-            return table;
-        }
-
-        private static Dictionary<string, (int SizeX, int SizeZ, (int, int)[] Columns)> LoadBlockFootprints(string path)
-        {
-            var table = new Dictionary<string, (int, int, (int, int)[])>(StringComparer.OrdinalIgnoreCase);
-            foreach (var f in File.ReadLines(path).Skip(1).Select(line => line.Split('\t')))
-            {
-                var columns = f[6].Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(c => c.Split(','))
-                    .Select(c => (int.Parse(c[0], CultureInfo.InvariantCulture), int.Parse(c[1], CultureInfo.InvariantCulture)))
-                    .ToArray();
-                table[f[0]] = (int.Parse(f[1], CultureInfo.InvariantCulture), int.Parse(f[2], CultureInfo.InvariantCulture), columns);
+                foreach (var (flags, mask) in masks)
+                {
+                    table[(tile, uint.Parse(flags, NumberStyles.HexNumber, CultureInfo.InvariantCulture) & 0x0FE01FFF)] = ulong.Parse(mask, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+                }
             }
             return table;
         }

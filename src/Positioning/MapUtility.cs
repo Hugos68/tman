@@ -7,6 +7,7 @@ using GBX.NET;
 using GBX.NET.Engines.Game;
 using tman.src.Application;
 using tman.src.Core;
+using tman.src.Inventory;
 
 namespace tman.src.Positioning
 {
@@ -114,13 +115,8 @@ namespace tman.src.Positioning
 
         private static Dictionary<string, (int X, int Z)> LoadBlockSizes()
         {
-            var sizes = new Dictionary<string, (int X, int Z)>(StringComparer.OrdinalIgnoreCase);
-            var path = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "data", "BlockSizes.tsv");
-            foreach (var fields in File.ReadLines(path).Skip(1).Select(line => line.Split('\t')))
-            {
-                sizes[fields[0]] = (int.Parse(fields[1]), int.Parse(fields[2]));
-            }
-            return sizes;
+            var path = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "data", "Blocks.json");
+            return Blocks.Load(path).ToDictionary(b => b.Key, b => (b.Value.SizeX, b.Value.SizeZ), StringComparer.OrdinalIgnoreCase);
         }
 
         private static Vec3 GetDirectionOffset(Direction direction, (int X, int Z) size) =>
