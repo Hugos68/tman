@@ -1,16 +1,15 @@
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using GBX.NET.Engines.Game;
-using tman.src.Application;
 using tman.src.Core;
 using tman.src.Inventory;
 using tman.src.Positioning;
 
 namespace tman.src.Alterations.Internal
 {
-    public class ItemFinishes(IReadOnlyDictionary<string, string> finishes) : Alteration
+    public class ItemFinishes(IReadOnlyDictionary<string, string> finishes, Predicate<CGameCtnBlock>? blockPredicate = null, Predicate<CGameCtnAnchoredObject>? itemPredicate = null) : Alteration
     {
         private static readonly Regex VariantRegex = new(@"V(\d+)$", RegexOptions.Compiled);
 
@@ -23,10 +22,12 @@ namespace tman.src.Alterations.Internal
                 int? variant = match.Success ? int.Parse(match.Groups[1].Value) : null;
 
                 var items = (map.AnchoredObjects ?? [])
+                    .Where(item => itemPredicate is null || itemPredicate(item))
                     .Where(item => item.ItemModel.Id == model && (variant is null || Variant(item) == variant))
                     .ToList();
                 var blocks = (map.Blocks ?? [])
-                    .Where(block => !block.IsFree && block.BlockModel.Id == model && (variant is null || Variant(block) == variant))
+                    .Where(block => blockPredicate is null || blockPredicate(block))
+                    .Where(block => block.BlockModel.Id == model && (variant is null || Variant(block) == variant))
                     .ToList();
                 if (items.Count == 0 && blocks.Count == 0)
                 {

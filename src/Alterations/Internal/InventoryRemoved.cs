@@ -5,18 +5,18 @@ using tman.src.Core;
 namespace tman.src.Alterations.Internal
 {
     public class InventoryRemoved(
-        Predicate<CGameCtnBlock>? blocks = null,
-        Predicate<CGameCtnAnchoredObject>? items = null) : Alteration
+        Predicate<CGameCtnBlock>? blockPredicate = null,
+        Predicate<CGameCtnAnchoredObject>? itemPredicate = null) : Alteration
     {
         protected override void Run(CGameCtnChallenge map)
         {
-            if (blocks is not null)
+            if (blockPredicate is not null)
             {
-                map.Blocks?.RemoveAll(blocks);
+                map.Blocks?.RemoveAll(blockPredicate);
             }
-            if (items is not null)
+            if (itemPredicate is not null)
             {
-                map.AnchoredObjects?.RemoveAll(items);
+                map.AnchoredObjects?.RemoveAll(itemPredicate);
             }
         }
     }

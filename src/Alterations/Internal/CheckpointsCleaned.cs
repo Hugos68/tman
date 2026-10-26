@@ -12,8 +12,8 @@ namespace tman.src.Alterations.Internal
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
             new InventoryRemoved(
-                blocks: block => InventoryUtility.IsCheckpoint(block) && block.BlockModel.Id == "GateCheckpoint",
-                items: InventoryUtility.IsCheckpoint
+                blockPredicate: block => InventoryUtility.IsCheckpoint(block) && block.BlockModel.Id == "GateCheckpoint",
+                itemPredicate: InventoryUtility.IsCheckpoint
             ),
         ];
 
