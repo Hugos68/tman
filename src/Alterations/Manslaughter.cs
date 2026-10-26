@@ -1,13 +1,9 @@
-
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using GBX.NET.Engines.Game;
 using tman.src.Alterations.Internal;
 using tman.src.Application;
 using tman.src.Core;
 using tman.src.Inventory;
-using tman.src.Positioning;
 
 namespace tman.src.Alterations
 {
@@ -19,50 +15,15 @@ namespace tman.src.Alterations
             new LightmapRemoved(),
             new InventoryRemoved(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
             new CheckpointsCleaned(),
-            new MapNameEdited(name => name + " Manslaughter")
-        ];
-
-        private static readonly Dictionary<string, string> BlockFinishes = new()
-        {
-            ["StandCornerIn"] = "FinishStandCornerIn.Item.Gbx",
-            ["StandCornerOut"] = "FinishStandCornerOut.Item.Gbx",
-            ["StandDiagIn"] = "FinishStandDiagIn.Item.Gbx",
-            ["StandDiagOut"] = "FinishStandDiagOut.Item.Gbx",
-            ["StandStraight"] = "FinishStandStraight.Item.Gbx",
-        };
-
-        private static readonly string StandsDirectory = Path.Combine(
-            ApplicationConstants.ProjectDirectory,
-            "assets",
-            "items",
-            "manslaughter");
-
-        protected override void Run(CGameCtnChallenge map)
-        {
-            foreach (var (standId, finishFile) in BlockFinishes)
+            new MapNameEdited(name => name + " Manslaughter"),
+            new ItemFinishes(new Dictionary<string, string>
             {
-                var sources = map.Blocks?
-                    .Where(block => block.BlockModel.Id == standId)
-                    .ToList() ?? [];
-
-                if (sources.Count == 0)
-                {
-                    continue;
-                }
-
-                var finishPath = Path.Combine(StandsDirectory, finishFile);
-                EmbedUtility.Embed(map, finishPath);
-
-                var finish = new CGameCtnAnchoredObject
-                {
-                    ItemModel = EmbedUtility.ExtractIdent(finishPath)
-                };
-
-                foreach (var source in sources)
-                {
-                    MapUtility.PlaceRelative(map, source, finish);
-                }
-            }
-        }
+                ["StandCornerIn"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "manslaughter", "FinishStandCornerIn.Item.Gbx"),
+                ["StandCornerOut"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "manslaughter", "FinishStandCornerOut.Item.Gbx"),
+                ["StandDiagIn"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "manslaughter", "FinishStandDiagIn.Item.Gbx"),
+                ["StandDiagOut"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "manslaughter", "FinishStandDiagOut.Item.Gbx"),
+                ["StandStraight"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "manslaughter", "FinishStandStraight.Item.Gbx"),
+            })
+        ];
     }
 }

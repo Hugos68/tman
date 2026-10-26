@@ -1,13 +1,9 @@
-
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using GBX.NET.Engines.Game;
 using tman.src.Alterations.Internal;
 using tman.src.Application;
 using tman.src.Core;
 using tman.src.Inventory;
-using tman.src.Positioning;
 
 namespace tman.src.Alterations
 {
@@ -19,47 +15,12 @@ namespace tman.src.Alterations
             new LightmapRemoved(),
             new InventoryRemoved(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
             new CheckpointsCleaned(),
-            new MapNameEdited(name => name + " Flags")
-        ];
-
-        private static readonly Dictionary<string, string> ItemFinishes = new()
-        {
-            ["Flag8m"] = "FinishFlag8m.Item.Gbx",
-            ["Flag16m"] = "FinishFlag16m.Item.Gbx",
-        };
-
-        private static readonly string FlagsDirectory = Path.Combine(
-            ApplicationConstants.ProjectDirectory,
-            "assets",
-            "items",
-            "flags");
-
-        protected override void Run(CGameCtnChallenge map)
-        {
-            foreach (var (flagId, finishFile) in ItemFinishes)
+            new MapNameEdited(name => name + " Flags"),
+            new ItemFinishes(new Dictionary<string, string>
             {
-                var sources = map.AnchoredObjects?
-                    .Where(item => item.ItemModel.Id == flagId)
-                    .ToList() ?? [];
-
-                if (sources.Count == 0)
-                {
-                    continue;
-                }
-
-                var finishPath = Path.Combine(FlagsDirectory, finishFile);
-                EmbedUtility.Embed(map, finishPath);
-
-                var finish = new CGameCtnAnchoredObject
-                {
-                    ItemModel = EmbedUtility.ExtractIdent(finishPath)
-                };
-
-                foreach (var source in sources)
-                {
-                    MapUtility.PlaceRelative(map, source, finish);
-                }
-            }
-        }
+                ["Flag8m"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "flags", "FinishFlag8m.Item.Gbx"),
+                ["Flag16m"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "flags", "FinishFlag16m.Item.Gbx"),
+            })
+        ];
     }
 }

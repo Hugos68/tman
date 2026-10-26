@@ -1,13 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using GBX.NET.Engines.Game;
 using tman.src.Alterations.Internal;
 using tman.src.Application;
 using tman.src.Core;
 using tman.src.Inventory;
-using tman.src.Positioning;
 
 namespace tman.src.Alterations
 {
@@ -19,120 +15,45 @@ namespace tman.src.Alterations
             new LightmapRemoved(),
             new InventoryRemoved(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
             new CheckpointsCleaned(),
-            new MapNameEdited(name => name + " Moth")
+            new MapNameEdited(name => name + " Moth"),
+            new ItemFinishes(new Dictionary<string, string>
+            {
+                ["Lamp"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishLamp.Item.Gbx"),
+                ["LampB"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishLampB.Item.Gbx"),
+                ["LampC"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishLampC.Item.Gbx"),
+                ["LampSmall"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishLampSmall.Item.Gbx"),
+                ["LampSmallB"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishLampSmallB.Item.Gbx"),
+                ["LampSmallC"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishLampSmallC.Item.Gbx"),
+                ["ShowLight4Spots"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishShowLight4Spots.Item.Gbx"),
+                ["ShowLightRamp4m"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishShowLightRamp4m.Item.Gbx"),
+                ["ShowLightRamp8m"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishShowLightRamp8m.Item.Gbx"),
+                ["ShowLightsV23"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishShowLightsV23.Item.Gbx"),
+                ["ShowLightsV24"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishShowLightsV24.Item.Gbx"),
+                ["ShowLightsV25"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishShowLightsV25.Item.Gbx"),
+                ["ShowLightsV32"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishShowLightsV32.Item.Gbx"),
+                ["ShowLightsV33"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishShowLightsV33.Item.Gbx"),
+                ["ShowV23"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishShowV23.Item.Gbx"),
+                ["ShowV24"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishShowV24.Item.Gbx"),
+                ["ShowV25"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishShowV25.Item.Gbx"),
+                ["ShowV35"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishShowV35.Item.Gbx"),
+                ["ShowV36"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishShowV36.Item.Gbx"),
+                ["SnowLampSupportLampion"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishSnowLampSupportLampion.Item.Gbx"),
+                ["SnowLampSupportLamp1"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishSnowLampSupportLamp1.Item.Gbx"),
+                ["SnowLampSupportLamp2"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishSnowLampSupportLamp2.Item.Gbx"),
+                ["SnowTemple16m"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishSnowTemple16m.Item.Gbx"),
+                ["SnowTemple24m"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishSnowTemple24m.Item.Gbx"),
+                ["SnowTemple32m"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishSnowTemple32m.Item.Gbx"),
+                ["SnowTempleCross"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishSnowTempleCross.Item.Gbx"),
+                ["SnowTempleDeadEnd"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishSnowTempleDeadEnd.Item.Gbx"),
+                ["SnowTempleRoadCorner"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishSnowTempleRoadCorner.Item.Gbx"),
+                ["SnowTempleRoadStraight"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishSnowTempleRoadStraight.Item.Gbx"),
+                ["SnowTempleRoadTShaped"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishSnowTempleRoadTShaped.Item.Gbx"),
+                ["StageTechnicsLight"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishStageTechnicsLight.Item.Gbx"),
+                ["StageTechnicsLightDeadend"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishStageTechnicsLightDeadend.Item.Gbx"),
+                ["StageTechnicsLightDown"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishStageTechnicsLightDown.Item.Gbx"),
+                ["StageTechnicsLightStraight"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishStageTechnicsLightStraight.Item.Gbx"),
+                ["StageTechnicsLightToStructure"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "moth", "FinishStageTechnicsLightToStructure.Item.Gbx"),
+            })
         ];
-
-        private static readonly Dictionary<string, string> ItemFinishes = new()
-        {
-            ["Lamp"] = "FinishLamp.Item.Gbx",
-            ["LampB"] = "FinishLampB.Item.Gbx",
-            ["LampC"] = "FinishLampC.Item.Gbx",
-            ["LampSmall"] = "FinishLampSmall.Item.Gbx",
-            ["LampSmallB"] = "FinishLampSmallB.Item.Gbx",
-            ["LampSmallC"] = "FinishLampSmallC.Item.Gbx",
-            ["ShowLight4Spots"] = "FinishShowLight4Spots.Item.Gbx",
-            ["ShowLightRamp4m"] = "FinishShowLightRamp4m.Item.Gbx",
-            ["ShowLightRamp8m"] = "FinishShowLightRamp8m.Item.Gbx",
-            ["ShowLightsV23"] = "FinishShowLightsV23.Item.Gbx",
-            ["ShowLightsV24"] = "FinishShowLightsV24.Item.Gbx",
-            ["ShowLightsV25"] = "FinishShowLightsV25.Item.Gbx",
-            ["ShowLightsV32"] = "FinishShowLightsV32.Item.Gbx",
-            ["ShowLightsV33"] = "FinishShowLightsV33.Item.Gbx",
-            ["ShowV23"] = "FinishShowV23.Item.Gbx",
-            ["ShowV24"] = "FinishShowV24.Item.Gbx",
-            ["ShowV25"] = "FinishShowV25.Item.Gbx",
-            ["ShowV35"] = "FinishShowV35.Item.Gbx",
-            ["ShowV36"] = "FinishShowV36.Item.Gbx",
-            ["SnowLampSupportLampion"] = "FinishSnowLampSupportLampion.Item.Gbx",
-            ["SnowLampSupportLamp1"] = "FinishSnowLampSupportLamp1.Item.Gbx",
-            ["SnowLampSupportLamp2"] = "FinishSnowLampSupportLamp2.Item.Gbx",
-            ["SnowTemple16m"] = "FinishSnowTemple16m.Item.Gbx",
-            ["SnowTemple24m"] = "FinishSnowTemple24m.Item.Gbx",
-            ["SnowTemple32m"] = "FinishSnowTemple32m.Item.Gbx",
-            ["SnowTempleCross"] = "FinishSnowTempleCross.Item.Gbx",
-            ["SnowTempleDeadEnd"] = "FinishSnowTempleDeadEnd.Item.Gbx",
-            ["SnowTempleRoadCorner"] = "FinishSnowTempleRoadCorner.Item.Gbx",
-            ["SnowTempleRoadStraight"] = "FinishSnowTempleRoadStraight.Item.Gbx",
-            ["SnowTempleRoadTShaped"] = "FinishSnowTempleRoadTShaped.Item.Gbx",
-        };
-
-        private static readonly Dictionary<string, string> BlockFinishes = new()
-        {
-            ["StageTechnicsLight"] = "FinishStageTechnicsLight.Item.Gbx",
-            ["StageTechnicsLightDeadend"] = "FinishStageTechnicsLightDeadend.Item.Gbx",
-            ["StageTechnicsLightDown"] = "FinishStageTechnicsLightDown.Item.Gbx",
-            ["StageTechnicsLightStraight"] = "FinishStageTechnicsLightStraight.Item.Gbx",
-            ["StageTechnicsLightToStructure"] = "FinishStageTechnicsLightToStructure.Item.Gbx",
-        };
-
-        private static readonly string MothDirectory = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "inventory", "moth");
-
-        private static readonly Regex VariantRegex = new(@"V(\d+)$", RegexOptions.Compiled);
-
-        protected override void Run(CGameCtnChallenge map)
-        {
-            foreach (var (itemId, finishFile) in ItemFinishes)
-            {
-                var match = VariantRegex.Match(itemId);
-                var model = match.Success
-                    ? itemId[..match.Index]
-                    : itemId;
-                int? variant = match.Success
-                    ? int.Parse(match.Groups[1].Value)
-                    : null;
-
-                var sources = map.AnchoredObjects?
-                    .Where(item =>
-                        item.ItemModel.Id == model &&
-                        (variant is null || Variant(item) == variant))
-                    .ToList() ?? [];
-
-                if (sources.Count == 0)
-                {
-                    continue;
-                }
-
-                var finishPath = Path.Combine(MothDirectory, finishFile);
-                EmbedUtility.Embed(map, finishPath);
-
-                var finish = new CGameCtnAnchoredObject
-                {
-                    ItemModel = EmbedUtility.ExtractIdent(finishPath)
-                };
-
-                foreach (var source in sources)
-                {
-                    MapUtility.PlaceRelative(map, source, finish);
-                }
-            }
-
-            foreach (var (blockId, finishFile) in BlockFinishes)
-            {
-                var sources = map.Blocks?
-                    .Where(block => block.Name == blockId)
-                    .ToList() ?? [];
-
-                if (sources.Count == 0)
-                {
-                    continue;
-                }
-
-                var finishPath = Path.Combine(MothDirectory, finishFile);
-                EmbedUtility.Embed(map, finishPath);
-
-                var finish = new CGameCtnAnchoredObject
-                {
-                    ItemModel = EmbedUtility.ExtractIdent(finishPath)
-                };
-
-                foreach (var source in sources)
-                {
-                    MapUtility.PlaceRelative(map, source, finish);
-                }
-            }
-        }
-
-        private static int Variant(CGameCtnAnchoredObject item) =>
-            (item.Flags >> 8) & 0xFF;
     }
 }

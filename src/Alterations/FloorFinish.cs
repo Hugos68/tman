@@ -65,7 +65,7 @@ namespace tman.src.Alterations
 
         protected override void Run(CGameCtnChallenge map)
         {
-            var inventory = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "inventory");
+            var inventory = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items");
             var data = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "data");
             var environment = map.GetEnvironment();
             var boxes = environment == "Stadium2020"
