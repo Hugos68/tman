@@ -27,10 +27,10 @@ namespace tman.src.Alterations
 
         private static readonly Dictionary<string, (string[] Tiles, float Level)> OpenWater = new()
         {
-            ["RedIsland"] = (["Water"], -4f),
-            ["WhiteShore"] = (["Water"], -4f),
-            ["BlueBay"] = (["Sea"], 4f),
-            ["GreenCoast"] = (["Lake"], -4f),
+            ["RedIsland"] = (["Water"], -3.7f),
+            ["WhiteShore"] = (["Water"], -3.7f),
+            ["BlueBay"] = (["Sea"], 5.1f),
+            ["GreenCoast"] = (["Lake"], -3.7f),
         };
 
         private static readonly Dictionary<string, string> Cutouts = new()
