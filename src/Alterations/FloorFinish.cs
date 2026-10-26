@@ -25,12 +25,12 @@ namespace tman.src.Alterations
             new MapNameEdited(name => name + " Floor Finish")
         ];
 
-        private static readonly Dictionary<string, (string[] Tiles, float Bed)> OpenWater = new()
+        private static readonly Dictionary<string, (string[] Tiles, float Level)> OpenWater = new()
         {
-            ["RedIsland"] = (["Water"], 2.0f),
-            ["WhiteShore"] = (["Water"], 2.0f),
-            ["BlueBay"] = (["Sea"], 4.0f),
-            ["GreenCoast"] = (["Lake"], 2.0f),
+            ["RedIsland"] = (["Water"], -4f),
+            ["WhiteShore"] = (["Water"], -4f),
+            ["BlueBay"] = (["Sea"], 4f),
+            ["GreenCoast"] = (["Lake"], -4f),
         };
 
         private static readonly Dictionary<string, string> Cutouts = new()
@@ -61,25 +61,22 @@ namespace tman.src.Alterations
 
         private static readonly Regex VariantRegex = new(@"V(\d+)$", RegexOptions.Compiled);
 
-        private const float BedBelow = 0.1f;
-        private const float BedAbove = 0.3f;
-        private const float GrassAbove = 0.3f;
+        private const float Thickness = 0.3f;
 
         protected override void Run(CGameCtnChallenge map)
         {
             var inventory = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "inventory");
-            var footprints = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "data");
+            var data = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "data");
             var environment = map.GetEnvironment();
             var boxes = environment == "Stadium2020"
-                ? GrassBoxes(map, Path.Combine(footprints, "StadiumBlockFootprints.tsv"))
-                : WaterBoxes(map, environment, Path.Combine(footprints, "WaterFootprints.tsv"));
-            var ramps = new List<FinishPlane.Ramp>();
-            OuterRing(map, environment, Path.Combine(footprints, "OuterTerrain.tsv"), boxes, ramps);
+                ? GrassBoxes(map, Path.Combine(data, "StadiumBlockFootprints.tsv"))
+                : WaterBoxes(map, environment, Path.Combine(data, "WaterFootprints.tsv"));
+            OuterRing(map, environment, Path.Combine(data, "OuterTerrain.tsv"), boxes);
             if (boxes.Count == 0)
             {
                 return;
             }
-            FinishPlane.Place(map, Path.Combine(inventory, "FinishPlaneTemplate.Item.Gbx"), $"FinishFloor_{map.MapUid}.Item.Gbx", boxes, ramps);
+            FinishPlane.Place(map, Path.Combine(inventory, "FinishPlaneTemplate.Item.Gbx"), $"FinishFloor_{map.MapUid}.Item.Gbx", boxes);
             if (environment == "Stadium2020")
             {
                 PlaceCutouts(map, Path.Combine(inventory, "floor-finish"));
@@ -135,19 +132,17 @@ namespace tman.src.Alterations
             {
                 return boxes;
             }
-            var groundRow = MapUtility.GroundRow(map);
             var footprints = LoadWaterFootprints(footprintsPath, environment);
-            var cells = new Dictionary<(float Floor, int Z), List<int>>();
-            var squares = new Dictionary<(float Floor, int Z), List<int>>();
+            var cells = new Dictionary<int, List<int>>();
+            var squares = new Dictionary<int, List<int>>();
             var seen = new HashSet<Int3>();
             foreach (var block in (map.Blocks ?? []).Concat(map.BakedBlocks ?? []).Where(b => !b.IsFree))
             {
-                var floor = (block.Coord.Y - groundRow) * MapConstants.CellHeight;
                 if (water.Tiles.Contains(block.BlockModel.Id))
                 {
                     if (seen.Add(block.Coord))
                     {
-                        Add(cells, (floor, block.Coord.Z), block.Coord.X);
+                        Add(cells, block.Coord.Z, block.Coord.X);
                     }
                 }
                 else if (footprints.TryGetValue((block.BlockModel.Id, (uint)block.Flags & 0x0FE01FFF), out var deep))
@@ -167,25 +162,23 @@ namespace tman.src.Alterations
                                 Direction.West => (zi, 7 - xi),
                                 _ => (xi, zi),
                             };
-                            Add(squares, (floor, block.Coord.Z * 8 + z), block.Coord.X * 8 + x);
+                            Add(squares, block.Coord.Z * 8 + z, block.Coord.X * 8 + x);
                         }
                     }
                 }
             }
-            foreach (var ((floor, z), xs) in cells)
+            foreach (var (z, xs) in cells)
             {
-                var bed = floor + water.Bed;
                 foreach (var (x0, x1) in Runs(xs))
                 {
-                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.CellSize, x1 * MapConstants.CellSize, z * MapConstants.CellSize, (z + 1) * MapConstants.CellSize, bed - BedBelow, bed + BedAbove));
+                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.CellSize, x1 * MapConstants.CellSize, z * MapConstants.CellSize, (z + 1) * MapConstants.CellSize, water.Level - Thickness, water.Level));
                 }
             }
-            foreach (var ((floor, z), xs) in squares)
+            foreach (var (z, xs) in squares)
             {
-                var bed = floor + water.Bed;
                 foreach (var (x0, x1) in Runs(xs))
                 {
-                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.SubcellSize, x1 * MapConstants.SubcellSize, z * MapConstants.SubcellSize, (z + 1) * MapConstants.SubcellSize, bed - BedBelow, bed + BedAbove));
+                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.SubcellSize, x1 * MapConstants.SubcellSize, z * MapConstants.SubcellSize, (z + 1) * MapConstants.SubcellSize, water.Level - Thickness, water.Level));
                 }
             }
             return boxes;
@@ -226,16 +219,17 @@ namespace tman.src.Alterations
             {
                 foreach (var (x0, x1) in Runs(xs))
                 {
-                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.CellSize, x1 * MapConstants.CellSize, z * MapConstants.CellSize, (z + 1) * MapConstants.CellSize, y, y + GrassAbove));
+                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.CellSize, x1 * MapConstants.CellSize, z * MapConstants.CellSize, (z + 1) * MapConstants.CellSize, y, y + Thickness));
                 }
             }
             return boxes;
         }
 
-        private static void OuterRing(CGameCtnChallenge map, string environment, string path, List<FinishPlane.Box> boxes, List<FinishPlane.Ramp> ramps)
+        private static void OuterRing(CGameCtnChallenge map, string environment, string path, List<FinishPlane.Box> boxes)
         {
             var collection = environment == "Stadium2020" ? "Stadium" : environment;
             var decoration = environment == "Stadium2020" ? Regex.Replace(map.Decoration.Id, "(Day|Night|Sunrise|Sunset)$", "") : "Base64x64";
+            var level = OpenWater.TryGetValue(environment, out var water) ? water.Level : (float?)null;
             foreach (var f in File.ReadLines(path).Skip(1).Select(line => line.Split('\t')).Where(f => f[0] == collection && f[1] == decoration))
             {
                 var x0 = float.Parse(f[2], CultureInfo.InvariantCulture);
@@ -243,15 +237,8 @@ namespace tman.src.Alterations
                 var z0 = float.Parse(f[4], CultureInfo.InvariantCulture);
                 var z1 = float.Parse(f[5], CultureInfo.InvariantCulture);
                 var floor = float.Parse(f[6], CultureInfo.InvariantCulture);
-                if (f[7] == "ramp")
-                {
-                    var side = f[9] switch { "N" => FinishPlane.Side.North, "S" => FinishPlane.Side.South, "W" => FinishPlane.Side.West, _ => FinishPlane.Side.East };
-                    ramps.Add(new FinishPlane.Ramp(x0, x1, z0, z1, floor, float.Parse(f[8], CultureInfo.InvariantCulture), BedBelow, BedAbove, side));
-                    continue;
-                }
-                var (below, above) = f[7] == "grass" ? (0f, GrassAbove) : (BedBelow, BedAbove);
-                var top = f[7] == "band" ? float.Parse(f[8], CultureInfo.InvariantCulture) : floor;
-                boxes.Add(new FinishPlane.Box(x0, x1, z0, z1, floor - below, top + above));
+                var (y0, y1) = level is { } fixedLevel ? (fixedLevel - Thickness, fixedLevel) : (floor, floor + Thickness);
+                boxes.Add(new FinishPlane.Box(x0, x1, z0, z1, y0, y1));
             }
         }
 
