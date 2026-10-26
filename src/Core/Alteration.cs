@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using GBX.NET.Engines.Game;
 
@@ -14,6 +15,7 @@ namespace tman.src.Core
                 alteration.Apply(map);
             }
             Run(map);
+            map.GenerateMapUid();
         }
 
         protected virtual void Run(CGameCtnChallenge map) { }
