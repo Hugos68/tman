@@ -50,7 +50,7 @@ namespace tman.src.Alterations
                     },
                     blockPredicate: block => !block.IsFree && block.IsGround
                 )),
-            new MapNameEdited(name => name + " Floor Finish"),
+            new MapNameEdited(name => name + " Pure Floor-fin"),
         ];
 
         private static readonly Dictionary<string, (string[] Tiles, float Bottom, float Top)> OpenWater = new()
