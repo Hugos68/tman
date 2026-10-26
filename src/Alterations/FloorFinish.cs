@@ -36,7 +36,7 @@ namespace tman.src.Alterations
         private static readonly Dictionary<string, string> Cutouts = new()
         {
             ["DecoPlatformCurve3In"] = "FloorFinishDecoPlatformCurve3In.Item.Gbx",
-            ["DecoPlatformSlopeBaseCurve1InFull"] = "FloorFinishDecoPlatformSlopeBaseCurve1InFull.Item.Gbx",
+            ["DecoPlatformSlopeBaseCurve1InFullV0"] = "FloorFinishDecoPlatformSlopeBaseCurve1InFullV0.Item.Gbx",
             ["DecoPlatformSlopeBaseCurve1OutV128"] = "FloorFinishDecoPlatformSlopeBaseCurve1OutV128.Item.Gbx",
             ["DecoWallCurve1Pillar"] = "FloorFinishDecoWallCurve1Pillar.Item.Gbx",
             ["DecoWallCurve2InPillar"] = "FloorFinishDecoWallCurve2InPillar.Item.Gbx",
