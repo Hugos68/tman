@@ -17,17 +17,23 @@ namespace tman.src.Inventory
 
         public readonly record struct Ramp(float X0, float X1, float Z0, float Z1, float YInner, float YOuter, float Below, float Above, Side Side);
 
-        public static void Place(CGameCtnChallenge map, string templatePath, string ident, IReadOnlyList<Box> boxes) => Place(map, templatePath, ident, boxes, []);
+        public static void Place(CGameCtnChallenge map, string templatePath, string ident, IReadOnlyList<Box> boxes) => Place(map, templatePath, ident, boxes, [], true);
 
-        public static void Place(CGameCtnChallenge map, string templatePath, string ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps)
+        public static void Place(CGameCtnChallenge map, string templatePath, string ident, IReadOnlyList<Box> boxes, bool visible) => Place(map, templatePath, ident, boxes, [], visible);
+
+        public static void Place(CGameCtnChallenge map, string templatePath, string ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps) => Place(map, templatePath, ident, boxes, ramps, true);
+
+        public static void Place(CGameCtnChallenge map, string templatePath, string ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps, bool visible)
         {
             var path = Path.Combine(Path.GetTempPath(), ident);
-            File.WriteAllBytes(path, Build(templatePath, ident, map.MapInfo.Collection, boxes, ramps));
+            File.WriteAllBytes(path, Build(templatePath, ident, map.MapInfo.Collection, boxes, ramps, visible));
             EmbedUtility.Embed(map, path);
             map.PlaceAnchoredObject(EmbedUtility.ExtractIdent(path), Vec3.Zero, Vec3.Zero, Vec3.Zero);
         }
 
-        public static byte[] Build(string templatePath, string ident, Id collection, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps)
+        public static byte[] Build(string templatePath, string ident, Id collection, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps) => Build(templatePath, ident, collection, boxes, ramps, true);
+
+        public static byte[] Build(string templatePath, string ident, Id collection, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps, bool visible)
         {
             var bodies = new List<Vec3[]>();
             foreach (var b in Merge(boxes))
@@ -63,7 +69,9 @@ namespace tman.src.Inventory
             {
                 throw new InvalidOperationException($"{templatePath} has no geometry + trigger layers with two materials");
             }
-            var glass = bodies.SelectMany(b => new[] { Face(b, 3, 7, 6, 2), Face(b, 0, 1, 5, 4) }).ToList();
+            var glass = visible
+                ? bodies.SelectMany(b => new[] { Face(b, 3, 7, 6, 2), Face(b, 0, 1, 5, 4) }).ToList()
+                : [Speck(bodies[0])];
             var prism = bodies.SelectMany(b => new[] { Face(b, 3, 7, 6, 2), Face(b, 0, 1, 5, 4), Face(b, 4, 0, 3, 7), Face(b, 1, 5, 6, 2), Face(b, 4, 5, 1, 0), Face(b, 3, 2, 6, 7) }).ToList();
             Fill(geometry.Crystal, glass, crystal.Materials[0], true);
             Fill(trigger.Crystal, prism, crystal.Materials[1], false);
@@ -86,6 +94,13 @@ namespace tman.src.Inventory
             new Vec3(x0, bottom(x0, z0), z0), new Vec3(x1, bottom(x1, z0), z0), new Vec3(x1, top(x1, z0), z0), new Vec3(x0, top(x0, z0), z0),
             new Vec3(x0, bottom(x0, z1), z1), new Vec3(x1, bottom(x1, z1), z1), new Vec3(x1, top(x1, z1), z1), new Vec3(x0, top(x0, z1), z1),
         ];
+
+        private static Vec3[] Speck(Vec3[] body)
+        {
+            const float size = 0.001f;
+            var o = body[0];
+            return [o, new Vec3(o.X, o.Y, o.Z + size), new Vec3(o.X + size, o.Y, o.Z + size), new Vec3(o.X + size, o.Y, o.Z)];
+        }
 
         private static Vec3[] Face(Vec3[] body, int a, int b, int c, int d)
         {

@@ -76,7 +76,7 @@ namespace tman.src.Alterations
             {
                 return;
             }
-            FinishPlane.Place(map, Path.Combine(inventory, "FinishPlaneTemplate.Item.Gbx"), $"FinishFloor_{map.MapUid}.Item.Gbx", boxes);
+            FinishPlane.Place(map, Path.Combine(inventory, "FinishPlaneTemplate.Item.Gbx"), $"FinishFloor_{map.MapUid}.Item.Gbx", boxes, environment == "Stadium2020");
         }
 
         private static List<FinishPlane.Box> WaterBoxes(CGameCtnChallenge map, string environment, string footprintsPath)
