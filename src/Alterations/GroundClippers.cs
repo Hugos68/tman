@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using GBX.NET;
 using GBX.NET.Engines.Game;
 using tman.src.Alterations.Internal;
 using tman.src.Application;
