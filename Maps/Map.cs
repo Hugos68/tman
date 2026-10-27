@@ -13,6 +13,8 @@ namespace tman.Maps
 {
     public sealed class Map
     {
+        private const int AdditionalVariantMask = 0x7F << 21;
+
         private static readonly Dictionary<Waypoint, string> WaypointTags = new()
         {
             [Waypoint.Start] = "Spawn",
@@ -130,10 +132,10 @@ namespace tman.Maps
         }
 
         public Placement PlaceLike(Placement source, Waypoint kind) => source.IsBlock
-            ? PlaceBlock(Copy(source.Block!, Twin(source.BlockModel, kind, source.Id), Turn(source.Waypoint, kind), null))
+            ? PlaceBlock(Copy(source.Block!, Twin(source.BlockModel, kind, source.Id), Turn(source.Waypoint, kind), null, true))
             : PlaceLike(source, Twin(source.ItemModel, kind, source.Id), HalfTurn(source, kind));
 
-        public Placement PlaceLike(Placement source, Block model) => PlaceBlock(Copy(source.Block!, model, DirectionOffset.None, null));
+        public Placement PlaceLike(Placement source, Block model) => PlaceBlock(Copy(source.Block!, model, DirectionOffset.None, null, false));
 
         public Placement PlaceLike(Placement source, Item model) => PlaceLike(source, model, 0);
 
@@ -141,18 +143,20 @@ namespace tman.Maps
         {
             if (source.IsBlock)
             {
-                return Replace(source, Twin(source.BlockModel, kind, source.Id), Turn(source.Waypoint, kind));
+                return Replace(source, Twin(source.BlockModel, kind, source.Id), Turn(source.Waypoint, kind), true);
             }
             var item = source.Item!;
             item.YawPitchRoll += new Vec3(HalfTurn(source, kind), 0, 0);
             return Replace(source, Twin(source.ItemModel, kind, source.Id));
         }
 
-        public Placement Replace(Placement source, Block model, DirectionOffset rotation)
+        public Placement Replace(Placement source, Block model, DirectionOffset rotation) => Replace(source, model, rotation, false);
+
+        private Placement Replace(Placement source, Block model, DirectionOffset rotation, bool sameFamily)
         {
             var block = source.Block!;
             Gbx.RemoveBlock(block);
-            return PlaceBlock(Copy(block, model, rotation, block.WaypointSpecialProperty));
+            return PlaceBlock(Copy(block, model, rotation, block.WaypointSpecialProperty, sameFamily));
         }
 
         public Placement Replace(Placement source, Item model)
@@ -198,23 +202,26 @@ namespace tman.Maps
             return new Placement(copy);
         }
 
-        private static CGameCtnBlock Copy(CGameCtnBlock block, Block model, DirectionOffset rotation, CGameWaypointSpecialProperty? property) => new()
+        private static CGameCtnBlock Copy(CGameCtnBlock block, Block model, DirectionOffset rotation, CGameWaypointSpecialProperty? property, bool sameFamily)
         {
-            Name = model.Id,
-            Coord = block.Coord,
-            Direction = block.Direction.Turn(rotation),
-            IsGround = block.IsGround,
-            Variant = block.Variant,
-            SubVariant = block.SubVariant,
-            YawPitchRoll = block.YawPitchRoll,
-            Color = block.Color,
-            IsClip = block.IsClip,
-            IsFree = block.IsFree,
-            IsPillar = block.IsPillar,
-            IsGhost = block.IsGhost,
-            IsReplacement = block.IsReplacement,
-            WaypointSpecialProperty = WaypointProperty(property, model.Waypoint)
-        };
+            var copy = new CGameCtnBlock
+            {
+                Name = model.Id,
+                Coord = block.Coord,
+                Direction = block.Direction.Turn(rotation),
+                Flags = sameFamily ? block.Flags : block.Flags & ~AdditionalVariantMask,
+                AbsolutePositionInMap = block.AbsolutePositionInMap,
+                YawPitchRoll = block.YawPitchRoll,
+                Color = block.Color,
+                LightmapQuality = block.LightmapQuality
+            };
+            if (block.Skin is not null)
+            {
+                copy.Skin = block.Skin;
+            }
+            copy.WaypointSpecialProperty = WaypointProperty(property, model.Waypoint);
+            return copy;
+        }
 
         private static Block Twin(Block? model, Waypoint kind, string id) =>
             model?.As(kind) ?? throw new InvalidOperationException($"{id} has no {kind} twin");
