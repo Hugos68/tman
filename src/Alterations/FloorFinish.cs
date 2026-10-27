@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text.Json;
 using GBX.NET;
 using tman.src.Alterations.Internal;
-using tman.Application;
+using tman.src.Application;
 using tman.src.Core;
-using tman.Maps;
+using tman.src.Maps;
 
 namespace tman.src.Alterations
 {

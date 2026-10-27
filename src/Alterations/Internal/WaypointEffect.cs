@@ -1,6 +1,6 @@
 using GBX.NET;
 using tman.src.Core;
-using tman.Maps;
+using tman.src.Maps;
 
 namespace tman.src.Alterations.Internal
 {
