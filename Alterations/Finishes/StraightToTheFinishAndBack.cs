@@ -3,7 +3,7 @@ using tman.Alterations.Internal;
 using tman.Inventory;
 using tman.Maps;
 
-namespace tman.Alterations.Checkpoints
+namespace tman.Alterations.Finishes
 {
     public class StraightToTheFinishAndBack : Alteration
     {

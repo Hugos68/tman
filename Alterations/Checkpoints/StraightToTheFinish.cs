@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using tman.Alterations.Internal;
-using tman.Inventory;
+
 namespace tman.Alterations.Checkpoints
 {
     public class StraightToTheFinish : Alteration
