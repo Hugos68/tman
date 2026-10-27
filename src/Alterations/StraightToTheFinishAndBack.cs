@@ -17,10 +17,6 @@ namespace tman.src.Alterations
 
         protected override void Run(Map map)
         {
-            foreach (var start in map.Waypoints(Waypoint.Start))
-            {
-                map.PlaceLike(start, Waypoint.Finish);
-            }
             foreach (var finish in map.Waypoints(Waypoint.Finish))
             {
                 if (finish.BlockModel == Blocks.GateExpandableFinish)
@@ -33,6 +29,10 @@ namespace tman.src.Alterations
                 {
                     map.Replace(finish, Waypoint.Checkpoint);
                 }
+            }
+            foreach (var start in map.Waypoints(Waypoint.Start))
+            {
+                map.PlaceLike(start, Waypoint.Finish);
             }
             map.Link(map.Waypoints(Waypoint.Checkpoint));
         }
