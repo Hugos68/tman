@@ -127,7 +127,7 @@ namespace tman.src.Maps
         {
             if (source.IsBlock)
             {
-                PlaceLike(source, Twin(source.BlockModel, kind, source.Id));
+                Gbx.PlaceBlock(Copy(source.Block!, Twin(source.BlockModel, kind, source.Id), Turn(source.Waypoint, kind), null));
             }
             else
             {
@@ -143,7 +143,7 @@ namespace tman.src.Maps
         {
             if (source.IsBlock)
             {
-                Replace(source, Twin(source.BlockModel, kind, source.Id), DirectionOffset.None);
+                Replace(source, Twin(source.BlockModel, kind, source.Id), Turn(source.Waypoint, kind));
             }
             else
             {
@@ -205,6 +205,9 @@ namespace tman.src.Maps
             model?.As(kind) ?? throw new InvalidOperationException($"{id} has no {kind} twin");
 
         private static float HalfTurn(Placement source, Waypoint kind) => Items.HalfTurned.Contains((source.Id, kind)) ? MathF.PI : 0;
+
+        private static DirectionOffset Turn(Waypoint from, Waypoint to) =>
+            (from, to) is (Waypoint.Start, Waypoint.Finish) or (Waypoint.Finish, Waypoint.Start) ? DirectionOffset.Half : DirectionOffset.None;
 
         private static CGameWaypointSpecialProperty? WaypointProperty(CGameWaypointSpecialProperty? current, Waypoint kind)
         {

@@ -71,12 +71,12 @@ internal class Program
             Required = true
         };
 
-        var generateCommand = new Command("generate", "Regenerate src/Core/Generated from the game's pak files and assets/items.");
+        var generateCommand = new Command("generate", "Regenerate src/Generated from the game's pak files and assets/items.");
         generateCommand.Options.Add(paksOption);
         generateCommand.SetAction(parseResult =>
         {
             var project = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."));
-            Generator.Run(parseResult.GetValue(paksOption)!.FullName, Path.Combine(project, "src", "Core", "Generated"), project, Path.Combine("assets", "items"));
+            Generator.Run(parseResult.GetValue(paksOption)!.FullName, Path.Combine(project, "src", "Generated"), project, Path.Combine("assets", "items"));
             return 0;
         });
         rootCommand.Subcommands.Add(generateCommand);
