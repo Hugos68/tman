@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using GBX.NET;
-using GBX.NET.Engines.Game;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Plug;
 
-namespace tman.Maps
+namespace tman.src.Maps
 {
     public static class FinishPlane
     {

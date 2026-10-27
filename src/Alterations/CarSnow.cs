@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using tman.Alterations.Internal;
-using tman.Core;
+using tman.src.Alterations.Internal;
+using tman.src.Core;
 
-namespace tman.Alterations
+namespace tman.src.Alterations
 {
     public class CarSnow : Alteration
     {

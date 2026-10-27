@@ -1,4 +1,4 @@
-namespace tman.Positioning
+namespace tman.src.Positioning
 {
     public enum DirectionOffset
     {

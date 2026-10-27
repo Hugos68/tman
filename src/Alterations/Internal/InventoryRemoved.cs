@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
-using tman.Core;
+using tman.src.Core;
 using tman.Maps;
 
-namespace tman.Alterations.Internal
+namespace tman.src.Alterations.Internal
 {
     public class InventoryRemoved(Func<Placement, bool> predicate) : Alteration
     {

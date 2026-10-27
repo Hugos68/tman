@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using tman.Core;
-using tman.Maps;
-using tman.Positioning;
+using tman.src.Core;
+using tman.src.Maps;
+using tman.src.Positioning;
 
-namespace tman.Alterations.Internal
+namespace tman.src.Alterations.Internal
 {
     public class CheckpointsCleaned : Alteration
     {

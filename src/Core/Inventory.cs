@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using GBX.NET;
-using GBX.NET.Engines.Game;
 using GBX.NET.Engines.GameData;
-using tman.Application;
-using tman.Maps;
+using tman.src.Application;
+using tman.src.Maps;
 
-namespace tman.Core
+namespace tman.src.Core
 {
     public static class Inventory
     {

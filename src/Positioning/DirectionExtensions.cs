@@ -1,6 +1,6 @@
 using GBX.NET;
 
-namespace tman.Positioning
+namespace tman.src.Positioning
 {
     public static class DirectionExtensions
     {

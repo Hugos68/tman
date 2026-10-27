@@ -1,8 +1,8 @@
 using System;
-using tman.Core;
+using tman.src.Core;
 using tman.Maps;
 
-namespace tman.Alterations.Internal
+namespace tman.src.Alterations.Internal
 {
     public class MapNameEdited(Func<string, string> edit) : Alteration
     {

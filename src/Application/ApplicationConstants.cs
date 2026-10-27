@@ -1,6 +1,6 @@
 using System;
 
-namespace tman.Application
+namespace tman.src.Application
 {
     public static class ApplicationConstants
     {

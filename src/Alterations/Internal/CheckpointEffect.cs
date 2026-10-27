@@ -1,7 +1,7 @@
 using GBX.NET;
-using tman.Core;
+using tman.src.Core;
 
-namespace tman.Alterations.Internal
+namespace tman.src.Alterations.Internal
 {
     public class CheckpointEffect(Block gate, Vec3 offset) : WaypointEffect(gate, offset)
     {

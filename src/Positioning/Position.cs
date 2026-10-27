@@ -3,7 +3,7 @@ using GBX.NET;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 
-namespace tman.Positioning
+namespace tman.src.Positioning
 {
     public class Position(Vec3? coords, Vec3? yawPitchRoll)
     {

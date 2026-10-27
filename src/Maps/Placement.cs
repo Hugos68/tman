@@ -1,10 +1,10 @@
 using System;
 using GBX.NET;
 using GBX.NET.Engines.Game;
-using tman.Core;
-using tman.Positioning;
+using tman.src.Core;
+using tman.src.Positioning;
 
-namespace tman.Maps
+namespace tman.src.Maps
 {
     public sealed class Placement
     {

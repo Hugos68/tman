@@ -1,4 +1,4 @@
-namespace tman.Core
+namespace tman.src.Core
 {
     public static class MapConstants
     {

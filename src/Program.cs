@@ -1,8 +1,9 @@
 ﻿using System;
 using System.CommandLine;
 using System.IO;
-using tman.Core;
-using tman.Maps;
+using tman.src.Core;
+using tman.src.Generator;
+using tman.src.Maps;
 
 internal class Program
 {
@@ -75,7 +76,7 @@ internal class Program
         generateCommand.SetAction(parseResult =>
         {
             var project = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."));
-            tman.Generator.Generator.Run(parseResult.GetValue(paksOption)!.FullName, Path.Combine(project, "src", "Core", "Generated"), project, Path.Combine("assets", "items"));
+            Generator.Run(parseResult.GetValue(paksOption)!.FullName, Path.Combine(project, "src", "Core", "Generated"), project, Path.Combine("assets", "items"));
             return 0;
         });
         rootCommand.Subcommands.Add(generateCommand);

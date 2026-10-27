@@ -1,8 +1,8 @@
 using GBX.NET;
-using tman.Core;
+using tman.src.Core;
 using tman.Maps;
 
-namespace tman.Alterations.Internal
+namespace tman.src.Alterations.Internal
 {
     public abstract class WaypointEffect(Block gate, Vec3 offset) : Alteration
     {

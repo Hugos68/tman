@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using GBX.NET;
 
-namespace tman.Core;
+namespace tman.src.Core;
 
 public readonly record struct ItemVariant(Item Model, int Variant);
 

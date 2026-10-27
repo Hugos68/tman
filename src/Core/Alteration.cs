@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using tman.Maps;
+using tman.src.Maps;
 
-namespace tman.Core
+namespace tman.src.Core
 {
     public abstract class Alteration
     {

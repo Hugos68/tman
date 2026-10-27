@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using GBX.NET;
 
-namespace tman.Core;
+namespace tman.src.Core;
 
 public static class Custom
 {

@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using GBX.NET;
-using tman.Alterations.Internal;
+using tman.src.Alterations.Internal;
 using tman.Application;
-using tman.Core;
+using tman.src.Core;
 using tman.Maps;
 
-namespace tman.Alterations
+namespace tman.src.Alterations
 {
     public class FloorFinish : Alteration
     {
@@ -57,7 +57,7 @@ namespace tman.Alterations
             [Collections.BlueBay] = ([Blocks.Sea], -10.1f, 5.1f),
             [Collections.GreenCoast] = ([Blocks.Lake], -13.6f, -3.7f),
         };
-        
+
         private const float Thickness = 0.3f;
 
         private const int Ring = 16;
