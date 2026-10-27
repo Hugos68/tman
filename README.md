@@ -36,6 +36,7 @@ tman currently supports the following alterations:
 | `NoSteer` | Applies the NoSteer alteration. |
 | `SlowMotion` | Applies the SlowMotion alteration. |
 | `StraightToTheFinish` | Applies the StraightToTheFinish alteration. |
+| `StraightToTheFinishAndBack` | Applies the StraightToTheFinishAndBack alteration |
 
 Alteration names are case-insensitive. Each alteration can be selected by passing its name as the first argument:
 
