@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Globalization;
 using System.Text;
 using GBX.NET;
 using GBX.NET.Engines.Game;
@@ -37,17 +36,17 @@ namespace tman.Generator
             using var store = new PakStore(paksDirectory);
             Directory.CreateDirectory(outDirectory);
             var blocks = Blocks(store);
-            var blocksPath = System.IO.Path.Combine(outDirectory, "Blocks.g.cs");
+            var blocksPath = Path.Combine(outDirectory, "Blocks.g.cs");
             File.WriteAllText(blocksPath, Emitter.Blocks(blocks, Families(blocks.ToDictionary(kv => kv.Key, kv => kv.Value.Waypoint, StringComparer.Ordinal), false)), new UTF8Encoding(false));
             Console.WriteLine($"wrote {blocksPath}: {blocks.Count} blocks");
             var items = Items(store);
-            var itemsPath = System.IO.Path.Combine(outDirectory, "Items.g.cs");
+            var itemsPath = Path.Combine(outDirectory, "Items.g.cs");
             File.WriteAllText(itemsPath, Emitter.Items("Items", items.Values, Families(items.ToDictionary(kv => kv.Key, kv => kv.Value.Waypoint, StringComparer.Ordinal), true)), new UTF8Encoding(false));
             Console.WriteLine($"wrote {itemsPath}: {items.Count} items");
             if (projectRoot is not null && customSubdirectory is not null)
             {
                 var custom = Custom(projectRoot, customSubdirectory);
-                var customPath = System.IO.Path.Combine(outDirectory, "Custom.g.cs");
+                var customPath = Path.Combine(outDirectory, "Custom.g.cs");
                 File.WriteAllText(customPath, Emitter.Items("Custom", custom, []), new UTF8Encoding(false));
                 Console.WriteLine($"wrote {customPath}: {custom.Count} items");
             }
@@ -238,21 +237,21 @@ namespace tman.Generator
 
         public static List<ItemRow> Custom(string projectRoot, string subdirectory)
         {
-            var root = System.IO.Path.GetFullPath(projectRoot);
-            var files = Directory.Exists(System.IO.Path.Combine(root, subdirectory))
-                ? Directory.EnumerateFiles(System.IO.Path.Combine(root, subdirectory), "*.Item.Gbx", SearchOption.AllDirectories).Where(f => f.EndsWith(".Item.Gbx", StringComparison.Ordinal)).ToList()
+            var root = Path.GetFullPath(projectRoot);
+            var files = Directory.Exists(Path.Combine(root, subdirectory))
+                ? Directory.EnumerateFiles(Path.Combine(root, subdirectory), "*.Item.Gbx", SearchOption.AllDirectories).Where(f => f.EndsWith(".Item.Gbx", StringComparison.Ordinal)).ToList()
                 : [];
-            files.Sort((a, b) => ComparePaths(System.IO.Path.GetRelativePath(root, a), System.IO.Path.GetRelativePath(root, b)));
+            files.Sort((a, b) => ComparePaths(Path.GetRelativePath(root, a), Path.GetRelativePath(root, b)));
             var rows = new List<ItemRow>();
             var seen = new HashSet<string>(StringComparer.Ordinal);
             foreach (var path in files)
             {
-                var file = System.IO.Path.GetFileName(path);
+                var file = Path.GetFileName(path);
                 if (!seen.Add(file))
                 {
                     continue;
                 }
-                var relative = System.IO.Path.GetRelativePath(root, path).Replace('\\', '/');
+                var relative = Path.GetRelativePath(root, path).Replace('\\', '/');
                 int? waypoint = null;
                 var size = new Vec3(0, 0, 0);
                 CGameItemModel? item = null;
@@ -279,8 +278,8 @@ namespace tman.Generator
 
         private static int ComparePaths(string a, string b)
         {
-            var pa = a.Split(System.IO.Path.DirectorySeparatorChar);
-            var pb = b.Split(System.IO.Path.DirectorySeparatorChar);
+            var pa = a.Split(Path.DirectorySeparatorChar);
+            var pb = b.Split(Path.DirectorySeparatorChar);
             for (var i = 0; i < Math.Min(pa.Length, pb.Length); i++)
             {
                 var c = string.CompareOrdinal(pa[i], pb[i]);
