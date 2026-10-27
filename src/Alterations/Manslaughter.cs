@@ -21,6 +21,11 @@ namespace tman.src.Alterations
                 [Blocks.StandDiagIn] = Custom.FinishStandDiagIn,
                 [Blocks.StandDiagOut] = Custom.FinishStandDiagOut,
                 [Blocks.StandStraight] = Custom.FinishStandStraight,
+                [Blocks.StandCornerInOnDecoWall] = Custom.FinishStandCornerIn,
+                [Blocks.StandCornerOutOnDecoWall] = Custom.FinishStandCornerOut,
+                [Blocks.StandDiagInOnDecoWall] = Custom.FinishStandDiagIn,
+                [Blocks.StandDiagOutOnDecoWall] = Custom.FinishStandDiagOut,
+                [Blocks.StandStraightOnDecoWall] = Custom.FinishStandStraight,
             })
         ];
     }
