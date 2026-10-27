@@ -126,6 +126,12 @@ namespace tman.Maps
             });
         }
 
+        public void Replace(Placement source, Item model)
+        {
+            var item = source.Item!;
+            item.ItemModel = model.Ident(this);
+        }
+
         public void Remove(Placement placement)
         {
             if (placement.Block is not null)
