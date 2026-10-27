@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -10,8 +10,13 @@
   <ItemGroup>
     <PackageReference Include="GBX.NET" Version="2.4.5" />
     <PackageReference Include="GBX.NET.LZO" Version="2.1.6" />
+    <PackageReference Include="GBX.NET.PAK" Version="2.4.4" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.13" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="assets/**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
