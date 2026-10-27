@@ -86,7 +86,7 @@ internal class Program
 
     private static Alteration CreateAlteration(string name)
     {
-        var type = typeof(Alteration).Assembly.GetType($"tman.Alterations.{name}", throwOnError: false, ignoreCase: true);
+        var type = typeof(Alteration).Assembly.GetType($"tman.src.Alterations.{name}", throwOnError: true, ignoreCase: true);
 
         if (type is null ||
             type.IsAbstract ||
