@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
 using tman.Alterations.Internal;
 using tman.Core;
 using tman.Maps;
-using tman.Positioning;
 
 namespace tman.Alterations
 {
@@ -19,43 +17,22 @@ namespace tman.Alterations
 
         protected override void Run(Map map)
         {
-            foreach (var placement in map.Waypoints(Waypoint.Start))
+            var finishes = map.Waypoints(Waypoint.Finish);
+            foreach (var start in map.Waypoints(Waypoint.Start))
             {
-                if (placement.IsBlock)
-                {
-                    var startFinish = Inventory.Block(placement.Id.Replace("Start", "Multilap"));
-                    if (startFinish != null)
-                    {
-                        map.Replace(placement, startFinish, DirectionOffset.None);
-                    }
-                }
-                else
-                {
-                    var startFinish = Inventory.Item(placement.Id.Replace("Start", "Multilap"));
-                    if (startFinish != null)
-                    {
-                        map.Replace(placement, startFinish);
-                    }
-                }
+                map.PlaceLike(start, Waypoint.Finish);
             }
-
-            foreach (var placement in map.Waypoints(Waypoint.Finish))
+            foreach (var finish in finishes)
             {
-                if (placement.IsBlock)
+                if (finish.BlockModel == Blocks.GateExpandableFinish)
                 {
-                    var checkpoint = Inventory.Block(placement.Id.Replace("Finish", "Checkpoint"));
-                    if (checkpoint != null)
-                    {
-                        map.Replace(placement, checkpoint, DirectionOffset.None) ;
-                    }
+                    map.Embed(Custom.CheckpointExpandable);
+                    map.PlaceRelative(finish, Custom.CheckpointExpandable);
+                    map.Remove(finish);
                 }
                 else
                 {
-                    var checkpoint = Inventory.Item(placement.Id.Replace("Finish", "Checkpoint"));
-                    if (checkpoint != null)
-                    {
-                        map.Replace(placement, checkpoint);
-                    }
+                    map.Replace(finish, Waypoint.Checkpoint);
                 }
             }
         }

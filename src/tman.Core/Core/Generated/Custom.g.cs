@@ -9,6 +9,7 @@ public static class Custom
 {
     public static readonly Item FinishFlag16m = new("FinishFlag16m.Item.Gbx", "FinishFlag16m.Item.Gbx", "assets/items/flags/FinishFlag16m.Item.Gbx", Collections.All, Waypoint.Finish, 1, new Vec3(1.376f, 17.050f, 3.882f));
     public static readonly Item FinishFlag8m = new("FinishFlag8m.Item.Gbx", "FinishFlag8m.Item.Gbx", "assets/items/flags/FinishFlag8m.Item.Gbx", Collections.All, Waypoint.Finish, 1, new Vec3(1.041f, 9.159f, 2.094f));
+    public static readonly Item CheckpointExpandable = new("CheckpointExpandable.Item.Gbx", "CheckpointExpandable.Item.Gbx", "assets/items/floor-finish/CheckpointExpandable.Item.Gbx", Collections.All, Waypoint.Checkpoint, 1, new Vec3(32.000f, 7.180f, 0.837f));
     public static readonly Item FinishPlaneTemplate = new("FinishPlaneTemplate.Item.Gbx", "FinishPlaneTemplate.Item.Gbx", "assets/items/floor-finish/FinishPlaneTemplate.Item.Gbx", Collections.All, Waypoint.Finish, 1, new Vec3(128.000f, 0.000f, 128.000f));
     public static readonly Item FinishStadiumPenaltyGrass = new("FinishStadiumPenaltyGrass.Item.Gbx", "FinishStadiumPenaltyGrass.Item.Gbx", "assets/items/floor-finish/FinishStadiumPenaltyGrass.Item.Gbx", Collections.All, Waypoint.Finish, 1, new Vec3(1961.326f, 0.300f, 1691.069f));
     public static readonly Item FloorFinishDecoPlatformCurve3In = new("FloorFinishDecoPlatformCurve3In.Item.Gbx", "FloorFinishDecoPlatformCurve3In.Item.Gbx", "assets/items/floor-finish/FloorFinishDecoPlatformCurve3In.Item.Gbx", Collections.All, Waypoint.Finish, 1, new Vec3(63.500f, 0.300f, 63.500f));
@@ -78,6 +79,7 @@ public static class Custom
     {
         ["FinishFlag16m.Item.Gbx"] = FinishFlag16m,
         ["FinishFlag8m.Item.Gbx"] = FinishFlag8m,
+        ["CheckpointExpandable.Item.Gbx"] = CheckpointExpandable,
         ["FinishPlaneTemplate.Item.Gbx"] = FinishPlaneTemplate,
         ["FinishStadiumPenaltyGrass.Item.Gbx"] = FinishStadiumPenaltyGrass,
         ["FloorFinishDecoPlatformCurve3In.Item.Gbx"] = FloorFinishDecoPlatformCurve3In,

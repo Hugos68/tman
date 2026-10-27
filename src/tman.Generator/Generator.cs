@@ -35,19 +35,57 @@ public static class Generator
         Directory.CreateDirectory(outDirectory);
         var blocks = Blocks(store);
         var blocksPath = System.IO.Path.Combine(outDirectory, "Blocks.g.cs");
-        File.WriteAllText(blocksPath, Emit.Blocks(blocks), new UTF8Encoding(false));
+        File.WriteAllText(blocksPath, Emit.Blocks(blocks, Families(blocks.ToDictionary(kv => kv.Key, kv => kv.Value.Waypoint, StringComparer.Ordinal), false)), new UTF8Encoding(false));
         Console.WriteLine($"wrote {blocksPath}: {blocks.Count} blocks");
         var items = Items(store);
         var itemsPath = System.IO.Path.Combine(outDirectory, "Items.g.cs");
-        File.WriteAllText(itemsPath, Emit.Items("Items", items), new UTF8Encoding(false));
+        File.WriteAllText(itemsPath, Emit.Items("Items", items.Values, Families(items.ToDictionary(kv => kv.Key, kv => kv.Value.Waypoint, StringComparer.Ordinal), true)), new UTF8Encoding(false));
         Console.WriteLine($"wrote {itemsPath}: {items.Count} items");
         if (projectRoot is not null && customSubdirectory is not null)
         {
             var custom = Custom(projectRoot, customSubdirectory);
             var customPath = System.IO.Path.Combine(outDirectory, "Custom.g.cs");
-            File.WriteAllText(customPath, Emit.Items("Custom", custom), new UTF8Encoding(false));
+            File.WriteAllText(customPath, Emit.Items("Custom", custom, []), new UTF8Encoding(false));
             Console.WriteLine($"wrote {customPath}: {custom.Count} items");
         }
+    }
+
+    private static readonly (int Kind, string Token)[] KindTokens = [(0, "Start"), (1, "Finish"), (2, "Checkpoint"), (4, "Multilap")];
+
+    public static List<(string Name, int Kind, string Twin, bool HalfTurned)> Families(IReadOnlyDictionary<string, int?> waypoints, bool gates)
+    {
+        var families = new List<(string Name, int Kind, string Twin, bool HalfTurned)>();
+        bool Is(string name, int kind) => waypoints.TryGetValue(name, out var w) && w == kind;
+        foreach (var (name, waypoint) in waypoints.OrderBy(kv => kv.Key, StringComparer.Ordinal))
+        {
+            if (waypoint is null || KindTokens.All(k => k.Kind != waypoint))
+            {
+                continue;
+            }
+            var own = KindTokens.First(k => k.Kind == waypoint).Token;
+            var at = name.IndexOf(own, StringComparison.Ordinal);
+            var sideGate = gates ? System.Text.RegularExpressions.Regex.Match(name, "^Gate(Start|Checkpoint|Multilap)(Left|Right)([0-9]+)m$") : System.Text.RegularExpressions.Match.Empty;
+            var finishGate = gates ? System.Text.RegularExpressions.Regex.Match(name, "^GateFinish([0-9]+)m$") : System.Text.RegularExpressions.Match.Empty;
+            foreach (var (kind, token) in KindTokens)
+            {
+                if (kind == waypoint)
+                {
+                    continue;
+                }
+                var twin = at >= 0 ? name[..at] + token + name[(at + own.Length)..] : null;
+                var halfTurned = false;
+                if (twin is null || !Is(twin, kind))
+                {
+                    twin = finishGate.Success ? $"Gate{token}Right{finishGate.Groups[1].Value}m" : sideGate.Success && kind == 1 ? $"GateFinish{sideGate.Groups[3].Value}m" : null;
+                    halfTurned = sideGate.Success && kind == 1 && sideGate.Groups[2].Value == "Left";
+                }
+                if (twin is not null && Is(twin, kind))
+                {
+                    families.Add((name, kind, twin, halfTurned));
+                }
+            }
+        }
+        return families;
     }
 
     public static int? CollectionBit(string logical)
@@ -359,12 +397,33 @@ public static class Emit
         return s;
     }
 
-    public static string Blocks(SortedDictionary<string, BlockRow> blocks)
+    private static string Kind(int kind) => Waypoint(kind);
+
+    private static void Families(StringBuilder cs, string type, List<(string Name, int Kind, string Twin, bool HalfTurned)> families, Dictionary<string, string> identOf)
+    {
+        cs.Append($"\n    public static readonly IReadOnlyDictionary<(string, Waypoint), {type}> Families = new Dictionary<(string, Waypoint), {type}>\n    {{\n");
+        foreach (var (name, kind, twin, _) in families)
+        {
+            cs.Append($"        [(\"{name}\", {Kind(kind)})] = {identOf[twin]},\n");
+        }
+        cs.Append("    };\n");
+        if (type == "Item")
+        {
+            cs.Append("\n    public static readonly IReadOnlySet<(string, Waypoint)> HalfTurned = new HashSet<(string, Waypoint)>\n    {\n");
+            foreach (var (name, kind, _, halfTurned) in families.Where(f => f.HalfTurned))
+            {
+                cs.Append($"        (\"{name}\", {Kind(kind)}),\n");
+            }
+            cs.Append("    };\n");
+        }
+    }
+
+    public static string Blocks(SortedDictionary<string, BlockRow> blocks, List<(string Name, int Kind, string Twin, bool HalfTurned)> families)
     {
         var cs = new StringBuilder();
         cs.Append(Generator.Header).Append(Generator.Common).Append(Generator.Enums);
         cs.Append("public readonly record struct BlockVariant(Block Model, int Variant);\n\n");
-        cs.Append("public sealed record Block(string Id, int SizeX, int SizeZ, int[][]? Cells, Collections Collections, Waypoint Waypoint, bool Ground, bool Air, int Variants)\n{\n    public Block? Plain => Blocks.PlainOf.TryGetValue(Id, out var plain) ? plain : null;\n\n    public BlockVariant Variant(int n) => new(this, n);\n}\n\n");
+        cs.Append("public sealed record Block(string Id, int SizeX, int SizeZ, int[][]? Cells, Collections Collections, Waypoint Waypoint, bool Ground, bool Air, int Variants)\n{\n    public Block? Plain => Blocks.PlainOf.TryGetValue(Id, out var plain) ? plain : null;\n\n    public Block? As(Waypoint kind) => kind == Waypoint ? this : Blocks.Families.TryGetValue((Id, kind), out var twin) ? twin : null;\n\n    public BlockVariant Variant(int n) => new(this, n);\n}\n\n");
         cs.Append("public static class Blocks\n{\n");
         var used = new HashSet<string>(StringComparer.Ordinal);
         var idents = new List<(string Ident, string Id)>();
@@ -395,20 +454,20 @@ public static class Emit
                 cs.Append($"        [\"{checkpoint}\"] = {plainIdent},\n");
             }
         }
-        cs.Append("    };\n}\n");
+        cs.Append("    };\n");
+        Families(cs, "Block", families, identOf);
+        cs.Append("}\n");
         return cs.ToString();
     }
 
-    public static string Items(string className, IEnumerable<KeyValuePair<string, ItemRow>> items) => Items(className, items.Select(kv => kv.Value));
-
-    public static string Items(string className, IEnumerable<ItemRow> items)
+    public static string Items(string className, IEnumerable<ItemRow> items, List<(string Name, int Kind, string Twin, bool HalfTurned)> families)
     {
         var cs = new StringBuilder();
         cs.Append(Generator.Header).Append(Generator.Common);
         if (className == "Items")
         {
             cs.Append("public readonly record struct ItemVariant(Item Model, int Variant);\n\n");
-            cs.Append("public sealed record Item(string Id, string Author, string? Path, Collections Collections, Waypoint Waypoint, int Variants, Vec3 Size)\n{\n    public ItemVariant Variant(int n) => new(this, n);\n}\n\n");
+            cs.Append("public sealed record Item(string Id, string Author, string? Path, Collections Collections, Waypoint Waypoint, int Variants, Vec3 Size)\n{\n    public Item? As(Waypoint kind) => kind == Waypoint ? this : Items.Families.TryGetValue((Id, kind), out var twin) ? twin : null;\n\n    public ItemVariant Variant(int n) => new(this, n);\n}\n\n");
         }
         cs.Append($"public static class {className}\n{{\n");
         var used = new HashSet<string>(StringComparer.Ordinal);
@@ -425,7 +484,12 @@ public static class Emit
         {
             cs.Append($"        [\"{id}\"] = {ident},\n");
         }
-        cs.Append("    };\n\n    public static Item? FromId(string id) => ById.TryGetValue(id, out var item) ? item : null;\n}\n");
+        cs.Append("    };\n\n    public static Item? FromId(string id) => ById.TryGetValue(id, out var item) ? item : null;\n");
+        if (className == "Items")
+        {
+            Families(cs, "Item", families, idents.ToDictionary(p => p.Id, p => p.Ident, StringComparer.Ordinal));
+        }
+        cs.Append("}\n");
         return cs.ToString();
     }
 }
