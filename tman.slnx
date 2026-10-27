@@ -1,7 +1,0 @@
-<Solution>
-  <Folder Name="/src/">
-    <Project Path="src/tman.Core/tman.Core.csproj" />
-    <Project Path="src/tman.Generator/tman.Generator.csproj" />
-    <Project Path="src/tman.Interface/tman.Interface.csproj" />
-  </Folder>
-</Solution>
