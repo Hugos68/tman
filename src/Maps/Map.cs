@@ -98,76 +98,94 @@ namespace tman.src.Maps
         public List<Placement> Waypoints(Waypoint waypoint) =>
             Placements.Where(placement => placement.IsWaypoint && placement.Waypoint == waypoint).ToList();
 
-        public void PlaceRelative(Placement source, Item model, Vec3 offset = default)
+        public Placement PlaceRelative(Placement source, Item model, Vec3 offset = default)
         {
             var position = source.Pose(this);
             position.Move(offset);
-            Place(model, position.Coords, position.YawPitchRoll);
+            return Place(model, position.Coords, position.YawPitchRoll);
         }
 
-        public void PlaceRelative(Placement source, Block model, Vec3 offset = default)
+        public Placement PlaceRelative(Placement source, Block model, Vec3 offset = default)
         {
             var position = source.Pose(this);
             position.Move(offset);
-            Gbx.PlaceBlock(new CGameCtnBlock
+            var block = new CGameCtnBlock
             {
                 Name = model.Id,
                 Coord = source.Cell,
                 Direction = Direction.North,
                 IsFree = true,
                 AbsolutePositionInMap = position.Coords,
-                YawPitchRoll = position.YawPitchRoll
-            });
+                YawPitchRoll = position.YawPitchRoll,
+                WaypointSpecialProperty = WaypointProperty(null, model.Waypoint)
+            };
+            Gbx.PlaceBlock(block);
+            return new Placement(block);
         }
 
-        public void Place(Item model, Vec3 position, Vec3 yawPitchRoll = default) =>
-            Gbx.PlaceAnchoredObject(model.Ident(this), position, yawPitchRoll, Vec3.Zero).WaypointSpecialProperty = WaypointProperty(null, model.Waypoint);
+        public Placement Place(Item model, Vec3 position, Vec3 yawPitchRoll = default)
+        {
+            var item = Gbx.PlaceAnchoredObject(model.Ident(this), position, yawPitchRoll, Vec3.Zero);
+            item.WaypointSpecialProperty = WaypointProperty(null, model.Waypoint);
+            return new Placement(item);
+        }
 
-        public void PlaceLike(Placement source, Waypoint kind)
+        public Placement PlaceLike(Placement source, Waypoint kind) => source.IsBlock
+            ? PlaceBlock(Copy(source.Block!, Twin(source.BlockModel, kind, source.Id), Turn(source.Waypoint, kind), null))
+            : PlaceLike(source, Twin(source.ItemModel, kind, source.Id), HalfTurn(source, kind));
+
+        public Placement PlaceLike(Placement source, Block model) => PlaceBlock(Copy(source.Block!, model, DirectionOffset.None, null));
+
+        public Placement PlaceLike(Placement source, Item model) => PlaceLike(source, model, 0);
+
+        public Placement Replace(Placement source, Waypoint kind)
         {
             if (source.IsBlock)
             {
-                Gbx.PlaceBlock(Copy(source.Block!, Twin(source.BlockModel, kind, source.Id), Turn(source.Waypoint, kind), null));
+                return Replace(source, Twin(source.BlockModel, kind, source.Id), Turn(source.Waypoint, kind));
             }
-            else
-            {
-                PlaceLike(source, Twin(source.ItemModel, kind, source.Id), HalfTurn(source, kind));
-            }
+            var item = source.Item!;
+            item.YawPitchRoll += new Vec3(HalfTurn(source, kind), 0, 0);
+            return Replace(source, Twin(source.ItemModel, kind, source.Id));
         }
 
-        public void PlaceLike(Placement source, Block model) => Gbx.PlaceBlock(Copy(source.Block!, model, DirectionOffset.None, null));
-
-        public void PlaceLike(Placement source, Item model) => PlaceLike(source, model, 0);
-
-        public void Replace(Placement source, Waypoint kind)
-        {
-            if (source.IsBlock)
-            {
-                Replace(source, Twin(source.BlockModel, kind, source.Id), Turn(source.Waypoint, kind));
-            }
-            else
-            {
-                var item = source.Item!;
-                item.YawPitchRoll += new Vec3(HalfTurn(source, kind), 0, 0);
-                Replace(source, Twin(source.ItemModel, kind, source.Id));
-            }
-        }
-
-        public void Replace(Placement source, Block model, DirectionOffset rotation)
+        public Placement Replace(Placement source, Block model, DirectionOffset rotation)
         {
             var block = source.Block!;
             Gbx.RemoveBlock(block);
-            Gbx.PlaceBlock(Copy(block, model, rotation, block.WaypointSpecialProperty));
+            return PlaceBlock(Copy(block, model, rotation, block.WaypointSpecialProperty));
         }
 
-        public void Replace(Placement source, Item model)
+        public Placement Replace(Placement source, Item model)
         {
             var item = source.Item!;
             item.ItemModel = model.Ident(this);
             item.WaypointSpecialProperty = WaypointProperty(item.WaypointSpecialProperty, model.Waypoint);
+            return source;
         }
 
-        private void PlaceLike(Placement source, Item model, float yaw)
+        public void Link(IReadOnlyCollection<Placement> checkpoints)
+        {
+            if (checkpoints.Count < 2)
+            {
+                return;
+            }
+            var order = Placements.Where(placement => placement.IsWaypoint && placement.Property!.Tag == "LinkedCheckpoint").Select(placement => placement.Property!.Order).DefaultIfEmpty(0).Max() + 1;
+            foreach (var checkpoint in checkpoints)
+            {
+                var property = checkpoint.Property ?? throw new InvalidOperationException($"{checkpoint.Id} is not a waypoint");
+                property.Tag = "LinkedCheckpoint";
+                property.Order = order;
+            }
+        }
+
+        private Placement PlaceBlock(CGameCtnBlock block)
+        {
+            Gbx.PlaceBlock(block);
+            return new Placement(block);
+        }
+
+        private Placement PlaceLike(Placement source, Item model, float yaw)
         {
             var item = source.Item!;
             var copy = Gbx.PlaceAnchoredObject(model.Ident(this), item.AbsolutePositionInMap, item.YawPitchRoll + new Vec3(yaw, 0, 0), item.PivotPosition);
@@ -178,6 +196,7 @@ namespace tman.src.Maps
             copy.PackDesc = item.PackDesc;
             copy.Color = item.Color;
             copy.WaypointSpecialProperty = WaypointProperty(null, model.Waypoint);
+            return new Placement(copy);
         }
 
         private static CGameCtnBlock Copy(CGameCtnBlock block, Block model, DirectionOffset rotation, CGameWaypointSpecialProperty? property) => new()

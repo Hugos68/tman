@@ -1,6 +1,7 @@
 using System;
 using GBX.NET;
 using GBX.NET.Engines.Game;
+using GBX.NET.Engines.GameData;
 using tman.src.Core;
 using tman.src.Positioning;
 
@@ -40,7 +41,9 @@ namespace tman.src.Maps
 
         public bool IsFree => Block?.IsFree ?? false;
 
-        public bool IsWaypoint => Block is not null ? Block.WaypointSpecialProperty is not null : Item!.WaypointSpecialProperty is not null;
+        internal CGameWaypointSpecialProperty? Property => Block is not null ? Block.WaypointSpecialProperty : Item!.WaypointSpecialProperty;
+
+        public bool IsWaypoint => Property is not null;
 
         public Waypoint Waypoint => IsBlock
             ? BlockModel?.Waypoint ?? WaypointByName
