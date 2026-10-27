@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using GBX.NET.Engines.Game;
 using tman.src.Alterations.Internal;
-using tman.src.Application;
 using tman.src.Core;
-using tman.src.Inventory;
-using tman.src.Positioning;
+using tman.src.Maps;
 
 namespace tman.src.Alterations
 {
@@ -17,44 +13,43 @@ namespace tman.src.Alterations
         [
             new ValidationRemoved(),
             new LightmapRemoved(),
-            new InventoryRemoved(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
+            new InventoryRemoved(placement => placement.IsFinish),
             new CheckpointsCleaned(),
             new MapNameEdited(name => name + " Ground Clippers")
         ];
 
-        private static readonly Dictionary<string, (string[] Tiles, float Bed)> Floors = new()
+        private static readonly Dictionary<Collections, (Block[] Tiles, float Bed)> Floors = new()
         {
-            ["RedIsland"] = (["Water", "WaterHill", "WaterShore1", "Dirt"], 2.0f),
-            ["WhiteShore"] = (["Water", "WaterShore1", "Land"], 2.0f),
-            ["BlueBay"] = (["Sea", "Beach", "SeaCliff13", "Sea_Land0_Land12"], 4.0f),
-            ["GreenCoast"] = (["Lake", "LakeShore", "Grass"], 2.0f),
-            ["Stadium2020"] = (["Grass"], 0.0f),
+            [Collections.RedIsland] = ([Blocks.Water, Blocks.WaterHill, Blocks.WaterShore1, Blocks.Dirt], 2.0f),
+            [Collections.WhiteShore] = ([Blocks.Water, Blocks.WaterShore1, Blocks.Land], 2.0f),
+            [Collections.BlueBay] = ([Blocks.Sea, Blocks.Beach, Blocks.SeaCliff13, Blocks.Sea_Land0_Land12], 4.0f),
+            [Collections.GreenCoast] = ([Blocks.Lake, Blocks.LakeShore, Blocks.Grass], 2.0f),
+            [Collections.Stadium] = ([Blocks.Grass], 0.0f),
         };
 
         private const float TopUnderFloor = 0.15f;
         private const float Thickness = 1.0f;
         private const float Margin = 6 * MapConstants.CellSize;
 
-        protected override void Run(CGameCtnChallenge map)
+        protected override void Run(Map map)
         {
-            if (!Floors.TryGetValue(map.GetEnvironment(), out var floor))
+            if (!Floors.TryGetValue(map.Collection, out var floor))
             {
                 return;
             }
-            var rows = (map.Blocks ?? []).Concat(map.BakedBlocks ?? [])
-                .Where(b => !b.IsFree && floor.Tiles.Contains(b.BlockModel.Id))
-                .Select(b => b.Coord.Y)
+            var rows = map.Terrain.Of(floor.Tiles)
+                .Select(placement => placement.Cell.Y)
                 .ToList();
             if (rows.Count == 0)
             {
                 return;
             }
-            var top = (rows.Min() - MapUtility.GroundRow(map)) * MapConstants.CellHeight + floor.Bed - TopUnderFloor;
+            var top = (rows.Min() - map.GroundRow) * MapConstants.CellHeight + floor.Bed - TopUnderFloor;
             var box = new FinishPlane.Box(-Margin, map.Size.X * MapConstants.CellSize + Margin, -Margin, map.Size.Z * MapConstants.CellSize + Margin, top - Thickness, top);
             FinishPlane.Place(
                 map,
-                Path.Combine(ApplicationConstants.ProjectDirectory, "data", "items", "FinishPlaneTemplate.Item.Gbx"),
-                $"GroundClippers_{map.MapUid}.Item.Gbx",
+                Custom.FinishPlaneTemplate.FullPath(),
+                $"GroundClippers_{map.Uid}.Item.Gbx",
                 [box], false);
         }
     }

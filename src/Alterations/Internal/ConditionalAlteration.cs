@@ -1,18 +1,17 @@
 using System;
-using GBX.NET.Engines.Game;
 using tman.src.Core;
+using tman.src.Maps;
 
 namespace tman.src.Alterations.Internal
 {
-    public class ConditionalAlteration(Predicate<CGameCtnChallenge> predicate, Alteration alteration) : Alteration
+    public class ConditionalAlteration(Predicate<Map> predicate, Alteration alteration) : Alteration
     {
-        protected override void Run(CGameCtnChallenge map)
+        protected override void Run(Map map)
         {
             if (predicate(map))
             {
                 alteration.Apply(map);
             }
         }
-
     }
 }

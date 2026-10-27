@@ -10,8 +10,8 @@ namespace tman.src.Alterations
         [
             new ValidationRemoved(),
             new LightmapRemoved(),
-            new StartEffect("NoSteer", new(0,0,0)),
-            new CheckpointEffect("NoSteer", new(0, 0, 0)),
+            new StartEffect(Blocks.GateSpecialNoSteering, new(0,0,0)),
+            new CheckpointEffect(Blocks.GateSpecialNoSteering, new(0, 0, 0)),
             new MapNameEdited(name => name + " NoSteer")
         ];
     }

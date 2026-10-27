@@ -1,10 +1,9 @@
 ﻿using System;
 using System.CommandLine;
 using System.IO;
-using GBX.NET;
-using GBX.NET.Engines.Game;
 using tman.src.Application;
 using tman.src.Core;
+using tman.src.Maps;
 
 internal class Program
 {
@@ -135,10 +134,7 @@ internal class Program
         string output,
         bool multipleFiles)
     {
-        var map = Gbx.Parse<CGameCtnChallenge>(input, new()
-        {
-            SafeSkippableChunks = true
-        });
+        var map = Map.Load(input);
 
         alteration.Apply(map);
 

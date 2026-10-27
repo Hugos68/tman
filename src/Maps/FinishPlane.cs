@@ -7,7 +7,7 @@ using GBX.NET.Engines.Game;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Plug;
 
-namespace tman.src.Inventory
+namespace tman.src.Maps
 {
     public static class FinishPlane
     {
@@ -17,18 +17,18 @@ namespace tman.src.Inventory
 
         public readonly record struct Ramp(float X0, float X1, float Z0, float Z1, float YInner, float YOuter, float Below, float Above, Side Side);
 
-        public static void Place(CGameCtnChallenge map, string templatePath, string ident, IReadOnlyList<Box> boxes) => Place(map, templatePath, ident, boxes, [], true);
+        public static void Place(Map map, string templatePath, string ident, IReadOnlyList<Box> boxes) => Place(map, templatePath, ident, boxes, [], true);
 
-        public static void Place(CGameCtnChallenge map, string templatePath, string ident, IReadOnlyList<Box> boxes, bool visible) => Place(map, templatePath, ident, boxes, [], visible);
+        public static void Place(Map map, string templatePath, string ident, IReadOnlyList<Box> boxes, bool visible) => Place(map, templatePath, ident, boxes, [], visible);
 
-        public static void Place(CGameCtnChallenge map, string templatePath, string ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps) => Place(map, templatePath, ident, boxes, ramps, true);
+        public static void Place(Map map, string templatePath, string ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps) => Place(map, templatePath, ident, boxes, ramps, true);
 
-        public static void Place(CGameCtnChallenge map, string templatePath, string ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps, bool visible)
+        public static void Place(Map map, string templatePath, string ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps, bool visible)
         {
             var path = Path.Combine(Path.GetTempPath(), ident);
-            File.WriteAllBytes(path, Build(templatePath, ident, map.MapInfo.Collection, boxes, ramps, visible));
-            EmbedUtility.Embed(map, path);
-            map.PlaceAnchoredObject(EmbedUtility.ExtractIdent(path), Vec3.Zero, Vec3.Zero, Vec3.Zero);
+            File.WriteAllBytes(path, Build(templatePath, ident, map.Gbx.MapInfo.Collection, boxes, ramps, visible));
+            map.Embed(path);
+            map.Gbx.PlaceAnchoredObject(new Ident(ident, map.Gbx.MapInfo.Collection, ident), Vec3.Zero, Vec3.Zero, Vec3.Zero);
         }
 
         public static byte[] Build(string templatePath, string ident, Id collection, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps) => Build(templatePath, ident, collection, boxes, ramps, true);

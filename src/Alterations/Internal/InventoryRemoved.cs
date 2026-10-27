@@ -1,22 +1,17 @@
 using System;
-using GBX.NET.Engines.Game;
+using System.Linq;
 using tman.src.Core;
+using tman.src.Maps;
 
 namespace tman.src.Alterations.Internal
 {
-    public class InventoryRemoved(
-        Predicate<CGameCtnBlock>? blockPredicate = null,
-        Predicate<CGameCtnAnchoredObject>? itemPredicate = null) : Alteration
+    public class InventoryRemoved(Func<Placement, bool> predicate) : Alteration
     {
-        protected override void Run(CGameCtnChallenge map)
+        protected override void Run(Map map)
         {
-            if (blockPredicate is not null)
+            foreach (var placement in map.Placements.Where(predicate).ToList())
             {
-                map.Blocks?.RemoveAll(blockPredicate);
-            }
-            if (itemPredicate is not null)
-            {
-                map.AnchoredObjects?.RemoveAll(itemPredicate);
+                map.Remove(placement);
             }
         }
     }

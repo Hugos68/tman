@@ -10,11 +10,11 @@ namespace tman.src.Alterations
         [
             new ValidationRemoved(),
             new LightmapRemoved(),
-            new StartEffect("Turbo", new(0, 0, 2)),
-            new StartEffect("NoEngine", new(0, 0, 4)),
-            new CheckpointEffect("NoEngine", new(0, 0,-2)),
-            new CheckpointEffect("Turbo", new(0, 0, 2)),
-            new CheckpointEffect("NoEngine", new(0, 0, 4)),
+            new StartEffect(Blocks.GateSpecialTurbo, new(0, 0, 2)),
+            new StartEffect(Blocks.GateSpecialNoEngine, new(0, 0, 4)),
+            new CheckpointEffect(Blocks.GateSpecialNoEngine, new(0, 0,-2)),
+            new CheckpointEffect(Blocks.GateSpecialTurbo, new(0, 0, 2)),
+            new CheckpointEffect(Blocks.GateSpecialNoEngine, new(0, 0, 4)),
             new MapNameEdited(name => name + " Freewheel")
         ];
     }

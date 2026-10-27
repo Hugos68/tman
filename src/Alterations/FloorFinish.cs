@@ -4,12 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using GBX.NET;
-using GBX.NET.Engines.Game;
 using tman.src.Alterations.Internal;
 using tman.src.Application;
 using tman.src.Core;
-using tman.src.Inventory;
-using tman.src.Positioning;
+using tman.src.Maps;
 
 namespace tman.src.Alterations
 {
@@ -19,92 +17,91 @@ namespace tman.src.Alterations
         [
             new ValidationRemoved(),
             new LightmapRemoved(),
-            new InventoryRemoved(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
+            new InventoryRemoved(placement => placement.IsFinish),
             new CheckpointsCleaned(),
             new ConditionalAlteration(
-                map => map.GetEnvironment() == "Stadium2020", 
-                new ItemFinishes(new Dictionary<string, string>
+                map => map.Collection == Collections.Stadium,
+                new ItemFinishes(new Dictionary<Selector, Item>
                     {
-                        ["DecoPlatformCurve3In"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishDecoPlatformCurve3In.Item.Gbx"),
-                        ["DecoPlatformSlopeBaseCurve1InFullV0"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishDecoPlatformSlopeBaseCurve1InFullV0.Item.Gbx"),
-                        ["DecoPlatformSlopeBaseCurve1OutV128"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishDecoPlatformSlopeBaseCurve1OutV128.Item.Gbx"),
-                        ["DecoWallCurve1Pillar"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishDecoWallCurve1Pillar.Item.Gbx"),
-                        ["DecoWallCurve2InPillar"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishDecoWallCurve2InPillar.Item.Gbx"),
-                        ["DecoWallCurve2Pillar"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishDecoWallCurve2Pillar.Item.Gbx"),
-                        ["DecoWallCurve3InPillar"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishDecoWallCurve3InPillar.Item.Gbx"),
-                        ["DecoWallCurve3OutPillar"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishDecoWallCurve3OutPillar.Item.Gbx"),
-                        ["DecoWallDiag1"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishDecoWallDiag1.Item.Gbx"),
-                        ["DecoWallDiag1Pillar"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishDecoWallDiag1Pillar.Item.Gbx"),
-                        ["SnowRoadPillarStraight"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishSnowRoadPillarStraight.Item.Gbx"),
-                        ["StructureBase"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishStructureBase.Item.Gbx"),
-                        ["StructurePillar"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishStructurePillar.Item.Gbx"),
-                        ["TrackWallBranchYShaped2X3PillarV64"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishTrackWallBranchYShaped2X3PillarV64.Item.Gbx"),
-                        ["TrackWallChicaneX2LeftPillarV64"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishTrackWallChicaneX2LeftPillarV64.Item.Gbx"),
-                        ["TrackWallChicaneX3LeftPillarV64"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishTrackWallChicaneX3LeftPillarV64.Item.Gbx"),
-                        ["TrackWallChicaneX3RightPillarV64"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishTrackWallChicaneX3RightPillarV64.Item.Gbx"),
-                        ["TrackWallCurve1PillarV64"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishTrackWallCurve1PillarV64.Item.Gbx"),
-                        ["TrackWallCurve2PillarV64"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishTrackWallCurve2PillarV64.Item.Gbx"),
-                        ["TrackWallCurve3PillarV64"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishTrackWallCurve3PillarV64.Item.Gbx"),
-                        ["TrackWallDeadendRoundPillarV64"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishTrackWallDeadendRoundPillarV64.Item.Gbx"),
-                        ["TrackWallStraightPillar"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "floor-finish", "FloorFinishTrackWallStraightPillar.Item.Gbx"),
+                        [Blocks.DecoPlatformCurve3In] = Custom.FloorFinishDecoPlatformCurve3In,
+                        [Blocks.DecoPlatformSlopeBaseCurve1InFull.Variant(0)] = Custom.FloorFinishDecoPlatformSlopeBaseCurve1InFullV0,
+                        [Blocks.DecoPlatformSlopeBaseCurve1Out.Variant(128)] = Custom.FloorFinishDecoPlatformSlopeBaseCurve1OutV128,
+                        [Blocks.DecoWallCurve1Pillar] = Custom.FloorFinishDecoWallCurve1Pillar,
+                        [Blocks.DecoWallCurve2InPillar] = Custom.FloorFinishDecoWallCurve2InPillar,
+                        [Blocks.DecoWallCurve2Pillar] = Custom.FloorFinishDecoWallCurve2Pillar,
+                        [Blocks.DecoWallCurve3InPillar] = Custom.FloorFinishDecoWallCurve3InPillar,
+                        [Blocks.DecoWallCurve3OutPillar] = Custom.FloorFinishDecoWallCurve3OutPillar,
+                        [Blocks.DecoWallDiag1] = Custom.FloorFinishDecoWallDiag1,
+                        [Blocks.DecoWallDiag1Pillar] = Custom.FloorFinishDecoWallDiag1Pillar,
+                        [Blocks.SnowRoadPillarStraight] = Custom.FloorFinishSnowRoadPillarStraight,
+                        [Blocks.StructureBase] = Custom.FloorFinishStructureBase,
+                        [Blocks.StructurePillar] = Custom.FloorFinishStructurePillar,
+                        [Blocks.TrackWallBranchYShaped2X3Pillar.Variant(64)] = Custom.FloorFinishTrackWallBranchYShaped2X3PillarV64,
+                        [Blocks.TrackWallChicaneX2LeftPillar.Variant(64)] = Custom.FloorFinishTrackWallChicaneX2LeftPillarV64,
+                        [Blocks.TrackWallChicaneX3LeftPillar.Variant(64)] = Custom.FloorFinishTrackWallChicaneX3LeftPillarV64,
+                        [Blocks.TrackWallChicaneX3RightPillar.Variant(64)] = Custom.FloorFinishTrackWallChicaneX3RightPillarV64,
+                        [Blocks.TrackWallCurve1Pillar.Variant(64)] = Custom.FloorFinishTrackWallCurve1PillarV64,
+                        [Blocks.TrackWallCurve2Pillar.Variant(64)] = Custom.FloorFinishTrackWallCurve2PillarV64,
+                        [Blocks.TrackWallCurve3Pillar.Variant(64)] = Custom.FloorFinishTrackWallCurve3PillarV64,
+                        [Blocks.TrackWallDeadendRoundPillar.Variant(64)] = Custom.FloorFinishTrackWallDeadendRoundPillarV64,
+                        [Blocks.TrackWallStraightPillar] = Custom.FloorFinishTrackWallStraightPillar,
                     },
-                    blockPredicate: block => !block.IsFree & block.IsGround)),
+                    placement => !placement.IsFree && placement.IsGround)),
             new MapNameEdited(name => name + " Floor Finish"),
         ];
 
-        private static readonly Dictionary<string, (string[] Tiles, float Bottom, float Top)> OpenWater = new()
+        private static readonly Dictionary<Collections, (Block[] Tiles, float Bottom, float Top)> OpenWater = new()
         {
-            ["RedIsland"] = (["Water"], -13.6f, -3.7f),
-            ["WhiteShore"] = (["Water"], -13.6f, -3.7f),
-            ["BlueBay"] = (["Sea"], -10.1f, 5.1f),
-            ["GreenCoast"] = (["Lake"], -13.6f, -3.7f),
+            [Collections.RedIsland] = ([Blocks.Water], -13.6f, -3.7f),
+            [Collections.WhiteShore] = ([Blocks.Water], -13.6f, -3.7f),
+            [Collections.BlueBay] = ([Blocks.Sea], -10.1f, 5.1f),
+            [Collections.GreenCoast] = ([Blocks.Lake], -13.6f, -3.7f),
         };
         
         private const float Thickness = 0.3f;
 
         private const int Ring = 16;
 
-        protected override void Run(CGameCtnChallenge map)
+        protected override void Run(Map map)
         {
-            var assets = Path.Combine(ApplicationConstants.ProjectDirectory, "assets");
-            var environment = map.GetEnvironment();
-            var boxes = environment == "Stadium2020"
-                ? GrassBoxes(map, Path.Combine(assets, "data", "Blocks.json"))
-                : WaterBoxes(map, environment, Path.Combine(assets, "data", "WaterFootprints.json"));
+            var data = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "data");
+            var collection = map.Collection;
+            var boxes = collection == Collections.Stadium
+                ? GrassBoxes(map)
+                : WaterBoxes(map, collection, Path.Combine(data, "WaterFootprints.json"));
             if (boxes.Count == 0)
             {
                 return;
             }
-            FinishPlane.Place(map, Path.Combine(assets, "items", "floor-finish", "FinishPlaneTemplate.Item.Gbx"), $"FinishFloor_{map.MapUid}.Item.Gbx", boxes, environment == "Stadium2020");
-            if (environment == "Stadium2020" && map.Decoration.Id.StartsWith("48x48"))
+            FinishPlane.Place(map, Custom.FinishPlaneTemplate.FullPath(), $"FinishFloor_{map.Uid}.Item.Gbx", boxes, collection == Collections.Stadium);
+            if (collection == Collections.Stadium && map.Decoration.StartsWith("48x48"))
             {
-                var path = Path.Combine(assets, "items", "floor-finish", "FinishStadiumPenaltyGrass.Item.Gbx");
-                EmbedUtility.Embed(map, path);
-                map.PlaceAnchoredObject(EmbedUtility.ExtractIdent(path), new Vec3(0, GrassLevel(map), 0), Vec3.Zero, Vec3.Zero);
+                map.Embed(Custom.FinishStadiumPenaltyGrass);
+                map.Place(Custom.FinishStadiumPenaltyGrass, new Vec3(0, GrassLevel(map), 0));
             }
         }
 
-        private static List<FinishPlane.Box> WaterBoxes(CGameCtnChallenge map, string environment, string footprintsPath)
+        private static List<FinishPlane.Box> WaterBoxes(Map map, Collections collection, string footprintsPath)
         {
             var boxes = new List<FinishPlane.Box>();
-            if (!OpenWater.TryGetValue(environment, out var water))
+            if (!OpenWater.TryGetValue(collection, out var water))
             {
                 return boxes;
             }
-            var footprints = LoadWaterFootprints(footprintsPath, environment);
+            var footprints = LoadWaterFootprints(footprintsPath, collection.ToString());
             var cells = new Dictionary<int, List<int>>();
             var squares = new Dictionary<int, List<int>>();
             var seen = new HashSet<Int3>();
-            foreach (var block in (map.Blocks ?? []).Concat(map.BakedBlocks ?? []).Where(b => !b.IsFree))
+            foreach (var block in map.Terrain)
             {
-                if (water.Tiles.Contains(block.BlockModel.Id))
+                if (water.Tiles.Contains(block.BlockModel))
                 {
-                    if (seen.Add(block.Coord))
+                    if (seen.Add(block.Cell))
                     {
-                        Add(cells, block.Coord.Z, block.Coord.X);
+                        Add(cells, block.Cell.Z, block.Cell.X);
                     }
                 }
-                else if (footprints.TryGetValue((block.BlockModel.Id, (uint)block.Flags & 0x0FE01FFF), out var deep))
+                else if (footprints.TryGetValue((block.Id, block.Flags & 0x0FE01FFF), out var deep))
                 {
                     for (var zi = 0; zi < 8; zi++)
                     {
@@ -121,7 +118,7 @@ namespace tman.src.Alterations
                                 Direction.West => (zi, 7 - xi),
                                 _ => (xi, zi),
                             };
-                            Add(squares, block.Coord.Z * 8 + z, block.Coord.X * 8 + x);
+                            Add(squares, block.Cell.Z * 8 + z, block.Cell.X * 8 + x);
                         }
                     }
                 }
@@ -150,19 +147,18 @@ namespace tman.src.Alterations
             return boxes;
         }
 
-        private static List<FinishPlane.Box> GrassBoxes(CGameCtnChallenge map, string blocksPath)
+        private static List<FinishPlane.Box> GrassBoxes(Map map)
         {
             var boxes = new List<FinishPlane.Box>();
-            var grass = (map.Blocks ?? []).Concat(map.BakedBlocks ?? []).Where(b => !b.IsFree && b.BlockModel.Id == "Grass").Select(b => b.Coord).Distinct().ToList();
+            var grass = map.Terrain.Of(Blocks.Grass).Select(placement => placement.Cell).Distinct().ToList();
             if (grass.Count == 0)
             {
                 return boxes;
             }
-            var blocks = Blocks.Load(blocksPath);
             var hidden = new HashSet<(int X, int Z)>();
-            foreach (var block in (map.Blocks ?? []).Where(b => !b.IsFree && b.IsGround && b.BlockModel.Id != "Grass"))
+            foreach (var block in map.Placements.OnlyBlocks().Ground().Where(placement => !placement.IsFree && placement.BlockModel != Blocks.Grass))
             {
-                var (sizeX, sizeZ, cells) = blocks.TryGetValue(block.BlockModel.Id, out var info) ? (info.SizeX, info.SizeZ, info.Footprint) : (1, 1, [(0, 0)]);
+                var (sizeX, sizeZ, cells) = block.BlockModel is { } model ? (model.SizeX, model.SizeZ, model.Footprint()) : (1, 1, [(0, 0)]);
                 foreach (var (ux, uz) in cells)
                 {
                     var (x, z) = block.Direction switch
@@ -172,7 +168,7 @@ namespace tman.src.Alterations
                         Direction.West => (uz, sizeX - 1 - ux),
                         _ => (ux, uz),
                     };
-                    hidden.Add((block.Coord.X + x, block.Coord.Z + z));
+                    hidden.Add((block.Cell.X + x, block.Cell.Z + z));
                 }
             }
             var y = GrassLevel(map);
@@ -191,8 +187,8 @@ namespace tman.src.Alterations
             return boxes;
         }
 
-        private static float GrassLevel(CGameCtnChallenge map) =>
-            ((map.Blocks ?? []).Concat(map.BakedBlocks ?? []).Where(b => !b.IsFree && b.BlockModel.Id == "Grass").Min(b => b.Coord.Y) - MapUtility.GroundRow(map)) * MapConstants.CellHeight;
+        private static float GrassLevel(Map map) =>
+            (map.Terrain.Of(Blocks.Grass).Min(placement => placement.Cell.Y) - map.GroundRow) * MapConstants.CellHeight;
 
         private static IEnumerable<(int X0, int X1)> Runs(List<int> xs)
         {

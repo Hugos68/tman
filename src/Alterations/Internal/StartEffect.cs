@@ -1,15 +1,10 @@
 using GBX.NET;
-using GBX.NET.Engines.Game;
-using tman.src.Inventory;
+using tman.src.Core;
 
 namespace tman.src.Alterations.Internal
 {
-    public class StartEffect(string effect, Vec3 offset) : WaypointEffect(effect, offset)
+    public class StartEffect(Block gate, Vec3 offset) : WaypointEffect(gate, offset)
     {
-        protected override bool Filter(CGameCtnBlock block) =>
-            InventoryUtility.IsStart(block);
-
-        protected override bool Filter(CGameCtnAnchoredObject item) =>
-            InventoryUtility.IsStart(item);
+        protected override Waypoint Waypoint => Waypoint.Start;
     }
 }

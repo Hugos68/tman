@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using GBX.NET.Engines.Game;
+using tman.src.Maps;
 
 namespace tman.src.Core
 {
@@ -7,16 +7,16 @@ namespace tman.src.Core
     {
         protected virtual IEnumerable<Alteration> PreappliedAlterations => [];
 
-        public void Apply(CGameCtnChallenge map)
+        public void Apply(Map map)
         {
             foreach (var alteration in PreappliedAlterations)
             {
                 alteration.Apply(map);
             }
             Run(map);
-            map.GenerateMapUid();
+            map.GenerateUid();
         }
 
-        protected virtual void Run(CGameCtnChallenge map) { }
+        protected virtual void Run(Map map) { }
     }
 }

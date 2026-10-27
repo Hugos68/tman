@@ -1,9 +1,7 @@
 using System.Collections.Generic;
-using System.IO;
 using tman.src.Alterations.Internal;
-using tman.src.Application;
 using tman.src.Core;
-using tman.src.Inventory;
+using tman.src.Maps;
 
 namespace tman.src.Alterations
 {
@@ -13,13 +11,13 @@ namespace tman.src.Alterations
         [
             new ValidationRemoved(),
             new LightmapRemoved(),
-            new InventoryRemoved(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
+            new InventoryRemoved(placement => placement.IsFinish),
             new CheckpointsCleaned(),
             new MapNameEdited(name => name + " Flags"),
-            new ItemFinishes(new Dictionary<string, string>
+            new ItemFinishes(new Dictionary<Selector, Item>
             {
-                ["Flag8m"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "flags", "FinishFlag8m.Item.Gbx"),
-                ["Flag16m"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "flags", "FinishFlag16m.Item.Gbx"),
+                [Items.Flag8m] = Custom.FinishFlag8m,
+                [Items.Flag16m] = Custom.FinishFlag16m,
             })
         ];
     }

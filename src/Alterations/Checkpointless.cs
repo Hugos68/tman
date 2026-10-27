@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using tman.src.Alterations.Internal;
 using tman.src.Core;
-using tman.src.Inventory;
+using tman.src.Maps;
 
 namespace tman.src.Alterations
 {
@@ -12,7 +12,7 @@ namespace tman.src.Alterations
         [
             new ValidationRemoved(),
             new LightmapRemoved(),
-            new InventoryRemoved(InventoryUtility.IsCheckpoint, InventoryUtility.IsCheckpoint),
+            new InventoryRemoved(placement => placement.IsCheckpoint),
             new MapNameEdited(name => name + " Checkpointless")
         ];
     }

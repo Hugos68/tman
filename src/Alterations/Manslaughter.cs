@@ -1,9 +1,7 @@
 using System.Collections.Generic;
-using System.IO;
 using tman.src.Alterations.Internal;
-using tman.src.Application;
 using tman.src.Core;
-using tman.src.Inventory;
+using tman.src.Maps;
 
 namespace tman.src.Alterations
 {
@@ -13,16 +11,16 @@ namespace tman.src.Alterations
         [
             new ValidationRemoved(),
             new LightmapRemoved(),
-            new InventoryRemoved(InventoryUtility.IsFinish, InventoryUtility.IsFinish),
+            new InventoryRemoved(placement => placement.IsFinish),
             new CheckpointsCleaned(),
             new MapNameEdited(name => name + " Manslaughter"),
-            new ItemFinishes(new Dictionary<string, string>
+            new ItemFinishes(new Dictionary<Selector, Item>
             {
-                ["StandCornerIn"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "manslaughter", "FinishStandCornerIn.Item.Gbx"),
-                ["StandCornerOut"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "manslaughter", "FinishStandCornerOut.Item.Gbx"),
-                ["StandDiagIn"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "manslaughter", "FinishStandDiagIn.Item.Gbx"),
-                ["StandDiagOut"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "manslaughter", "FinishStandDiagOut.Item.Gbx"),
-                ["StandStraight"] = Path.Combine(ApplicationConstants.ProjectDirectory, "assets", "items", "manslaughter", "FinishStandStraight.Item.Gbx"),
+                [Blocks.StandCornerIn] = Custom.FinishStandCornerIn,
+                [Blocks.StandCornerOut] = Custom.FinishStandCornerOut,
+                [Blocks.StandDiagIn] = Custom.FinishStandDiagIn,
+                [Blocks.StandDiagOut] = Custom.FinishStandDiagOut,
+                [Blocks.StandStraight] = Custom.FinishStandStraight,
             })
         ];
     }
