@@ -1231,7 +1231,6 @@ public static class Blocks
     public static readonly Block DecoWallWaterToTrackWallWaterHFCInside = new("DecoWallWaterToTrackWallWaterHFCInside", 1, 1, null, Collections.Stadium, Waypoint.None, true, true, 2);
     public static readonly Block DecoWallWaterToTrackWallWaterHFCInsideShort = new("DecoWallWaterToTrackWallWaterHFCInsideShort", 1, 1, null, Collections.Stadium, Waypoint.None, true, true, 2);
     public static readonly Block DecoWallWaterVFC = new("DecoWallWaterVFC", 1, 1, null, Collections.Stadium, Waypoint.None, true, true, 2);
-    public static readonly Block Deprecated = new("Deprecated", 3, 2, new[] { new[] { 0, 0 }, new[] { 0, 1 }, new[] { 1, 0 }, new[] { 1, 1 }, new[] { 2, 0 } }, Collections.Stadium, Waypoint.None, true, true, 2);
     public static readonly Block Dirt = new("Dirt", 1, 1, null, Collections.RedIsland, Waypoint.None, true, false, 1);
     public static readonly Block Dirt0_Dirt2_Dirt4 = new("Dirt0_Dirt2_Dirt4", 1, 1, null, Collections.RedIsland, Waypoint.None, true, false, 1);
     public static readonly Block Dirt0_Dirt4_Dirt8 = new("Dirt0_Dirt4_Dirt8", 1, 1, null, Collections.RedIsland, Waypoint.None, true, false, 1);
@@ -1252,9 +1251,9 @@ public static class Blocks
     public static readonly Block GateExpandableCheckpointFCT = new("GateExpandableCheckpointFCT", 1, 1, null, Collections.All, Waypoint.None, false, true, 1);
     public static readonly Block GateExpandableCheckpointInPillarFCB = new("GateExpandableCheckpointInPillarFCB", 1, 1, null, Collections.All, Waypoint.None, false, true, 1);
     public static readonly Block GateExpandableCheckpointInPillarFCT = new("GateExpandableCheckpointInPillarFCT", 1, 1, null, Collections.All, Waypoint.None, false, true, 1);
+    public static readonly Block GateExpandableCheckpointLeftVFC = new("GateExpandableCheckpointLeftVFC", 1, 1, null, Collections.All, Waypoint.None, true, true, 2);
     public static readonly Block GateExpandableCheckpointRightVFC = new("GateExpandableCheckpointRightVFC", 1, 1, null, Collections.All, Waypoint.None, true, true, 2);
     public static readonly Block GateExpandableFinish = new("GateExpandableFinish", 1, 1, null, Collections.All, Waypoint.Finish, true, true, 5);
-    public static readonly Block GateExpandableFinishCheckpointVFC = new("GateExpandableFinishCheckpointVFC", 1, 1, null, Collections.All, Waypoint.None, true, true, 2);
     public static readonly Block GateExpandableFinishFCB = new("GateExpandableFinishFCB", 1, 1, null, Collections.All, Waypoint.None, false, true, 1);
     public static readonly Block GateExpandableFinishFCT = new("GateExpandableFinishFCT", 1, 1, null, Collections.All, Waypoint.None, false, true, 1);
     public static readonly Block GateExpandableFinishInPillarFCB = new("GateExpandableFinishInPillarFCB", 1, 1, null, Collections.All, Waypoint.None, false, true, 1);
@@ -1293,10 +1292,10 @@ public static class Blocks
     public static readonly Block GateGameplayRally = new("GateGameplayRally", 1, 1, null, Collections.All, Waypoint.None, true, true, 5);
     public static readonly Block GateGameplaySnow = new("GateGameplaySnow", 1, 1, null, Collections.All, Waypoint.None, true, true, 5);
     public static readonly Block GateGameplayStadium = new("GateGameplayStadium", 1, 1, null, Collections.All, Waypoint.None, true, true, 5);
-    public static readonly Block GateSpecialBoost = new("GateSpecialBoost", 1, 1, null, Collections.All, Waypoint.None, true, true, 5);
-    public static readonly Block GateSpecialBoost2 = new("GateSpecialBoost2", 1, 1, null, Collections.All, Waypoint.None, true, true, 5);
-    public static readonly Block GateSpecialBoost2Deprecated = new("GateSpecialBoost2Deprecated", 1, 1, null, Collections.Stadium, Waypoint.None, true, true, 5);
-    public static readonly Block GateSpecialBoostDeprecated = new("GateSpecialBoostDeprecated", 1, 1, null, Collections.Stadium, Waypoint.None, true, true, 5);
+    public static readonly Block GateSpecialBoost = new("GateSpecialBoost", 1, 1, null, Collections.Stadium, Waypoint.None, true, true, 5);
+    public static readonly Block GateSpecialBoost2 = new("GateSpecialBoost2", 1, 1, null, Collections.Stadium, Waypoint.None, true, true, 5);
+    public static readonly Block GateSpecialBoost2Oriented = new("GateSpecialBoost2Oriented", 1, 1, null, Collections.All, Waypoint.None, true, true, 5);
+    public static readonly Block GateSpecialBoostOriented = new("GateSpecialBoostOriented", 1, 1, null, Collections.All, Waypoint.None, true, true, 5);
     public static readonly Block GateSpecialCruise = new("GateSpecialCruise", 1, 1, null, Collections.All, Waypoint.None, true, true, 5);
     public static readonly Block GateSpecialFragile = new("GateSpecialFragile", 1, 1, null, Collections.All, Waypoint.None, true, true, 5);
     public static readonly Block GateSpecialNoBrake = new("GateSpecialNoBrake", 1, 1, null, Collections.All, Waypoint.None, true, true, 5);
@@ -1342,9 +1341,8 @@ public static class Blocks
     public static readonly Block LandHill1DeadendToStadiumRoadSlopeBaseCurve2OutFCLeft = new("LandHill1DeadendToStadiumRoadSlopeBaseCurve2OutFCLeft", 1, 1, null, Collections.WhiteShore, Waypoint.None, true, true, 2);
     public static readonly Block LandHill1DeadendToStadiumRoadSlopeBaseCurve2OutFCRight = new("LandHill1DeadendToStadiumRoadSlopeBaseCurve2OutFCRight", 1, 1, null, Collections.WhiteShore, Waypoint.None, true, true, 2);
     public static readonly Block LandHill2 = new("LandHill2", 1, 1, null, Collections.WhiteShore | Collections.BlueBay, Waypoint.None, true, false, 1);
-    public static readonly Block LandHill2CornerToStadiumRoadSlope2BaseCurve2InFCLeft = new("LandHill2CornerToStadiumRoadSlope2BaseCurve2InFCLeft", 1, 1, null, Collections.BlueBay, Waypoint.None, true, true, 2);
+    public static readonly Block LandHill2CornerToStadiumRoadSlope2BaseCurve2InFCLeft = new("LandHill2CornerToStadiumRoadSlope2BaseCurve2InFCLeft", 1, 1, null, Collections.WhiteShore | Collections.BlueBay, Waypoint.None, true, true, 2);
     public static readonly Block LandHill2CornerToStadiumRoadSlope2BaseCurve2InFCRight = new("LandHill2CornerToStadiumRoadSlope2BaseCurve2InFCRight", 1, 1, null, Collections.WhiteShore | Collections.BlueBay, Waypoint.None, true, true, 2);
-    public static readonly Block LandHill2CornerToStadiumRoadSlopeBase2Curve2InFCLeft = new("LandHill2CornerToStadiumRoadSlopeBase2Curve2InFCLeft", 1, 1, null, Collections.WhiteShore, Waypoint.None, true, true, 2);
     public static readonly Block LandHill2DeadendToStadiumRoadSlope2BaseCurve2OutFCLeft = new("LandHill2DeadendToStadiumRoadSlope2BaseCurve2OutFCLeft", 1, 1, null, Collections.WhiteShore | Collections.BlueBay, Waypoint.None, true, true, 2);
     public static readonly Block LandHill2DeadendToStadiumRoadSlope2BaseCurve2OutFCRight = new("LandHill2DeadendToStadiumRoadSlope2BaseCurve2OutFCRight", 1, 1, null, Collections.WhiteShore | Collections.BlueBay, Waypoint.None, true, true, 2);
     public static readonly Block LandHill3 = new("LandHill3", 1, 1, null, Collections.BlueBay, Waypoint.None, true, false, 1);
@@ -1953,6 +1951,7 @@ public static class Blocks
     public static readonly Block OpenTechZoneEndLargeLeftSlope2StraightRight = new("OpenTechZoneEndLargeLeftSlope2StraightRight", 1, 1, null, Collections.All, Waypoint.None, true, true, 8);
     public static readonly Block OpenTechZoneEndLargeLeftSlope2StraightUp = new("OpenTechZoneEndLargeLeftSlope2StraightUp", 1, 1, null, Collections.All, Waypoint.None, true, true, 8);
     public static readonly Block OpenTechZoneEndLargeRight = new("OpenTechZoneEndLargeRight", 1, 1, null, Collections.All, Waypoint.None, true, true, 6);
+    public static readonly Block OpenTechZoneEndLargeRightSlope2StraightDown = new("OpenTechZoneEndLargeRightSlope2StraightDown", 1, 1, null, Collections.All, Waypoint.None, true, true, 8);
     public static readonly Block OpenTechZoneEndLargeRightSlope2StraightLeft = new("OpenTechZoneEndLargeRightSlope2StraightLeft", 1, 1, null, Collections.All, Waypoint.None, true, true, 8);
     public static readonly Block OpenTechZoneEndLargeRightSlope2StraightRight = new("OpenTechZoneEndLargeRightSlope2StraightRight", 1, 1, null, Collections.All, Waypoint.None, true, true, 8);
     public static readonly Block OpenTechZoneEndLargeRightSlope2StraightUp = new("OpenTechZoneEndLargeRightSlope2StraightUp", 1, 1, null, Collections.All, Waypoint.None, true, true, 8);
@@ -3582,7 +3581,7 @@ public static class Blocks
     public static readonly Block PlatformToDecoDiag1Slope2UpRightFCBGround = new("PlatformToDecoDiag1Slope2UpRightFCBGround", 1, 1, null, Collections.RedIsland | Collections.WhiteShore | Collections.GreenCoast | Collections.BlueBay, Waypoint.None, false, true, 1);
     public static readonly Block PlatformToDecoDiag1WallDownLeftFCBGround = new("PlatformToDecoDiag1WallDownLeftFCBGround", 1, 1, null, Collections.RedIsland | Collections.WhiteShore | Collections.GreenCoast | Collections.BlueBay, Waypoint.None, false, true, 1);
     public static readonly Block PlatformToDecoDiag1WallDownRightFCBGround = new("PlatformToDecoDiag1WallDownRightFCBGround", 1, 1, null, Collections.RedIsland | Collections.WhiteShore | Collections.GreenCoast | Collections.BlueBay, Waypoint.None, false, true, 1);
-    public static readonly Block PlatformToDecoDiag1WallUpLeftFCBGroundund = new("PlatformToDecoDiag1WallUpLeftFCBGroundund", 1, 1, null, Collections.RedIsland | Collections.WhiteShore | Collections.GreenCoast | Collections.BlueBay, Waypoint.None, false, true, 1);
+    public static readonly Block PlatformToDecoDiag1WallUpLeftFCBGround = new("PlatformToDecoDiag1WallUpLeftFCBGround", 1, 1, null, Collections.RedIsland | Collections.WhiteShore | Collections.GreenCoast | Collections.BlueBay, Waypoint.None, false, true, 1);
     public static readonly Block PlatformToDecoDiag1WallUpRightFCBGround = new("PlatformToDecoDiag1WallUpRightFCBGround", 1, 1, null, Collections.RedIsland | Collections.WhiteShore | Collections.GreenCoast | Collections.BlueBay, Waypoint.None, false, true, 1);
     public static readonly Block PlatformToDecoLoopEndCurve0OutFCBGround = new("PlatformToDecoLoopEndCurve0OutFCBGround", 1, 1, null, Collections.RedIsland | Collections.WhiteShore | Collections.GreenCoast | Collections.BlueBay, Waypoint.None, false, true, 1);
     public static readonly Block PlatformToDecoLoopEndCurve1InFCBGround = new("PlatformToDecoLoopEndCurve1InFCBGround", 1, 1, null, Collections.RedIsland | Collections.WhiteShore | Collections.GreenCoast | Collections.BlueBay, Waypoint.None, false, true, 1);
@@ -3799,6 +3798,7 @@ public static class Blocks
     public static readonly Block PlatformWaterToDecoWallWaterSlope2EndStraightHFC = new("PlatformWaterToDecoWallWaterSlope2EndStraightHFC", 1, 1, null, Collections.Stadium, Waypoint.None, true, true, 2);
     public static readonly Block PlatformWaterToRoadWaterFCBInside = new("PlatformWaterToRoadWaterFCBInside", 1, 1, null, Collections.Stadium, Waypoint.None, false, true, 1);
     public static readonly Block PlatformWaterToRoadWaterHFCInsideShort = new("PlatformWaterToRoadWaterHFCInsideShort", 1, 1, null, Collections.Stadium, Waypoint.None, true, true, 2);
+    public static readonly Block RRoadBumpDiagRightStartCurve2Out = new("RRoadBumpDiagRightStartCurve2Out", 3, 2, new[] { new[] { 0, 0 }, new[] { 0, 1 }, new[] { 1, 0 }, new[] { 1, 1 }, new[] { 2, 0 } }, Collections.Stadium, Waypoint.None, true, true, 2);
     public static readonly Block RallyCastleBranchCrossToGrassFCBGround = new("RallyCastleBranchCrossToGrassFCBGround", 1, 1, null, Collections.Stadium, Waypoint.None, false, true, 1);
     public static readonly Block RallyCastleCurve1ToGrassFCBGround = new("RallyCastleCurve1ToGrassFCBGround", 1, 1, null, Collections.Stadium, Waypoint.None, false, true, 1);
     public static readonly Block RallyCastleCurve1TowerToGrassFCBGround = new("RallyCastleCurve1TowerToGrassFCBGround", 1, 1, null, Collections.Stadium, Waypoint.None, false, true, 1);
@@ -4999,6 +4999,7 @@ public static class Blocks
     public static readonly Block RoadIceSlopeUTopX2FCBGround = new("RoadIceSlopeUTopX2FCBGround", 1, 1, null, Collections.RedIsland | Collections.WhiteShore | Collections.GreenCoast | Collections.BlueBay, Waypoint.None, false, true, 1);
     public static readonly Block RoadIceSlopeUTopX2UnderFCB = new("RoadIceSlopeUTopX2UnderFCB", 1, 1, null, Collections.RedIsland | Collections.WhiteShore | Collections.GreenCoast | Collections.BlueBay, Waypoint.None, false, true, 1);
     public static readonly Block RoadIceSlopeUpPenaltyHFC = new("RoadIceSlopeUpPenaltyHFC", 1, 1, null, Collections.All, Waypoint.None, true, true, 2);
+    public static readonly Block RoadIceSlopeUpPenaltyHFCEnds = new("RoadIceSlopeUpPenaltyHFCEnds", 1, 1, null, Collections.All, Waypoint.None, true, true, 2);
     public static readonly Block RoadIceSpecialBoost = new("RoadIceSpecialBoost", 1, 1, null, Collections.All, Waypoint.None, true, true, 2);
     public static readonly Block RoadIceSpecialBoost2 = new("RoadIceSpecialBoost2", 1, 1, null, Collections.All, Waypoint.None, true, true, 2);
     public static readonly Block RoadIceSpecialBoost2SlopeDown = new("RoadIceSpecialBoost2SlopeDown", 1, 1, null, Collections.All, Waypoint.None, true, true, 4);
@@ -5135,6 +5136,7 @@ public static class Blocks
     public static readonly Block RoadIceWithWallDiagRightSpecialTurboRight = new("RoadIceWithWallDiagRightSpecialTurboRight", 3, 2, null, Collections.All, Waypoint.None, true, true, 2);
     public static readonly Block RoadIceWithWallDiagRightSpecialTurboRouletteLeft = new("RoadIceWithWallDiagRightSpecialTurboRouletteLeft", 3, 2, null, Collections.All, Waypoint.None, true, true, 2);
     public static readonly Block RoadIceWithWallDiagRightSpecialTurboRouletteRight = new("RoadIceWithWallDiagRightSpecialTurboRouletteRight", 3, 2, null, Collections.All, Waypoint.None, true, true, 2);
+    public static readonly Block RoadIceWithWallDiagRightStartCurve1In = new("RoadIceWithWallDiagRightStartCurve1In", 2, 2, null, Collections.All, Waypoint.None, true, true, 2);
     public static readonly Block RoadIceWithWallDiagRightStartCurve1Out = new("RoadIceWithWallDiagRightStartCurve1Out", 2, 1, null, Collections.All, Waypoint.None, true, true, 2);
     public static readonly Block RoadIceWithWallDiagRightStartCurve2In = new("RoadIceWithWallDiagRightStartCurve2In", 2, 3, null, Collections.All, Waypoint.None, true, true, 2);
     public static readonly Block RoadIceWithWallDiagRightStartCurve2Out = new("RoadIceWithWallDiagRightStartCurve2Out", 3, 2, new[] { new[] { 0, 0 }, new[] { 0, 1 }, new[] { 1, 0 }, new[] { 1, 1 }, new[] { 2, 0 } }, Collections.All, Waypoint.None, true, true, 2);
@@ -5261,7 +5263,7 @@ public static class Blocks
     public static readonly Block RoadIceWithWallRightDiagRightStraightOnGrassCliff8 = new("RoadIceWithWallRightDiagRightStraightOnGrassCliff8", 3, 2, new[] { new[] { 0, 1 }, new[] { 1, 0 }, new[] { 1, 1 }, new[] { 2, 0 } }, Collections.GreenCoast, Waypoint.None, true, false, 1);
     public static readonly Block RoadIceWithWallRightDiagRightStraightOnGrassHill1 = new("RoadIceWithWallRightDiagRightStraightOnGrassHill1", 3, 2, new[] { new[] { 0, 1 }, new[] { 1, 0 }, new[] { 1, 1 }, new[] { 2, 0 } }, Collections.GreenCoast, Waypoint.None, true, false, 1);
     public static readonly Block RoadIceWithWallRightDiagRightStraightOnHill = new("RoadIceWithWallRightDiagRightStraightOnHill", 3, 2, new[] { new[] { 0, 1 }, new[] { 1, 0 }, new[] { 1, 1 }, new[] { 2, 0 }, new[] { 2, 1 } }, Collections.WhiteShore, Waypoint.None, true, false, 1);
-    public static readonly Block RoadIceWithWallRightDiagRightStraightOnHill2DeadendnHill2 = new("RoadIceWithWallRightDiagRightStraightOnHill2DeadendnHill2", 3, 2, new[] { new[] { 0, 1 }, new[] { 1, 0 }, new[] { 1, 1 }, new[] { 2, 0 }, new[] { 2, 1 } }, Collections.WhiteShore, Waypoint.None, true, false, 1);
+    public static readonly Block RoadIceWithWallRightDiagRightStraightOnHill2 = new("RoadIceWithWallRightDiagRightStraightOnHill2", 3, 2, new[] { new[] { 0, 1 }, new[] { 1, 0 }, new[] { 1, 1 }, new[] { 2, 0 }, new[] { 2, 1 } }, Collections.WhiteShore, Waypoint.None, true, false, 1);
     public static readonly Block RoadIceWithWallRightDiagRightStraightOnLakeShore = new("RoadIceWithWallRightDiagRightStraightOnLakeShore", 3, 2, new[] { new[] { 0, 1 }, new[] { 1, 0 }, new[] { 1, 1 }, new[] { 2, 0 } }, Collections.GreenCoast, Waypoint.None, true, false, 1);
     public static readonly Block RoadIceWithWallRightDiagRightStraightOnLakeShoreStraight = new("RoadIceWithWallRightDiagRightStraightOnLakeShoreStraight", 3, 2, null, Collections.GreenCoast, Waypoint.None, true, false, 1);
     public static readonly Block RoadIceWithWallRightDiagRightStraightOnLandCliff12 = new("RoadIceWithWallRightDiagRightStraightOnLandCliff12", 3, 2, new[] { new[] { 0, 1 }, new[] { 1, 0 }, new[] { 1, 1 }, new[] { 2, 0 }, new[] { 2, 1 } }, Collections.BlueBay, Waypoint.None, true, false, 1);
@@ -5294,7 +5296,6 @@ public static class Blocks
     public static readonly Block RoadIceWithWallRightOnWaterHill = new("RoadIceWithWallRightOnWaterHill", 1, 1, null, Collections.RedIsland, Waypoint.None, true, false, 1);
     public static readonly Block RoadIceWithWallRightOnWaterHillStraight = new("RoadIceWithWallRightOnWaterHillStraight", 1, 1, null, Collections.RedIsland, Waypoint.None, true, false, 1);
     public static readonly Block RoadIceWithWallRightOnWaterShore1 = new("RoadIceWithWallRightOnWaterShore1", 1, 1, null, Collections.WhiteShore, Waypoint.None, true, false, 1);
-    public static readonly Block RoadIceWithWallRightStartCurve1In = new("RoadIceWithWallRightStartCurve1In", 2, 2, null, Collections.All, Waypoint.None, true, true, 2);
     public static readonly Block RoadIceWithWallSlope2BaseCurve2Left = new("RoadIceWithWallSlope2BaseCurve2Left", 2, 2, null, Collections.All, Waypoint.None, true, true, 3);
     public static readonly Block RoadIceWithWallSlope2BaseCurve2LeftOnDirtHill2 = new("RoadIceWithWallSlope2BaseCurve2LeftOnDirtHill2", 2, 2, null, Collections.RedIsland, Waypoint.None, true, false, 1);
     public static readonly Block RoadIceWithWallSlope2BaseCurve2LeftOnGrassHill1 = new("RoadIceWithWallSlope2BaseCurve2LeftOnGrassHill1", 2, 2, null, Collections.GreenCoast, Waypoint.None, true, false, 1);
@@ -8580,7 +8581,6 @@ public static class Blocks
         ["DecoWallWaterToTrackWallWaterHFCInside"] = DecoWallWaterToTrackWallWaterHFCInside,
         ["DecoWallWaterToTrackWallWaterHFCInsideShort"] = DecoWallWaterToTrackWallWaterHFCInsideShort,
         ["DecoWallWaterVFC"] = DecoWallWaterVFC,
-        ["Deprecated"] = Deprecated,
         ["Dirt"] = Dirt,
         ["Dirt0_Dirt2_Dirt4"] = Dirt0_Dirt2_Dirt4,
         ["Dirt0_Dirt4_Dirt8"] = Dirt0_Dirt4_Dirt8,
@@ -8601,9 +8601,9 @@ public static class Blocks
         ["GateExpandableCheckpointFCT"] = GateExpandableCheckpointFCT,
         ["GateExpandableCheckpointInPillarFCB"] = GateExpandableCheckpointInPillarFCB,
         ["GateExpandableCheckpointInPillarFCT"] = GateExpandableCheckpointInPillarFCT,
+        ["GateExpandableCheckpointLeftVFC"] = GateExpandableCheckpointLeftVFC,
         ["GateExpandableCheckpointRightVFC"] = GateExpandableCheckpointRightVFC,
         ["GateExpandableFinish"] = GateExpandableFinish,
-        ["GateExpandableFinishCheckpointVFC"] = GateExpandableFinishCheckpointVFC,
         ["GateExpandableFinishFCB"] = GateExpandableFinishFCB,
         ["GateExpandableFinishFCT"] = GateExpandableFinishFCT,
         ["GateExpandableFinishInPillarFCB"] = GateExpandableFinishInPillarFCB,
@@ -8644,8 +8644,8 @@ public static class Blocks
         ["GateGameplayStadium"] = GateGameplayStadium,
         ["GateSpecialBoost"] = GateSpecialBoost,
         ["GateSpecialBoost2"] = GateSpecialBoost2,
-        ["GateSpecialBoost2Deprecated"] = GateSpecialBoost2Deprecated,
-        ["GateSpecialBoostDeprecated"] = GateSpecialBoostDeprecated,
+        ["GateSpecialBoost2Oriented"] = GateSpecialBoost2Oriented,
+        ["GateSpecialBoostOriented"] = GateSpecialBoostOriented,
         ["GateSpecialCruise"] = GateSpecialCruise,
         ["GateSpecialFragile"] = GateSpecialFragile,
         ["GateSpecialNoBrake"] = GateSpecialNoBrake,
@@ -8693,7 +8693,6 @@ public static class Blocks
         ["LandHill2"] = LandHill2,
         ["LandHill2CornerToStadiumRoadSlope2BaseCurve2InFCLeft"] = LandHill2CornerToStadiumRoadSlope2BaseCurve2InFCLeft,
         ["LandHill2CornerToStadiumRoadSlope2BaseCurve2InFCRight"] = LandHill2CornerToStadiumRoadSlope2BaseCurve2InFCRight,
-        ["LandHill2CornerToStadiumRoadSlopeBase2Curve2InFCLeft"] = LandHill2CornerToStadiumRoadSlopeBase2Curve2InFCLeft,
         ["LandHill2DeadendToStadiumRoadSlope2BaseCurve2OutFCLeft"] = LandHill2DeadendToStadiumRoadSlope2BaseCurve2OutFCLeft,
         ["LandHill2DeadendToStadiumRoadSlope2BaseCurve2OutFCRight"] = LandHill2DeadendToStadiumRoadSlope2BaseCurve2OutFCRight,
         ["LandHill3"] = LandHill3,
@@ -9302,6 +9301,7 @@ public static class Blocks
         ["OpenTechZoneEndLargeLeftSlope2StraightRight"] = OpenTechZoneEndLargeLeftSlope2StraightRight,
         ["OpenTechZoneEndLargeLeftSlope2StraightUp"] = OpenTechZoneEndLargeLeftSlope2StraightUp,
         ["OpenTechZoneEndLargeRight"] = OpenTechZoneEndLargeRight,
+        ["OpenTechZoneEndLargeRightSlope2StraightDown"] = OpenTechZoneEndLargeRightSlope2StraightDown,
         ["OpenTechZoneEndLargeRightSlope2StraightLeft"] = OpenTechZoneEndLargeRightSlope2StraightLeft,
         ["OpenTechZoneEndLargeRightSlope2StraightRight"] = OpenTechZoneEndLargeRightSlope2StraightRight,
         ["OpenTechZoneEndLargeRightSlope2StraightUp"] = OpenTechZoneEndLargeRightSlope2StraightUp,
@@ -10931,7 +10931,7 @@ public static class Blocks
         ["PlatformToDecoDiag1Slope2UpRightFCBGround"] = PlatformToDecoDiag1Slope2UpRightFCBGround,
         ["PlatformToDecoDiag1WallDownLeftFCBGround"] = PlatformToDecoDiag1WallDownLeftFCBGround,
         ["PlatformToDecoDiag1WallDownRightFCBGround"] = PlatformToDecoDiag1WallDownRightFCBGround,
-        ["PlatformToDecoDiag1WallUpLeftFCBGroundund"] = PlatformToDecoDiag1WallUpLeftFCBGroundund,
+        ["PlatformToDecoDiag1WallUpLeftFCBGround"] = PlatformToDecoDiag1WallUpLeftFCBGround,
         ["PlatformToDecoDiag1WallUpRightFCBGround"] = PlatformToDecoDiag1WallUpRightFCBGround,
         ["PlatformToDecoLoopEndCurve0OutFCBGround"] = PlatformToDecoLoopEndCurve0OutFCBGround,
         ["PlatformToDecoLoopEndCurve1InFCBGround"] = PlatformToDecoLoopEndCurve1InFCBGround,
@@ -11148,6 +11148,7 @@ public static class Blocks
         ["PlatformWaterToDecoWallWaterSlope2EndStraightHFC"] = PlatformWaterToDecoWallWaterSlope2EndStraightHFC,
         ["PlatformWaterToRoadWaterFCBInside"] = PlatformWaterToRoadWaterFCBInside,
         ["PlatformWaterToRoadWaterHFCInsideShort"] = PlatformWaterToRoadWaterHFCInsideShort,
+        ["RRoadBumpDiagRightStartCurve2Out"] = RRoadBumpDiagRightStartCurve2Out,
         ["RallyCastleBranchCrossToGrassFCBGround"] = RallyCastleBranchCrossToGrassFCBGround,
         ["RallyCastleCurve1ToGrassFCBGround"] = RallyCastleCurve1ToGrassFCBGround,
         ["RallyCastleCurve1TowerToGrassFCBGround"] = RallyCastleCurve1TowerToGrassFCBGround,
@@ -12348,6 +12349,7 @@ public static class Blocks
         ["RoadIceSlopeUTopX2FCBGround"] = RoadIceSlopeUTopX2FCBGround,
         ["RoadIceSlopeUTopX2UnderFCB"] = RoadIceSlopeUTopX2UnderFCB,
         ["RoadIceSlopeUpPenaltyHFC"] = RoadIceSlopeUpPenaltyHFC,
+        ["RoadIceSlopeUpPenaltyHFCEnds"] = RoadIceSlopeUpPenaltyHFCEnds,
         ["RoadIceSpecialBoost"] = RoadIceSpecialBoost,
         ["RoadIceSpecialBoost2"] = RoadIceSpecialBoost2,
         ["RoadIceSpecialBoost2SlopeDown"] = RoadIceSpecialBoost2SlopeDown,
@@ -12484,6 +12486,7 @@ public static class Blocks
         ["RoadIceWithWallDiagRightSpecialTurboRight"] = RoadIceWithWallDiagRightSpecialTurboRight,
         ["RoadIceWithWallDiagRightSpecialTurboRouletteLeft"] = RoadIceWithWallDiagRightSpecialTurboRouletteLeft,
         ["RoadIceWithWallDiagRightSpecialTurboRouletteRight"] = RoadIceWithWallDiagRightSpecialTurboRouletteRight,
+        ["RoadIceWithWallDiagRightStartCurve1In"] = RoadIceWithWallDiagRightStartCurve1In,
         ["RoadIceWithWallDiagRightStartCurve1Out"] = RoadIceWithWallDiagRightStartCurve1Out,
         ["RoadIceWithWallDiagRightStartCurve2In"] = RoadIceWithWallDiagRightStartCurve2In,
         ["RoadIceWithWallDiagRightStartCurve2Out"] = RoadIceWithWallDiagRightStartCurve2Out,
@@ -12610,7 +12613,7 @@ public static class Blocks
         ["RoadIceWithWallRightDiagRightStraightOnGrassCliff8"] = RoadIceWithWallRightDiagRightStraightOnGrassCliff8,
         ["RoadIceWithWallRightDiagRightStraightOnGrassHill1"] = RoadIceWithWallRightDiagRightStraightOnGrassHill1,
         ["RoadIceWithWallRightDiagRightStraightOnHill"] = RoadIceWithWallRightDiagRightStraightOnHill,
-        ["RoadIceWithWallRightDiagRightStraightOnHill2DeadendnHill2"] = RoadIceWithWallRightDiagRightStraightOnHill2DeadendnHill2,
+        ["RoadIceWithWallRightDiagRightStraightOnHill2"] = RoadIceWithWallRightDiagRightStraightOnHill2,
         ["RoadIceWithWallRightDiagRightStraightOnLakeShore"] = RoadIceWithWallRightDiagRightStraightOnLakeShore,
         ["RoadIceWithWallRightDiagRightStraightOnLakeShoreStraight"] = RoadIceWithWallRightDiagRightStraightOnLakeShoreStraight,
         ["RoadIceWithWallRightDiagRightStraightOnLandCliff12"] = RoadIceWithWallRightDiagRightStraightOnLandCliff12,
@@ -12643,7 +12646,6 @@ public static class Blocks
         ["RoadIceWithWallRightOnWaterHill"] = RoadIceWithWallRightOnWaterHill,
         ["RoadIceWithWallRightOnWaterHillStraight"] = RoadIceWithWallRightOnWaterHillStraight,
         ["RoadIceWithWallRightOnWaterShore1"] = RoadIceWithWallRightOnWaterShore1,
-        ["RoadIceWithWallRightStartCurve1In"] = RoadIceWithWallRightStartCurve1In,
         ["RoadIceWithWallSlope2BaseCurve2Left"] = RoadIceWithWallSlope2BaseCurve2Left,
         ["RoadIceWithWallSlope2BaseCurve2LeftOnDirtHill2"] = RoadIceWithWallSlope2BaseCurve2LeftOnDirtHill2,
         ["RoadIceWithWallSlope2BaseCurve2LeftOnGrassHill1"] = RoadIceWithWallSlope2BaseCurve2LeftOnGrassHill1,

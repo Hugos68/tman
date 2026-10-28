@@ -8,6 +8,13 @@ namespace tman.Inventory;
 public static class Custom
 {
     public static readonly Item CheckpointExpandable = new("CheckpointExpandable.Item.Gbx", "CheckpointExpandable.Item.Gbx", "assets/items/expandable/CheckpointExpandable.Item.Gbx", Collections.All, Waypoint.Checkpoint, 1, new Vec3(32.000f, 11.795f, 16.416f));
+    public static readonly Item CheckpointExpandableBottom = new("CheckpointExpandableBottom.Item.Gbx", "CheckpointExpandableBottom.Item.Gbx", "assets/items/expandable/CheckpointExpandableBottom.Item.Gbx", Collections.All, Waypoint.None, 1, new Vec3(32.200f, 1.492f, 2.183f));
+    public static readonly Item CheckpointExpandableBottomInPillar = new("CheckpointExpandableBottomInPillar.Item.Gbx", "CheckpointExpandableBottomInPillar.Item.Gbx", "assets/items/expandable/CheckpointExpandableBottomInPillar.Item.Gbx", Collections.All, Waypoint.None, 1, new Vec3(32.223f, 1.479f, 3.374f));
+    public static readonly Item CheckpointExpandableFoot = new("CheckpointExpandableFoot.Item.Gbx", "CheckpointExpandableFoot.Item.Gbx", "assets/items/expandable/CheckpointExpandableFoot.Item.Gbx", Collections.All, Waypoint.None, 1, new Vec3(32.000f, 4.000f, 16.764f));
+    public static readonly Item CheckpointExpandableLeft = new("CheckpointExpandableLeft.Item.Gbx", "CheckpointExpandableLeft.Item.Gbx", "assets/items/expandable/CheckpointExpandableLeft.Item.Gbx", Collections.All, Waypoint.None, 1, new Vec3(1.458f, 8.067f, 1.642f));
+    public static readonly Item CheckpointExpandableRight = new("CheckpointExpandableRight.Item.Gbx", "CheckpointExpandableRight.Item.Gbx", "assets/items/expandable/CheckpointExpandableRight.Item.Gbx", Collections.All, Waypoint.None, 1, new Vec3(1.458f, 8.067f, 1.642f));
+    public static readonly Item CheckpointExpandableTop = new("CheckpointExpandableTop.Item.Gbx", "CheckpointExpandableTop.Item.Gbx", "assets/items/expandable/CheckpointExpandableTop.Item.Gbx", Collections.All, Waypoint.None, 1, new Vec3(32.200f, 3.732f, 2.183f));
+    public static readonly Item CheckpointExpandableTopInPillar = new("CheckpointExpandableTopInPillar.Item.Gbx", "CheckpointExpandableTopInPillar.Item.Gbx", "assets/items/expandable/CheckpointExpandableTopInPillar.Item.Gbx", Collections.All, Waypoint.None, 1, new Vec3(32.223f, 3.732f, 3.980f));
     public static readonly Item FinishFlag16m = new("FinishFlag16m.Item.Gbx", "FinishFlag16m.Item.Gbx", "assets/items/flags/FinishFlag16m.Item.Gbx", Collections.All, Waypoint.Finish, 1, new Vec3(1.376f, 17.050f, 3.882f));
     public static readonly Item FinishFlag8m = new("FinishFlag8m.Item.Gbx", "FinishFlag8m.Item.Gbx", "assets/items/flags/FinishFlag8m.Item.Gbx", Collections.All, Waypoint.Finish, 1, new Vec3(1.041f, 9.159f, 2.094f));
     public static readonly Item FinishPlaneTemplate = new("FinishPlaneTemplate.Item.Gbx", "FinishPlaneTemplate.Item.Gbx", "assets/items/floor-finish/FinishPlaneTemplate.Item.Gbx", Collections.All, Waypoint.Finish, 1, new Vec3(128.000f, 0.000f, 128.000f));
@@ -78,6 +85,13 @@ public static class Custom
     public static readonly IReadOnlyDictionary<string, Item> ById = new Dictionary<string, Item>
     {
         ["CheckpointExpandable.Item.Gbx"] = CheckpointExpandable,
+        ["CheckpointExpandableBottom.Item.Gbx"] = CheckpointExpandableBottom,
+        ["CheckpointExpandableBottomInPillar.Item.Gbx"] = CheckpointExpandableBottomInPillar,
+        ["CheckpointExpandableFoot.Item.Gbx"] = CheckpointExpandableFoot,
+        ["CheckpointExpandableLeft.Item.Gbx"] = CheckpointExpandableLeft,
+        ["CheckpointExpandableRight.Item.Gbx"] = CheckpointExpandableRight,
+        ["CheckpointExpandableTop.Item.Gbx"] = CheckpointExpandableTop,
+        ["CheckpointExpandableTopInPillar.Item.Gbx"] = CheckpointExpandableTopInPillar,
         ["FinishFlag16m.Item.Gbx"] = FinishFlag16m,
         ["FinishFlag8m.Item.Gbx"] = FinishFlag8m,
         ["FinishPlaneTemplate.Item.Gbx"] = FinishPlaneTemplate,

@@ -80,7 +80,7 @@ namespace tman.Inventory.Builders
             var smoothing = crystal.Chunks.Get<CPlugCrystal.Chunk09003007>();
             if (smoothing is not null)
             {
-                smoothing.U01 = Enumerable.Repeat(2, geometry.Crystal.Faces.Length).ToArray();
+                smoothing.U01 = [.. Enumerable.Repeat(2, geometry.Crystal.Faces.Length)];
             }
 
             item.Ident = new Ident(ident, collection, ident);
@@ -145,7 +145,7 @@ namespace tman.Inventory.Builders
                 }
                 result[i] = new CPlugCrystal.Face(vertices, group, material, null);
             }
-            crystal.Positions = positions.ToArray();
+            crystal.Positions = [.. positions];
             crystal.Edges = [];
             crystal.Faces = result;
         }
