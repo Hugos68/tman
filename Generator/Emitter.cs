@@ -17,7 +17,7 @@ namespace tman.Generator
 
         public static string Identifier(string id)
         {
-            var s = new string(id.Select(c => char.IsAsciiLetterOrDigit(c) || c == '_' ? c : '_').ToArray());
+            var s = new string([.. id.Select(c => char.IsAsciiLetterOrDigit(c) || c == '_' ? c : '_')]);
             if (s.Length == 0 || char.IsAsciiDigit(s[0]))
             {
                 s = "_" + s;
