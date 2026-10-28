@@ -95,8 +95,9 @@ namespace tman.Alterations.Finishes
 
         private static void Place(Map map, Placement segment, Item item)
         {
-            map.Embed(item);
-            map.PlaceRelative(segment, item);
+            var skinned = item.For(map.Collection);
+            map.Embed(skinned);
+            map.PlaceRelative(segment, skinned);
         }
     }
 }

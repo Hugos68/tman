@@ -11,6 +11,9 @@ namespace tman.Inventory
     {
         private static readonly Dictionary<Item, Ident> Idents = new();
 
+        public static Item For(this Item item, Collections collection) =>
+            collection == Collections.Stadium ? item : Custom.FromId(item.Id.Replace(".Item.Gbx", $"{collection}.Item.Gbx")) ?? item;
+
         public static string FullPath(this Item item) =>
             Path.Combine(Assets.Root, (item.Path ?? throw new InvalidOperationException($"{item.Id} is not a custom item")).Replace('/', Path.DirectorySeparatorChar));
 
