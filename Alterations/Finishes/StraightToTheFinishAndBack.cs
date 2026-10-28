@@ -35,6 +35,10 @@ namespace tman.Alterations.Finishes
                 {
                     ReplaceSegment(map, finish, segments);
                 }
+                else if (finish.BlockModel == Blocks.GateFinish)
+                {
+                    ReplaceRing(map, finish);
+                }
                 else
                 {
                     map.Replace(finish, Waypoint.Checkpoint);
@@ -45,6 +49,13 @@ namespace tman.Alterations.Finishes
                 map.PlaceLike(start, Waypoint.Finish);
             }
             map.Link(map.Waypoints(Waypoint.Checkpoint));
+        }
+
+        private static void ReplaceRing(Map map, Placement ring)
+        {
+            var pillar = ring.IsGround ? 0 : ring.Variant / 64;
+            Place(map, ring, pillar == 1 ? Custom.CheckpointRingPillar : pillar == 2 ? Custom.CheckpointRingInPillar : Custom.CheckpointRing);
+            map.Remove(ring);
         }
 
         private static void ReplaceSegment(Map map, Placement segment, HashSet<string> segments)

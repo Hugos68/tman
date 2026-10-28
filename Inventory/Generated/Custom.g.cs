@@ -81,6 +81,9 @@ public static class Custom
     public static readonly Item FinishStageTechnicsLightDown = new("FinishStageTechnicsLightDown.Item.Gbx", "FinishStageTechnicsLightDown.Item.Gbx", "assets/items/moth/FinishStageTechnicsLightDown.Item.Gbx", Collections.All, Waypoint.Finish, 1, new Vec3(31.070f, 5.760f, 29.720f));
     public static readonly Item FinishStageTechnicsLightStraight = new("FinishStageTechnicsLightStraight.Item.Gbx", "FinishStageTechnicsLightStraight.Item.Gbx", "assets/items/moth/FinishStageTechnicsLightStraight.Item.Gbx", Collections.All, Waypoint.Finish, 1, new Vec3(31.070f, 11.760f, 23.260f));
     public static readonly Item FinishStageTechnicsLightToStructure = new("FinishStageTechnicsLightToStructure.Item.Gbx", "FinishStageTechnicsLightToStructure.Item.Gbx", "assets/items/moth/FinishStageTechnicsLightToStructure.Item.Gbx", Collections.All, Waypoint.Finish, 1, new Vec3(31.070f, 11.760f, 29.720f));
+    public static readonly Item CheckpointRing = new("CheckpointRing.Item.Gbx", "CheckpointRing.Item.Gbx", "assets/items/ring/CheckpointRing.Item.Gbx", Collections.All, Waypoint.Checkpoint, 1, new Vec3(31.431f, 31.431f, 4.799f));
+    public static readonly Item CheckpointRingInPillar = new("CheckpointRingInPillar.Item.Gbx", "CheckpointRingInPillar.Item.Gbx", "assets/items/ring/CheckpointRingInPillar.Item.Gbx", Collections.All, Waypoint.Checkpoint, 1, new Vec3(31.431f, 32.000f, 4.799f));
+    public static readonly Item CheckpointRingPillar = new("CheckpointRingPillar.Item.Gbx", "CheckpointRingPillar.Item.Gbx", "assets/items/ring/CheckpointRingPillar.Item.Gbx", Collections.All, Waypoint.Checkpoint, 1, new Vec3(31.431f, 31.716f, 4.799f));
 
     public static readonly IReadOnlyDictionary<string, Item> ById = new Dictionary<string, Item>
     {
@@ -158,6 +161,9 @@ public static class Custom
         ["FinishStageTechnicsLightDown.Item.Gbx"] = FinishStageTechnicsLightDown,
         ["FinishStageTechnicsLightStraight.Item.Gbx"] = FinishStageTechnicsLightStraight,
         ["FinishStageTechnicsLightToStructure.Item.Gbx"] = FinishStageTechnicsLightToStructure,
+        ["CheckpointRing.Item.Gbx"] = CheckpointRing,
+        ["CheckpointRingInPillar.Item.Gbx"] = CheckpointRingInPillar,
+        ["CheckpointRingPillar.Item.Gbx"] = CheckpointRingPillar,
     };
 
     public static Item? FromId(string id) => ById.TryGetValue(id, out var item) ? item : null;
