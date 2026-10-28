@@ -49,14 +49,15 @@ namespace tman.Alterations.Finishes
 
         private static void ReplaceSegment(Map map, Placement segment, HashSet<string> segments)
         {
+            var inPillar = segment.Variant / 64;
             Place(map, segment, Custom.CheckpointExpandable);
             if (!segments.Contains(Key(map, segment, new Vec3(0, -MapConstants.CellHeight, 0))))
             {
-                Place(map, segment, segment.IsGround ? Custom.CheckpointExpandableFoot : Custom.CheckpointExpandableBottom);
+                Place(map, segment, segment.IsGround ? Custom.CheckpointExpandableFoot : inPillar == 1 ? Custom.CheckpointExpandableBottom : Custom.CheckpointExpandableBottomInPillar);
             }
             if (!segments.Contains(Key(map, segment, new Vec3(0, MapConstants.CellHeight, 0))))
             {
-                Place(map, segment, Custom.CheckpointExpandableTop);
+                Place(map, segment, inPillar == (segment.IsGround ? 1 : 2) ? Custom.CheckpointExpandableTopInPillar : Custom.CheckpointExpandableTop);
             }
             if (!segments.Contains(Key(map, segment, new Vec3(-MapConstants.CellSize, 0, 0))))
             {
