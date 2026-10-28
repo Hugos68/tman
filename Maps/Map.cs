@@ -94,10 +94,10 @@ namespace tman.Maps
         public IEnumerable<Placement> Terrain =>
             (Gbx.Blocks ?? []).Concat(Gbx.BakedBlocks ?? []).Where(block => !block.IsFree).Select(block => new Placement(block));
 
-        public List<Placement> Of(Selector selector) => [.. Placements.Where(selector.Matches)];
+        public List<Placement> Of(Selector selector) => Placements.Where(selector.Matches).ToList();
 
         public List<Placement> Waypoints(Waypoint waypoint) =>
-            [.. Placements.Where(placement => placement.IsWaypoint && placement.Waypoint == waypoint)];
+            Placements.Where(placement => placement.IsWaypoint && placement.Waypoint == waypoint).ToList();
 
         public Placement PlaceRelative(Placement source, Item model, Vec3 offset = default)
         {
