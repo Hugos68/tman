@@ -11,9 +11,9 @@ namespace Tman.Core.Alterations.Other
 {
     public class Jitter : Alteration
     {
-        private const float Shift = 0.25f;
+        private const float Shift = 0.125f;
 
-        private const float Tilt = MathF.PI / 90;
+        private const float Tilt = MathF.PI / 180;
 
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
@@ -24,7 +24,6 @@ namespace Tman.Core.Alterations.Other
 
         protected override void Run(Map map)
         {
-            var random = new Random(BitConverter.ToInt32(SHA256.HashData(Encoding.UTF8.GetBytes(map.Name)), 0));
             foreach (var placement in map.Placements.ToList())
             {
                 if (placement.IsBlock)
@@ -35,6 +34,8 @@ namespace Tman.Core.Alterations.Other
                     }
                     map.Free(placement);
                 }
+                var pose = placement.Pose(map);
+                var random = new Random(Seed($"{map.Name}|{placement.Id}|{pose.Coords}"));
                 Nudge(placement, new Vec3(Spread(random, Shift), Spread(random, Shift), Spread(random, Shift)), new Vec3(Spread(random, Tilt), Spread(random, Tilt), Spread(random, Tilt)));
             }
         }
@@ -53,5 +54,6 @@ namespace Tman.Core.Alterations.Other
 
 
         private static float Spread(Random random, float extent) => (float)(random.NextDouble() * 2 - 1) * extent;
+        private static int Seed(string key) => BitConverter.ToInt32(SHA256.HashData(Encoding.UTF8.GetBytes(key)), 0);
     }
 }
