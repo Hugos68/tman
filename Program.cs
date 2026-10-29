@@ -2,7 +2,6 @@
 using System.CommandLine;
 using System.IO;
 using System.Linq;
-using tman;
 using tman.Alterations;
 using tman.Generator;
 using tman.Maps;
@@ -73,12 +72,12 @@ internal class Program
             Required = true
         };
 
-        var generateCommand = new Command("generate", "Regenerate Inventory/Generated from the game's pak files and assets/items.");
+        var generateCommand = new Command("generate", "Regenerate Inventory/Generated from the game's pak files and Assets/Items.");
         generateCommand.Options.Add(paksOption);
         generateCommand.SetAction(parseResult =>
         {
             var project = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."));
-            CatalogGenerator.Run(parseResult.GetValue(paksOption)!.FullName, Path.Combine(project, "Inventory", "Generated"), project, Path.Combine("assets", "items"));
+            CatalogGenerator.Run(parseResult.GetValue(paksOption)!.FullName, Path.Combine(project, "Inventory", "Generated"), project, Path.Combine("Assets", "Items"));
             return 0;
         });
         rootCommand.Subcommands.Add(generateCommand);

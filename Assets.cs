@@ -7,6 +7,6 @@ namespace tman
     {
         public static readonly string Root = AppContext.BaseDirectory;
 
-        public static string Data(string file) => Path.Combine(Root, "assets", "data", file);
+        public static string Data(string file) => Path.Combine(Root, "Assets", "Data", file);
     }
 }
