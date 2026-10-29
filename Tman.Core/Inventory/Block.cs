@@ -1,4 +1,4 @@
-namespace Tman.Inventory
+namespace Tman.Core.Inventory
 {
     public sealed record Block(string Id, int SizeX, int SizeZ, int[][]? Cells, Collections Collections, Waypoint Waypoint, bool Ground, bool Air, int Variants)
     {

@@ -1,6 +1,6 @@
 using GBX.NET;
 
-namespace Tman.Inventory
+namespace Tman.Core.Inventory
 {
     public sealed record Item(string Id, string Author, string? Path, Collections Collections, Waypoint Waypoint, int Variants, Vec3 Size)
     {

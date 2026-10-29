@@ -1,7 +1,7 @@
 using GBX.NET;
-using Tman.Inventory;
+using Tman.Core.Inventory;
 
-namespace Tman.Alterations.Internal
+namespace Tman.Core.Alterations.Internal
 {
     public class StartEffect(Block gate, Vec3 offset) : WaypointEffect(gate, offset)
     {
