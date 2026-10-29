@@ -182,6 +182,23 @@ namespace Tman.Core.Maps
             }
         }
 
+        public void Free(Placement placement)
+        {
+            var block = placement.Block!;
+            if (block.IsFree)
+            {
+                return;
+            }
+            var pose = placement.Pose(this);
+            Gbx.TryCreateChunk<CGameCtnChallenge.Chunk0304305F>(out _);
+            block.IsFree = true;
+            block.IsGround = false;
+            block.Coord = new Int3(-1, 0, -1);
+            block.Direction = Direction.North;
+            block.AbsolutePositionInMap = pose.Coords;
+            block.YawPitchRoll = pose.YawPitchRoll;
+        }
+
         private Placement PlaceBlock(CGameCtnBlock block)
         {
             Gbx.PlaceBlock(block);
