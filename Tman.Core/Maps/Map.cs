@@ -7,9 +7,9 @@ using GBX.NET;
 using GBX.NET.Engines.Game;
 using GBX.NET.Engines.GameData;
 using GBX.NET.LZO;
-using Tman.Inventory;
+using Tman.Core.Inventory;
 
-namespace Tman.Maps
+namespace Tman.Core.Maps
 {
     public sealed class Map
     {
@@ -90,6 +90,9 @@ namespace Tman.Maps
         public IEnumerable<Placement> Placements =>
             (Gbx.Blocks ?? []).Select(block => new Placement(block))
                 .Concat((Gbx.AnchoredObjects ?? []).Select(item => new Placement(item)));
+
+        public IEnumerable<Placement> Baked =>
+            (Gbx.BakedBlocks ?? []).Select(block => new Placement(block));
 
         public IEnumerable<Placement> Terrain =>
             (Gbx.Blocks ?? []).Concat(Gbx.BakedBlocks ?? []).Where(block => !block.IsFree).Select(block => new Placement(block));
@@ -249,6 +252,95 @@ namespace Tman.Maps
             }
             property.Tag = WaypointTags[kind];
             return property;
+        }
+
+        public void Mirror(Placement placement)
+        {
+            if (placement.Item is { } item)
+            {
+                var twin = MirrorTwin(placement.ItemModel, placement.Id);
+                var position = item.AbsolutePositionInMap;
+                var rotation = item.YawPitchRoll;
+                item.ItemModel = new Ident(twin, item.ItemModel.Collection, item.ItemModel.Author);
+                item.AbsolutePositionInMap = new Vec3(Size.X * MapConstants.CellSize - position.X, position.Y, position.Z);
+                item.YawPitchRoll = new Vec3(-rotation.X + (HalfTurnedMirrors.Contains(twin) ? MathF.PI : 0), rotation.Y, -rotation.Z);
+                item.BlockUnitCoord = new Byte3((byte)(Size.X - 1 - item.BlockUnitCoord.X), item.BlockUnitCoord.Y, item.BlockUnitCoord.Z);
+                return;
+            }
+            var block = placement.Block!;
+            var model = placement.BlockModel;
+            var mirrored = model?.Mirrored ?? model;
+            var turn = (DirectionOffset)(model?.MirrorTurn ?? 0);
+            if (block.IsFree)
+            {
+                var position = block.AbsolutePositionInMap ?? Vec3.Zero;
+                var rotation = block.YawPitchRoll ?? Vec3.Zero;
+                var pose = new Position(
+                    new Vec3(Size.X * MapConstants.CellSize - position.X, position.Y, position.Z),
+                    new Vec3(-rotation.X, rotation.Y, -rotation.Z));
+                pose.Move(new Vec3(-(model?.SizeX ?? 1) * MapConstants.CellSize, 0, 0));
+                var extra = Direction.North.Turn(turn);
+                pose.AddPosition(new Position(Placement.DirectionOffsetOf(extra, (mirrored?.SizeX ?? 1, mirrored?.SizeZ ?? 1)), Placement.DirectionRotationOf(extra)));
+                block.AbsolutePositionInMap = pose.Coords;
+                block.YawPitchRoll = pose.YawPitchRoll;
+            }
+            else
+            {
+                var covered = (model?.Footprint(block.Direction) ?? [(0, 0)]).Select(cell => (X: Size.X - 1 - (block.Coord.X + cell.X), Z: block.Coord.Z + cell.Z)).ToList();
+                var direction = MirrorDirection(block.Direction).Turn(turn);
+                var offsets = mirrored?.Footprint(direction) ?? [(0, 0)];
+                block.Coord = new Int3(covered.Min(cell => cell.X) - offsets.Min(cell => cell.X), block.Coord.Y, covered.Min(cell => cell.Z) - offsets.Min(cell => cell.Z));
+                block.Direction = direction;
+            }
+            if (mirrored is not null)
+            {
+                block.Name = mirrored.Id;
+            }
+        }
+
+        private static readonly IReadOnlySet<string> HalfTurnedMirrors =
+            Items.Families.Where(family => Items.HalfTurned.Contains(family.Key)).Select(family => family.Value.Id).ToHashSet();
+
+        private static Direction MirrorDirection(Direction direction) => direction switch
+        {
+            Direction.East => Direction.West,
+            Direction.West => Direction.East,
+            _ => direction,
+        };
+
+        private static string MirrorTwin(Item? model, string id)
+        {
+            var swapped = id.Replace("Left", "\u0001").Replace("Right", "Left").Replace("\u0001", "Right");
+            return swapped == id || model is null ? id : (Items.FromId(swapped) ?? Custom.FromId(swapped))?.Id ?? id;
+        }
+
+        public void Free(Placement placement)
+        {
+            var block = placement.Block!;
+            if (block.IsFree)
+            {
+                return;
+            }
+            var pose = placement.Pose(this);
+            Gbx.TryCreateChunk<CGameCtnChallenge.Chunk0304305F>(out _);
+            block.IsFree = true;
+            block.IsGround = false;
+            block.Coord = new Int3(-1, 0, -1);
+            block.Direction = Direction.North;
+            block.AbsolutePositionInMap = pose.Coords;
+            block.YawPitchRoll = pose.YawPitchRoll;
+        }
+
+        public void Nudge(Placement placement, Vec3 offset, Vec3 yawPitchRoll)
+        {
+            if (placement.Block is { } block)
+            {
+                block.AbsolutePositionInMap += offset;
+                block.YawPitchRoll += yawPitchRoll;
+                return;
+            }
+            placement.Item!.AbsolutePositionInMap += offset;
+            placement.Item.YawPitchRoll += yawPitchRoll;
         }
 
         public void Remove(Placement placement)

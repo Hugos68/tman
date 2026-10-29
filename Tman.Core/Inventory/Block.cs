@@ -1,10 +1,12 @@
-namespace Tman.Inventory
+namespace Tman.Core.Inventory
 {
-    public sealed record Block(string Id, int SizeX, int SizeZ, int[][]? Cells, Collections Collections, Waypoint Waypoint, bool Ground, bool Air, int Variants)
+    public sealed record Block(string Id, int SizeX, int SizeZ, int[][]? Cells, Collections Collections, Waypoint Waypoint, bool Ground, bool Air, int Variants, string? Mirror, int MirrorTurn)
     {
         public Block? Plain => Blocks.PlainOf.TryGetValue(Id, out var plain) ? plain : null;
 
         public Block? As(Waypoint kind) => kind == Waypoint ? this : Blocks.Families.TryGetValue((Id, kind), out var twin) ? twin : null;
+
+        public Block Mirrored => Mirror is null ? this : Blocks.FromId(Mirror) ?? this;
 
         public BlockVariant Variant(int n) => new(this, n);
     }

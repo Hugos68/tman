@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using GBX.NET;
-using Tman.Alterations.Internal;
-using Tman.Inventory;
-using Tman.Inventory.Builders;
-using Tman.Maps;
+using Tman.Core.Alterations.Internal;
+using Tman.Core.Inventory;
+using Tman.Core.Inventory.Builders;
+using Tman.Core.Maps;
 
-namespace Tman.Alterations.Finishes
+namespace Tman.Core.Alterations.Finishes
 {
     public class FloorFinish : Alteration
     {
@@ -157,16 +157,8 @@ namespace Tman.Alterations.Finishes
             var hidden = new HashSet<(int X, int Z)>();
             foreach (var block in map.Placements.OnlyBlocks().Ground().Where(placement => !placement.IsFree && placement.BlockModel != Blocks.Grass))
             {
-                var (sizeX, sizeZ, cells) = block.BlockModel is { } model ? (model.SizeX, model.SizeZ, model.Footprint()) : (1, 1, [(0, 0)]);
-                foreach (var (ux, uz) in cells)
+                foreach (var (x, z) in block.BlockModel?.Footprint(block.Direction) ?? [(0, 0)])
                 {
-                    var (x, z) = block.Direction switch
-                    {
-                        Direction.East => (sizeZ - 1 - uz, ux),
-                        Direction.South => (sizeX - 1 - ux, sizeZ - 1 - uz),
-                        Direction.West => (uz, sizeX - 1 - ux),
-                        _ => (ux, uz),
-                    };
                     hidden.Add((block.Cell.X + x, block.Cell.Z + z));
                 }
             }

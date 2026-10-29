@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using GBX.NET;
 
-namespace Tman.Inventory;
+namespace Tman.Core.Inventory;
 
 public static class Items
 {

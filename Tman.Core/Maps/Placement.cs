@@ -2,9 +2,9 @@ using System;
 using GBX.NET;
 using GBX.NET.Engines.Game;
 using GBX.NET.Engines.GameData;
-using Tman.Inventory;
+using Tman.Core.Inventory;
 
-namespace Tman.Maps
+namespace Tman.Core.Maps
 {
     public sealed class Placement
     {
@@ -84,7 +84,7 @@ namespace Tman.Maps
             : Id.Contains("Start", StringComparison.Ordinal) ? Waypoint.Start
             : Waypoint.None;
 
-        private static Vec3 DirectionOffsetOf(Direction direction, (int X, int Z) size) =>
+        internal static Vec3 DirectionOffsetOf(Direction direction, (int X, int Z) size) =>
             direction switch
             {
                 Direction.North => Vec3.Zero,
@@ -94,7 +94,7 @@ namespace Tman.Maps
                 _ => throw new ArgumentOutOfRangeException(nameof(direction))
             };
 
-        private static Vec3 DirectionRotationOf(Direction direction) =>
+        internal static Vec3 DirectionRotationOf(Direction direction) =>
             direction switch
             {
                 Direction.North => Vec3.Zero,
