@@ -13,7 +13,7 @@ namespace Tman.Core.Alterations.Finishes
             new LightmapRemoved(),
             new InventoryRemoved(placement => placement.IsFinish),
             new CheckpointsCleaned(),
-            new MapNameEdited(name => name + " Flags"),
+            new MapNameEdited(name => name + " Screens"),
             new ItemFinishes(new Dictionary<Selector, Item>
             {
                 [Blocks.TechnicsScreen1x1Straight] = Custom.FinishScreen1x1Straight,
