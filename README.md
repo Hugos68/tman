@@ -59,6 +59,7 @@ Every output map has its validation removed (no author time, no medals — valid
 | `GroundClippers` | Finishes | A finish slab just under the ground, for cars that clip through it. |
 | `Manslaughter` | Finishes | Every spectator stand is a finish. |
 | `Moth` | Finishes | Every light is a finish. |
+| `Jitter` | Other | Slightly offsets (coords/jaw/roll) every block/item on the map. |
 
 ## Where it comes from
 
