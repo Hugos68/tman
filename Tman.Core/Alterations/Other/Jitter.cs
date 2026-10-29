@@ -13,7 +13,7 @@ namespace Tman.Core.Alterations.Other
     {
         private const float Shift = 0.25f;
 
-        private const float Tilt = MathF.PI / 10;
+        private const float Tilt = MathF.PI / 45;
 
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
@@ -24,7 +24,7 @@ namespace Tman.Core.Alterations.Other
 
         protected override void Run(Map map)
         {
-            foreach (var placement in map.Placements.ToList())
+            foreach (var placement in map.Placements.Where(p => !p.IsWaypoint))
             {
                 if (placement.IsBlock)
                 {
