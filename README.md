@@ -1,82 +1,71 @@
 # tman (Trackmania Altered Nadeo)
 
-tman is a CLI tool for programmatically applying predefined alterations to Trackmania maps.
+tman applies predefined alterations to Trackmania 2020 maps: give it a `.Map.Gbx` file (or a folder of them) and the name of an alteration, and it writes an altered copy. Map creators use it to produce whole altered campaigns without touching each map in the editor.
 
-It provides a reusable way to modify .Map.Gbx files through composable alterations, allowing map creators to automate repetitive editing tasks and generate modified versions of existing maps.
+## Install
 
-## Features
-
-- **CLI-based workflow** — process maps directly from the command line.
-
-- **Composable alterations** — combine multiple alterations to produce the desired result.
-
-- **Automated map editing** — apply changes without manually editing each map in the Trackmania editor.
-
-- **Batch-friendly** — integrate map generation into scripts and other automated workflows.
-
-The example applies the Straight to the Finish alteration to the input map and writes the result to the specified output file.
-
-## Layout
-
-| Project | What |
-| --- | --- |
-| `Tman.Core` | The library: `Alterations/` (one folder per family, `Internal/` for the reusable steps), `Inventory/` (`Block`, `Item`, the enums, `Generated/` catalogs written by the generator, `Builders/`), `Maps/` (`Map`, `Placement`, `Selector`, positioning), `Assets/` (copied next to the executable). No UI code. |
-| `TMAN.INTERFACE` | The CLI (`tman <alteration> -i <map or pattern> -o <map or pattern>`); a GUI is another project referencing `Tman.Core`. |
-| `TMAN.GENERATOR` | `tman-generator --paks <directory with the five .pak files> [--core <Tman.Core directory>]` regenerates `Tman.Core/Inventory/Generated` from the game and `Assets/Items`. |
-
-Build everything with `dotnet build TMAN.sln`.
-
-## Supported Alterations
-
-tman currently supports the following alterations:
-
-| Alteration | Description |
-| --- | --- |
-| `CarDesert` | Replaces the car with the Desert Car. |
-| `CarRally` | Replaces the car with the Rally Car. |
-| `CarSnow` | Replaces the car with the Snow Car. |
-| `CarSport` | Replaces the car with the Sport Car. |
-| `Checkpointless` | Applies the Checkpointless alteration. |
-| `Flags` | Applies the Flags alteration. |
-| `FloorFinish` | Applies the FloorFinish alteration. |
-| `Freewheel` | Applies the Freewheel alteration. |
-| `GroundClippers` | Applies the GroundClippers alteration. |
-| `Manslaughter` | Applies the Manslaughter alteration. |
-| `Moth` | Applies the Moth alteration. |
-| `NoSteer` | Applies the NoSteer alteration. |
-| `SlowMotion` | Applies the SlowMotion alteration. |
-| `StraightToTheFinish` | Applies the StraightToTheFinish alteration. |
-| `StraightToTheFinishAndBack` | Applies the StraightToTheFinishAndBack alteration |
-
-Alteration names are case-insensitive. Each alteration can be selected by passing its name as the first argument:
+Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download). Then:
 
 ```bash
-dotnet run -- "Checkpointless" \
-  -i "input.Map.Gbx" \
-  -o "output.Map.Gbx"
+git clone https://github.com/Hugos68/tman
+cd tman
+dotnet build Tman.sln --configuration Release
 ```
 
-## Development
+The executable is `Tman.Interface/bin/Release/net10.0/tman` (`tman.exe` on Windows).
 
-tman is built with C# and .NET 10, using GBX.NET to work with Trackmania's GBX file format.
+## Usage
 
-### Requirements
+```bash
+tman <alteration> -i <input> -o <output>
+```
 
-.NET 10 SDK
+| Option | Meaning |
+| --- | --- |
+| `<alteration>` | The alteration's name (case-insensitive), see the table below. |
+| `-i`, `--input` | A map file, or a wildcard pattern such as `maps/*.Map.Gbx`. |
+| `-o`, `--output` | The output file, or a pattern containing `*` when the input is a pattern (`*` is replaced by each input's name). |
 
-A Trackmania map in .Map.Gbx format
+Example — one map:
 
-### Build
+```bash
+tman StraightToTheFinish -i "Fall 2026 - 01.Map.Gbx" -o "Fall 2026 - 01 STTF.Map.Gbx"
+```
 
-dotnet restore
-dotnet build --configuration Release
+Example — a campaign:
 
-#### Formatting
+```bash
+tman Flags -i "*.Map.Gbx" -o "* Flags.Map.Gbx"
+```
 
-Check that the code follows the expected formatting conventions:
+Every output map has its validation removed (no author time, no medals — validate it in the editor), its lightmap removed (the editor recomputes shadows), a new UID and the alteration's name appended to the map name. Alterations that add items embed them in the map; nothing has to be installed on the player's side.
 
-dotnet format --verify-no-changes --no-restore
+## Alterations
+
+| Alteration | Family | What it does |
+| --- | --- | --- |
+| `CarDesert` | Cars | Drives the map with the Desert car. |
+| `CarRally` | Cars | Drives the map with the Rally car. |
+| `CarSnow` | Cars | Drives the map with the Snow car. |
+| `CarSport` | Cars | Drives the map with the Sport (Stadium) car. |
+| `Checkpointless` | Checkpoints | Removes every checkpoint. |
+| `StraightToTheFinish` | Checkpoints | Replaces every checkpoint by its plain block (the road or platform piece it was built from), so the race is start to finish with nothing in between. |
+| `StraightToTheFinishAndBack` | Finishes | Puts a finish inside the start and turns every old finish into a linked checkpoint: drive to the far end and back. Ring finishes become respawnable checkpoint gates; expandable finish gates become expandable checkpoint gates. |
+| `Freewheel` | Effects | Turbo and no-engine gates at the start and at every checkpoint. |
+| `NoSteer` | Effects | No-steering gates at the start and at every checkpoint. |
+| `SlowMotion` | Effects | Slow-motion gates at the start and at every checkpoint. |
+| `Flags` | Finishes | Every flag is a finish. |
+| `FloorFinish` | Finishes | The floor is the finish: the grass on Stadium maps (including the unbuildable grass out to the stands, minus the cells blocks stand on), the water on the vista maps (plus a 16-cell ring around the map). |
+| `GroundClippers` | Finishes | A finish slab just under the ground, for cars that clip through it. |
+| `Manslaughter` | Finishes | Every spectator stand is a finish. |
+| `Moth` | Finishes | Every light is a finish. |
+
+## Where it comes from
+
+Trackmania and its file format are Nadeo's. tman reads and writes maps with [GBX.NET](https://github.com/BigBang1112/gbx-net). The block and item catalog it ships (`Tman.Core/Inventory/Generated`) is generated from the game's own pak files; the custom items in `Tman.Core/Assets/Items` are built from the game's own meshes and materials.
+
+Developing tman: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-See the repository's license file for licensing information.
+[MIT](LICENSE.txt).
