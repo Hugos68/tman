@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Tman.Alterations.Internal;
+using Tman.Core.Alterations.Internal;
 
-namespace Tman.Alterations.Checkpoints
+namespace Tman.Core.Alterations.Checkpoints
 {
     public class StraightToTheFinish : Alteration
     {

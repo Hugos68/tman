@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using Tman.Alterations.Internal;
-using Tman.Inventory;
-using Tman.Inventory.Builders;
-using Tman.Maps;
+using Tman.Core.Alterations.Internal;
+using Tman.Core.Inventory;
+using Tman.Core.Inventory.Builders;
+using Tman.Core.Maps;
 
-namespace Tman.Alterations.Finishes
+namespace Tman.Core.Alterations.Finishes
 {
     public class GroundClippers : Alteration
     {

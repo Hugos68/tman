@@ -7,9 +7,9 @@ using GBX.NET;
 using GBX.NET.Engines.Game;
 using GBX.NET.Engines.GameData;
 using GBX.NET.LZO;
-using Tman.Inventory;
+using Tman.Core.Inventory;
 
-namespace Tman.Maps
+namespace Tman.Core.Maps
 {
     public sealed class Map
     {

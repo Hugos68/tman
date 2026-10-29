@@ -1,7 +1,7 @@
-using Tman.Inventory;
-using Tman.Maps;
+using Tman.Core.Inventory;
+using Tman.Core.Maps;
 
-namespace Tman.Alterations.Internal
+namespace Tman.Core.Alterations.Internal
 {
     public class ValidationRemoved : Alteration
     {

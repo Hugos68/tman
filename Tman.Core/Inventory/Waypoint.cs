@@ -1,4 +1,4 @@
-namespace Tman.Inventory
+namespace Tman.Core.Inventory
 {
     public enum Waypoint
     {

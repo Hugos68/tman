@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Tman.Alterations.Internal;
-using Tman.Inventory;
+using Tman.Core.Alterations.Internal;
+using Tman.Core.Inventory;
 
-namespace Tman.Alterations.Effects
+namespace Tman.Core.Alterations.Effects
 {
     public class Freewheel : Alteration
     {
