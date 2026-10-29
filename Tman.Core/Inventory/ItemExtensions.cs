@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using GBX.NET;
 using GBX.NET.Engines.GameData;
-using Tman.Maps;
+using Tman.Core.Maps;
 
-namespace Tman.Inventory
+namespace Tman.Core.Inventory
 {
     public static class ItemExtensions
     {

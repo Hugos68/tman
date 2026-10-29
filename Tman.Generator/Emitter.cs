@@ -1,13 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Globalization;
 using System.Text;
-using GBX.NET;
-using GBX.NET.Engines.Game;
-using GBX.NET.Engines.GameData;
-using GBX.NET.Engines.Plug;
 
 namespace Tman.Generator
 {

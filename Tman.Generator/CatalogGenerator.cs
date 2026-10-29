@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Globalization;
 using System.Text;
 using GBX.NET;
 using GBX.NET.Engines.Game;
@@ -37,17 +36,17 @@ namespace Tman.Generator
             using var store = new PakStore(paksDirectory);
             Directory.CreateDirectory(outDirectory);
             var blocks = Blocks(store);
-            var blocksPath = System.IO.Path.Combine(outDirectory, "Blocks.g.cs");
+            var blocksPath = Path.Combine(outDirectory, "Blocks.g.cs");
             File.WriteAllText(blocksPath, Emitter.Blocks(blocks, Families(blocks.ToDictionary(kv => kv.Key, kv => kv.Value.Waypoint, StringComparer.Ordinal), false)), new UTF8Encoding(false));
             Console.WriteLine($"wrote {blocksPath}: {blocks.Count} blocks");
             var items = Items(store);
-            var itemsPath = System.IO.Path.Combine(outDirectory, "Items.g.cs");
+            var itemsPath = Path.Combine(outDirectory, "Items.g.cs");
             File.WriteAllText(itemsPath, Emitter.Items("Items", items.Values, Families(items.ToDictionary(kv => kv.Key, kv => kv.Value.Waypoint, StringComparer.Ordinal), true)), new UTF8Encoding(false));
             Console.WriteLine($"wrote {itemsPath}: {items.Count} items");
             if (projectRoot is not null && customSubdirectory is not null)
             {
                 var custom = Custom(projectRoot, customSubdirectory);
-                var customPath = System.IO.Path.Combine(outDirectory, "Custom.g.cs");
+                var customPath = Path.Combine(outDirectory, "Custom.g.cs");
                 File.WriteAllText(customPath, Emitter.Items("Custom", custom, []), new UTF8Encoding(false));
                 Console.WriteLine($"wrote {customPath}: {custom.Count} items");
             }
