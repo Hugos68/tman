@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using tman.Inventory;
-using tman.Alterations.Internal;
+using Tman.Inventory;
+using Tman.Alterations.Internal;
 
-namespace tman.Alterations.Cars
+namespace Tman.Alterations.Cars
 {
     public class CarDesert : Alteration
     {

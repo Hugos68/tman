@@ -1,6 +1,6 @@
 using GBX.NET;
 
-namespace tman.Maps
+namespace Tman.Maps
 {
     public static class DirectionExtensions
     {

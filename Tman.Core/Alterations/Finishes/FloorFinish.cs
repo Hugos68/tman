@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using GBX.NET;
-using tman.Alterations.Internal;
-using tman.Inventory;
-using tman.Inventory.Builders;
-using tman.Maps;
+using Tman.Alterations.Internal;
+using Tman.Inventory;
+using Tman.Inventory.Builders;
+using Tman.Maps;
 
-namespace tman.Alterations.Finishes
+namespace Tman.Alterations.Finishes
 {
     public class FloorFinish : Alteration
     {

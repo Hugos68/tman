@@ -1,4 +1,4 @@
-namespace tman.Maps
+namespace Tman.Maps
 {
     public enum DirectionOffset
     {

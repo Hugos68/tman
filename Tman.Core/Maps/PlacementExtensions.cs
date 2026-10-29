@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using tman.Inventory;
+using Tman.Inventory;
 
-namespace tman.Maps
+namespace Tman.Maps
 {
     public static class PlacementQueries
     {

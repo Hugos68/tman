@@ -6,7 +6,7 @@ using GBX.NET;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Plug;
 
-namespace tman.Generator
+namespace Tman.Generator
 {
     public readonly record struct Xform(float M0, float M1, float M2, float M3, float M4, float M5, float M6, float M7, float M8, float M9, float M10, float M11)
     {

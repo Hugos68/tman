@@ -1,6 +1,6 @@
 using System;
 
-namespace tman.Inventory
+namespace Tman.Inventory
 {
     [Flags]
     public enum Collections

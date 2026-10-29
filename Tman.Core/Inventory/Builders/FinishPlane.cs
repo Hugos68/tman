@@ -5,9 +5,9 @@ using System.Linq;
 using GBX.NET;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Plug;
-using tman.Maps;
+using Tman.Maps;
 
-namespace tman.Inventory.Builders
+namespace Tman.Inventory.Builders
 {
     public static class FinishPlane
     {

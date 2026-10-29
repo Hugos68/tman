@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 using GBX.NET;
 
-namespace tman.Generator
+namespace Tman.Generator
 {
     public static class VegetationSizes
     {

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace tman.Generator
+namespace Tman.Generator
 {
     public static class CheckpointTwins
     {

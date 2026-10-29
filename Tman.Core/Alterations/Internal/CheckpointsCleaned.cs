@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using tman.Inventory;
-using tman.Maps;
+using Tman.Inventory;
+using Tman.Maps;
 
-namespace tman.Alterations.Internal
+namespace Tman.Alterations.Internal
 {
     public class CheckpointsCleaned : Alteration
     {

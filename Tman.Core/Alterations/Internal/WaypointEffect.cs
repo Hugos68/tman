@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using GBX.NET;
-using tman.Inventory;
-using tman.Maps;
+using Tman.Inventory;
+using Tman.Maps;
 
-namespace tman.Alterations.Internal
+namespace Tman.Alterations.Internal
 {
     public abstract class WaypointEffect(Block gate, Vec3 offset) : Alteration
     {

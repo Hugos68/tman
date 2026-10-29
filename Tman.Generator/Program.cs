@@ -2,7 +2,7 @@ using System;
 using System.CommandLine;
 using System.IO;
 
-namespace tman.Generator
+namespace Tman.Generator
 {
     internal class Program
     {
@@ -16,8 +16,8 @@ namespace tman.Generator
 
             var coreOption = new Option<DirectoryInfo>("--core")
             {
-                Description = "The TMAN.CORE project directory (Inventory/Generated is written, Assets/Items is scanned).",
-                DefaultValueFactory = _ => new DirectoryInfo(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "TMAN.CORE")))
+                Description = "The Tman.Core project directory (Inventory/Generated is written, Assets/Items is scanned).",
+                DefaultValueFactory = _ => new DirectoryInfo(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "Tman.Core")))
             };
 
             var rootCommand = new RootCommand("Regenerate the TMAN.CORE inventory catalog from the game's pak files and the custom items.");

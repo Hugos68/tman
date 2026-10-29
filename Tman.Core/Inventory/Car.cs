@@ -1,4 +1,4 @@
-namespace tman.Inventory
+namespace Tman.Inventory
 {
     public enum Car
     {

@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using tman.Alterations.Internal;
-using tman.Inventory;
-using tman.Maps;
+using Tman.Alterations.Internal;
+using Tman.Inventory;
+using Tman.Maps;
 
-namespace tman.Alterations.Finishes
+namespace Tman.Alterations.Finishes
 {
     public class Flags : Alteration
     {

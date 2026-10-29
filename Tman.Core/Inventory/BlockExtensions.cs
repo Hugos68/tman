@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace tman.Inventory
+namespace Tman.Inventory
 {
     public static class BlockExtensions
     {

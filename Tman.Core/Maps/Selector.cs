@@ -1,6 +1,6 @@
-using tman.Inventory;
+using Tman.Inventory;
 
-namespace tman.Maps
+namespace Tman.Maps
 {
     public readonly record struct Selector(string Id, bool IsBlock, int? Variant)
     {

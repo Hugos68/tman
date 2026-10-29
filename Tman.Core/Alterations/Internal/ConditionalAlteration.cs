@@ -1,8 +1,8 @@
 using System;
-using tman.Inventory;
-using tman.Maps;
+using Tman.Inventory;
+using Tman.Maps;
 
-namespace tman.Alterations.Internal
+namespace Tman.Alterations.Internal
 {
     public class ConditionalAlteration(Predicate<Map> predicate, Alteration alteration) : Alteration
     {

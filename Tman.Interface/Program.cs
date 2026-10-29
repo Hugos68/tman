@@ -2,8 +2,8 @@
 using System.CommandLine;
 using System.IO;
 using System.Linq;
-using tman.Alterations;
-using tman.Maps;
+using Tman.Alterations;
+using Tman.Maps;
 
 internal class Program
 {

@@ -9,7 +9,7 @@ using GBX.NET.Engines.Game;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Plug;
 
-namespace tman.Generator
+namespace Tman.Generator
 {
     public static class Emitter
     {

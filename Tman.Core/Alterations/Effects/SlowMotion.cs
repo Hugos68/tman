@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using tman.Alterations.Internal;
-using tman.Inventory;
+using Tman.Alterations.Internal;
+using Tman.Inventory;
 
-namespace tman.Alterations.Effects
+namespace Tman.Alterations.Effects
 {
     public class SlowMotion : Alteration
     {

@@ -7,7 +7,7 @@ using System.Text;
 using GBX.NET;
 using GBX.NET.PAK;
 
-namespace tman.Generator
+namespace Tman.Generator
 {
     public sealed class PakStore : IDisposable
     {
