@@ -11,9 +11,9 @@ namespace Tman.Core.Alterations.Other
 {
     public class Jitter : Alteration
     {
-        private const float Shift = 0.125f;
+        private const float Shift = 0.5f;
 
-        private const float Tilt = MathF.PI / 180;
+        private const float Tilt = MathF.PI / 45;
 
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
