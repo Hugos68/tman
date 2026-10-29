@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace tman
+namespace Tman
 {
     public static class Assets
     {
