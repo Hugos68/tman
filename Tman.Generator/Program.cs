@@ -20,7 +20,7 @@ namespace Tman.Generator
                 DefaultValueFactory = _ => new DirectoryInfo(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "Tman.Core")))
             };
 
-            var rootCommand = new RootCommand("Regenerate the TMAN.CORE inventory catalog from the game's pak files and the custom items.");
+            var rootCommand = new RootCommand("Regenerate the Tman.Core inventory catalog from the game's pak files and the custom items.");
             rootCommand.Options.Add(paksOption);
             rootCommand.Options.Add(coreOption);
             rootCommand.SetAction(parseResult =>
