@@ -16,6 +16,16 @@ It provides a reusable way to modify .Map.Gbx files through composable alteratio
 
 The example applies the Straight to the Finish alteration to the input map and writes the result to the specified output file.
 
+## Layout
+
+| Project | What |
+| --- | --- |
+| `Tman.Core` | The library: `Alterations/` (one folder per family, `Internal/` for the reusable steps), `Inventory/` (`Block`, `Item`, the enums, `Generated/` catalogs written by the generator, `Builders/`), `Maps/` (`Map`, `Placement`, `Selector`, positioning), `Assets/` (copied next to the executable). No UI code. |
+| `TMAN.INTERFACE` | The CLI (`tman <alteration> -i <map or pattern> -o <map or pattern>`); a GUI is another project referencing `Tman.Core`. |
+| `TMAN.GENERATOR` | `tman-generator --paks <directory with the five .pak files> [--core <Tman.Core directory>]` regenerates `Tman.Core/Inventory/Generated` from the game and `Assets/Items`. |
+
+Build everything with `dotnet build TMAN.sln`.
+
 ## Supported Alterations
 
 tman currently supports the following alterations:
