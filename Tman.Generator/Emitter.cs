@@ -130,6 +130,15 @@ namespace Tman.Generator
                 }
             }
             cs.Append("    };\n");
+            cs.Append("\n    public static readonly IReadOnlyDictionary<(string Id, Surface Surface), Block> Surfaces = new Dictionary<(string, Surface), Block>\n    {\n");
+            foreach (var (source, surface, twin) in SurfaceTwins.Twins)
+            {
+                if (identOf.ContainsKey(source) && identOf.TryGetValue(twin, out var twinIdent))
+                {
+                    cs.Append($"        [(\"{source}\", Surface.{surface})] = {twinIdent},\n");
+                }
+            }
+            cs.Append("    };\n");
             Families(cs, "Block", families, identOf);
             cs.Append("}\n");
             return cs.ToString();
