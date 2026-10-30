@@ -199,6 +199,37 @@ namespace Tman.Core.Maps
             block.YawPitchRoll = pose.YawPitchRoll;
         }
 
+        public static void Nudge(Placement placement, Vec3 offset, Vec3 yawPitchRoll)
+        {
+            if (placement.Block is { } block)
+            {
+                block.AbsolutePositionInMap += offset;
+                block.YawPitchRoll += yawPitchRoll;
+                return;
+            }
+            placement.Item!.AbsolutePositionInMap += offset;
+            placement.Item.YawPitchRoll += yawPitchRoll;
+        }
+
+        public void Translate(Placement placement, Vec3 offset)
+        {
+            if (placement.Block is { IsFree: false } block && offset.X % MapConstants.CellSize == 0 && offset.Y % MapConstants.CellHeight == 0 && offset.Z % MapConstants.CellSize == 0)
+            {
+                var coord = block.Coord + new Int3((int)(offset.X / MapConstants.CellSize), (int)(offset.Y / MapConstants.CellHeight), (int)(offset.Z / MapConstants.CellSize));
+                if (coord.X < 0 || coord.Y < 0 || coord.Z < 0 || coord.X >= Size.X || coord.Y >= Size.Y || coord.Z >= Size.Z)
+                {
+                    throw new InvalidOperationException($"{placement.Id} at {block.Coord} cannot move by {offset}: outside the map");
+                }
+                block.Coord = coord;
+                return;
+            }
+            if (placement.IsBlock)
+            {
+                Free(placement);
+            }
+            Nudge(placement, offset, Vec3.Zero);
+        }
+
         private Placement PlaceBlock(CGameCtnBlock block)
         {
             Gbx.PlaceBlock(block);

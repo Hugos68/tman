@@ -36,20 +36,8 @@ namespace Tman.Core.Alterations.Other
                 }
                 var pose = placement.Pose(map);
                 var random = new Random(Seed($"{map.Name}|{placement.Id}|{pose.Coords}"));
-                Nudge(placement, new Vec3(Spread(random, Shift), Spread(random, Shift), Spread(random, Shift)), new Vec3(Spread(random, Tilt), Spread(random, Tilt), Spread(random, Tilt)));
+                Map.Nudge(placement, new Vec3(Spread(random, Shift), Spread(random, Shift), Spread(random, Shift)), new Vec3(Spread(random, Tilt), Spread(random, Tilt), Spread(random, Tilt)));
             }
-        }
-
-        private static void Nudge(Placement placement, Vec3 offset, Vec3 yawPitchRoll)
-        {
-            if (placement.Block is { } block)
-            {
-                block.AbsolutePositionInMap += offset;
-                block.YawPitchRoll += yawPitchRoll;
-                return;
-            }
-            placement.Item!.AbsolutePositionInMap += offset;
-            placement.Item.YawPitchRoll += yawPitchRoll;
         }
 
         private static float Spread(Random random, float extent) => (float)(random.NextDouble() * 2 - 1) * extent;
