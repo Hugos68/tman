@@ -104,7 +104,8 @@ namespace Tman.Core.Maps
             var position = source.Pose(this);
             position.Move(offset);
             var placement = Place(model, position.Coords, position.YawPitchRoll);
-            placement.Item!.Color = source.Color;
+            placement.Block?.Color = source.Color;
+            placement.Item?.Color = source.Color;
             return placement;
         }
 
