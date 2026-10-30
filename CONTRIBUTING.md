@@ -40,7 +40,7 @@ Tman.Core/
 └─ Assets/           Data/ (lookup tables) and Items/<Category>/<Family>/*.Item.Gbx (the custom items)
 ```
 
-Namespaces follow the folders (`Tman.Alterations.Finishes`, `Tman.Inventory`, `Tman.Maps`).
+Namespaces follow the folders (`Tman.Core.Alterations.Finishes`, `Tman.Core.Inventory`, `Tman.Core.Maps`).
 
 ### The catalog
 
