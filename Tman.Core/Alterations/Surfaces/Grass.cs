@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using Tman.Alterations.Internal;
-using Tman.Inventory;
-using Tman.Maps;
+using Tman.Core.Alterations.Internal;
+using Tman.Core.Inventory;
+using Tman.Core.Maps;
 
-namespace Tman.Alterations.Surfaces
+namespace Tman.Core.Alterations.Surfaces
 {
     public class Grass : Alteration
     {
@@ -13,7 +13,7 @@ namespace Tman.Alterations.Surfaces
             new LightmapRemoved(),
             new PenaltiesReplaced(),
             new MapNameEdited(name => name + " Grass"),
-            new ItemFinishes(new Dictionary<Selector, Item>
+            new ItemsPlaced(new Dictionary<Selector, Item>
             {
                 [Blocks.PlatformDirtBase] = Custom.GrassPlatformDirtBase,
                 [Blocks.PlatformDirtBaseOnLandHill3] = Custom.GrassPlatformDirtBaseOnLandHill3,

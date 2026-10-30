@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using Tman.Alterations.Internal;
-using Tman.Inventory;
-using Tman.Maps;
-
-namespace Tman.Alterations.Surfaces
+using Tman.Core.Alterations.Internal;
+using Tman.Core.Inventory;
+using Tman.Core.Maps;
+    
+namespace Tman.Core.Alterations.Surfaces
 {
     public class Ice : Alteration
     {
@@ -13,7 +13,7 @@ namespace Tman.Alterations.Surfaces
             new LightmapRemoved(),
             new PenaltiesReplaced(),
             new MapNameEdited(name => name + " Ice"),
-            new ItemFinishes(new Dictionary<Selector, Item>
+            new ItemsPlaced(new Dictionary<Selector, Item>
             {
                 [Blocks.PlatformDirtBase] = Custom.IcePlatformDirtBase,
                 [Blocks.PlatformDirtBaseOnLandHill3] = Custom.IcePlatformDirtBaseOnLandHill3,

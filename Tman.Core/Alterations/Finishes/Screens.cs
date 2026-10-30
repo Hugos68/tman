@@ -14,7 +14,7 @@ namespace Tman.Core.Alterations.Finishes
             new InventoryRemoved(placement => placement.IsFinish),
             new CheckpointsCleaned(),
             new MapNameEdited(name => name + " Screens"),
-            new ItemFinishes(new Dictionary<Selector, Item>
+            new ItemsPlaced(new Dictionary<Selector, Item>
             {
                 [Blocks.TechnicsScreen1x1Straight] = Custom.FinishScreen1x1Straight,
                 [Blocks.TechnicsScreen1x1StraightX2] = Custom.FinishScreen1x1StraightX2,

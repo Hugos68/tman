@@ -13,7 +13,7 @@ namespace Tman.Core.Alterations.Surfaces
             new LightmapRemoved(),
             new PenaltiesReplaced(),
             new MapNameEdited(name => name + " Dirt"),
-            new ItemFinishes(new Dictionary<Selector, Item>
+            new ItemsPlaced(new Dictionary<Selector, Item>
             {
                 [Blocks.PlatformGrassBase] = Custom.DirtPlatformGrassBase,
                 [Blocks.PlatformGrassBaseOnLandHill1] = Custom.DirtPlatformGrassBaseOnLandHill1,
