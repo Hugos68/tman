@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Globalization;
 using System.Text;
 using GBX.NET;
 using GBX.NET.Engines.Game;
@@ -10,12 +11,19 @@ using GBX.NET.Engines.Plug;
 
 namespace Tman.Generator
 {
-    public sealed record BlockRow(string Id, int SizeX, int SizeZ, List<(int X, int Z)>? Cells, int Collections, int? Waypoint, bool Ground, bool Air, int Variants)
+    public sealed record BlockRow(string Id, int SizeX, int SizeZ, List<(int X, int Z)>? Cells, int Collections, int? Waypoint, bool Ground, bool Air, int Variants, string SymmetricalBlock, int SymmetricalDir, bool SymmetryH, bool SymmetryV, bool SymmetryD1, bool SymmetryD2)
     {
         public int Collections { get; set; } = Collections;
         public bool Ground { get; set; } = Ground;
         public bool Air { get; set; } = Air;
         public int Variants { get; set; } = Variants;
+        public string SymmetricalBlock { get; set; } = SymmetricalBlock;
+        public bool SymmetryH { get; set; } = SymmetryH;
+        public bool SymmetryV { get; set; } = SymmetryV;
+        public bool SymmetryD1 { get; set; } = SymmetryD1;
+        public bool SymmetryD2 { get; set; } = SymmetryD2;
+        public string? Mirror { get; set; }
+        public int MirrorTurn { get; set; }
     }
 
     public sealed record ItemRow(string Id, string Author, string? Path, int Collections, int? Waypoint, int Variants, Vec3 Size)
@@ -36,17 +44,17 @@ namespace Tman.Generator
             using var store = new PakStore(paksDirectory);
             Directory.CreateDirectory(outDirectory);
             var blocks = Blocks(store);
-            var blocksPath = Path.Combine(outDirectory, "Blocks.g.cs");
+            var blocksPath = System.IO.Path.Combine(outDirectory, "Blocks.g.cs");
             File.WriteAllText(blocksPath, Emitter.Blocks(blocks, Families(blocks.ToDictionary(kv => kv.Key, kv => kv.Value.Waypoint, StringComparer.Ordinal), false)), new UTF8Encoding(false));
             Console.WriteLine($"wrote {blocksPath}: {blocks.Count} blocks");
             var items = Items(store);
-            var itemsPath = Path.Combine(outDirectory, "Items.g.cs");
+            var itemsPath = System.IO.Path.Combine(outDirectory, "Items.g.cs");
             File.WriteAllText(itemsPath, Emitter.Items("Items", items.Values, Families(items.ToDictionary(kv => kv.Key, kv => kv.Value.Waypoint, StringComparer.Ordinal), true)), new UTF8Encoding(false));
             Console.WriteLine($"wrote {itemsPath}: {items.Count} items");
             if (projectRoot is not null && customSubdirectory is not null)
             {
                 var custom = Custom(projectRoot, customSubdirectory);
-                var customPath = Path.Combine(outDirectory, "Custom.g.cs");
+                var customPath = System.IO.Path.Combine(outDirectory, "Custom.g.cs");
                 File.WriteAllText(customPath, Emitter.Items("Custom", custom, []), new UTF8Encoding(false));
                 Console.WriteLine($"wrote {customPath}: {custom.Count} items");
             }
@@ -132,18 +140,50 @@ namespace Tman.Generator
                 var full = cells.Count >= size.Item1 * size.Item2;
                 var variants = Has(info.VariantBaseGround) + Has(info.VariantBaseAir) + (info.AdditionalVariantsGround ?? []).Sum(Has) + (info.AdditionalVariantsAir ?? []).Sum(Has);
                 int? waypoint = info.Chunks.Any(c => c.Id == 0x0304E026) ? (int)info.WayPointType : null;
-                var row = new BlockRow(name, size.Item1, size.Item2, full ? null : cells, bit, waypoint, ground is not null, air is not null, variants);
+                var symmetry = info.VariantBaseGround is { BlockUnitModels.Length: > 0 } ? info.VariantBaseGround : info.VariantBaseAir is { BlockUnitModels.Length: > 0 } ? info.VariantBaseAir : (CGameCtnBlockInfoVariant?)info.VariantBaseGround ?? info.VariantBaseAir;
+                var row = new BlockRow(name, size.Item1, size.Item2, full ? null : cells, bit, waypoint, ground is not null, air is not null, variants, info.SymmetricalBlockInfoId ?? "", (int)info.Dir, symmetry?.HasManualSymmetryH ?? false, symmetry?.HasManualSymmetryV ?? false, symmetry?.HasManualSymmetryD1 ?? false, symmetry?.HasManualSymmetryD2 ?? false);
                 if (blocks.TryGetValue(name, out var existing))
                 {
                     existing.Collections |= bit;
                     existing.Variants = Math.Max(existing.Variants, row.Variants);
                     existing.Ground |= row.Ground;
                     existing.Air |= row.Air;
+                    if (existing.SymmetricalBlock.Length == 0)
+                    {
+                        existing.SymmetricalBlock = row.SymmetricalBlock;
+                    }
+                    existing.SymmetryH |= row.SymmetryH;
+                    existing.SymmetryV |= row.SymmetryV;
+                    existing.SymmetryD1 |= row.SymmetryD1;
+                    existing.SymmetryD2 |= row.SymmetryD2;
                 }
                 else
                 {
                     blocks.Add(name, row);
                 }
+            }
+            var byLower = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var id in blocks.Keys)
+            {
+                byLower.TryAdd(id.ToLowerInvariant(), id);
+            }
+            foreach (var (id, row) in blocks)
+            {
+                if (row.SymmetricalBlock.Length > 0 && row.SymmetricalBlock != id && byLower.TryGetValue(row.SymmetricalBlock.ToLowerInvariant(), out var twin))
+                {
+                    row.Mirror = twin;
+                    row.MirrorTurn = row.SymmetricalDir & 3;
+                    continue;
+                }
+                var swapped = id.Replace("Left", "\0").Replace("Right", "Left").Replace("\0", "Right");
+                if (swapped != id && blocks.ContainsKey(swapped))
+                {
+                    row.Mirror = swapped;
+                    row.MirrorTurn = 0;
+                    continue;
+                }
+                row.Mirror = null;
+                row.MirrorTurn = row.SymmetryV ? 0 : row.SymmetryH ? 2 : row.SymmetryD1 ? 1 : row.SymmetryD2 ? 3 : 0;
             }
             return blocks;
         }

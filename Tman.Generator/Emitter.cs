@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Globalization;
 using System.Text;
+using GBX.NET;
+using GBX.NET.Engines.Game;
+using GBX.NET.Engines.GameData;
+using GBX.NET.Engines.Plug;
 
 namespace Tman.Generator
 {
@@ -92,7 +97,7 @@ namespace Tman.Generator
             {
                 var ident = Unique(id, used);
                 var cells = b.Cells is null ? "null" : "new[] { " + string.Join(", ", b.Cells.Select(c => $"new[] {{ {c.X}, {c.Z} }}")) + " }";
-                cs.Append($"    public static readonly Block {ident} = new(\"{id}\", {b.SizeX}, {b.SizeZ}, {cells}, {Collections(b.Collections)}, {Waypoint(b.Waypoint)}, {(b.Ground ? "true" : "false")}, {(b.Air ? "true" : "false")}, {b.Variants});\n");
+                cs.Append($"    public static readonly Block {ident} = new(\"{id}\", {b.SizeX}, {b.SizeZ}, {cells}, {Collections(b.Collections)}, {Waypoint(b.Waypoint)}, {(b.Ground ? "true" : "false")}, {(b.Air ? "true" : "false")}, {b.Variants}, {(b.Mirror is null ? "null" : $"\"{b.Mirror}\"")}, {b.MirrorTurn});\n");
                 idents.Add((ident, id));
             }
             cs.Append("\n    public static readonly IReadOnlyDictionary<string, Block> ById = new Dictionary<string, Block>\n    {\n");
@@ -113,6 +118,15 @@ namespace Tman.Generator
                 if (identOf.ContainsKey(checkpoint) && identOf.TryGetValue(plain, out var plainIdent))
                 {
                     cs.Append($"        [\"{checkpoint}\"] = {plainIdent},\n");
+                }
+            }
+            cs.Append("    };\n");
+            cs.Append("\n    public static readonly IReadOnlyDictionary<string, Block> PenaltyOf = new Dictionary<string, Block>\n    {\n");
+            foreach (var (penalty, plain) in PenaltyTwins.Twins)
+            {
+                if (identOf.ContainsKey(penalty) && identOf.TryGetValue(plain, out var plainIdent))
+                {
+                    cs.Append($"        [\"{penalty}\"] = {plainIdent},\n");
                 }
             }
             cs.Append("    };\n");
