@@ -103,7 +103,9 @@ namespace Tman.Core.Maps
         {
             var position = source.Pose(this);
             position.Move(offset);
-            return Place(model, position.Coords, position.YawPitchRoll);
+            var placement = Place(model, position.Coords, position.YawPitchRoll);
+            placement.Item!.Color = source.Color;
+            return placement;
         }
 
         public Placement PlaceRelative(Placement source, Block model, Vec3 offset = default)

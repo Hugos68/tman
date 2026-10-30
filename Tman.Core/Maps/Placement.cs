@@ -28,6 +28,8 @@ namespace Tman.Core.Maps
 
         public uint Flags => Block is not null ? (uint)Block.Flags : (uint)Item!.Flags;
 
+        public DifficultyColor Color => Block?.Color ?? Item!.Color;
+
         public int Variant => Block is not null
             ? (Block.Flags & 0x3F) + 64 * ((Block.Flags >> 21) & 0x7F)
             : (Item!.Flags >> 8) & 0xFF;
