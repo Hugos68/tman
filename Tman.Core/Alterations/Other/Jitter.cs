@@ -35,7 +35,7 @@ namespace Tman.Core.Alterations.Other
                     map.Free(placement);
                 }
                 var pose = placement.Pose(map);
-                var random = new Random(Seed($"{map.Uid}|{placement.Id}|{pose.Coords}"));
+                var random = new Random(Seed($"{map.Name}|{placement.Id}|{pose.Coords}"));
                 Nudge(placement, new Vec3(Spread(random, Shift), Spread(random, Shift), Spread(random, Shift)), new Vec3(Spread(random, Tilt), Spread(random, Tilt), Spread(random, Tilt)));
             }
         }
