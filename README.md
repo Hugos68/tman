@@ -50,6 +50,7 @@ Every output map has its validation removed (no author time, no medals — valid
 | `CarSport` | Cars | Drives the map with the Sport (Stadium) car. |
 | `Checkpointless` | Checkpoints | Removes every checkpoint. |
 | `StraightToTheFinish` | Checkpoints | Replaces every checkpoint by its plain block (the road or platform piece it was built from), so the race is start to finish with nothing in between. |
+| `StraightToTheCenter` | Finishes | Moves the finish as is to the absolute center of the map |
 | `StraightToTheFinishAndBack` | Finishes | Puts a finish inside the start and turns every old finish into a linked checkpoint: drive to the far end and back. Ring finishes become respawnable checkpoint gates; expandable finish gates become expandable checkpoint gates. |
 | `Freewheel` | Effects | Turbo and no-engine gates at the start and at every checkpoint. |
 | `NoSteer` | Effects | No-steering gates at the start and at every checkpoint. |
@@ -59,6 +60,7 @@ Every output map has its validation removed (no author time, no medals — valid
 | `GroundClippers` | Finishes | A finish slab just under the ground, for cars that clip through it. |
 | `Manslaughter` | Finishes | Every spectator stand is a finish. |
 | `Moth` | Finishes | Every light is a finish. |
+| `Jitter` | Other | Every block/item position and yawpitchroll is slightly changed |
 
 ## Where it comes from
 
