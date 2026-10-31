@@ -40,7 +40,7 @@ Tman.Core/
 └─ Assets/           Data/ (lookup tables) and Items/<Category>/<Family>/*.Item.Gbx (the custom items)
 ```
 
-Namespaces follow the folders (`Tman.Alterations.Finishes`, `Tman.Inventory`, `Tman.Maps`).
+Namespaces follow the folders (`Tman.Core.Alterations.Finishes`, `Tman.Core.Inventory`, `Tman.Core.Maps`).
 
 ### The catalog
 
@@ -66,7 +66,7 @@ Facts the code relies on, learnt from the game's own files: a start block connec
 
 ## Writing an alteration
 
-An alteration is a class deriving from `Alteration` in `Tman.Alterations.<Family>`; its class name is the name users type. Most alterations are a list of steps:
+An alteration is a class deriving from `Alteration` in `Tman.Core.Alterations.<Family>`; its class name is the name users type. Most alterations are a list of steps:
 
 ```csharp
 public class Checkpointless : Alteration
