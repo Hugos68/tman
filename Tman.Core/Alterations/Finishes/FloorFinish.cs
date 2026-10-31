@@ -21,7 +21,7 @@ namespace Tman.Core.Alterations.Finishes
             new CheckpointsCleaned(),
             new ConditionalAlteration(
                 map => map.Collection == Collections.Stadium,
-                new ItemFinishes(new Dictionary<Selector, Item>
+                new RelativelyPlacedItems(new Dictionary<Selector, Item>
                     {
                         [Blocks.DecoPlatformCurve3In] = Custom.FloorFinishDecoPlatformCurve3In,
                         [Blocks.DecoPlatformSlopeBaseCurve1InFull.Variant(0)] = Custom.FloorFinishDecoPlatformSlopeBaseCurve1InFullV0,

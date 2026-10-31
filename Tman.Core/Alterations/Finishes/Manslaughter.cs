@@ -14,7 +14,7 @@ namespace Tman.Core.Alterations.Finishes
             new InventoryRemoved(placement => placement.IsFinish),
             new CheckpointsCleaned(),
             new MapNameEdited(name => name + " Manslaughter"),
-            new ItemFinishes(new Dictionary<Selector, Item>
+            new RelativelyPlacedItems(new Dictionary<Selector, Item>
             {
                 [Blocks.StandCornerIn] = Custom.FinishStandCornerIn,
                 [Blocks.StandCornerInOnDecoWall] = Custom.FinishStandCornerIn,
