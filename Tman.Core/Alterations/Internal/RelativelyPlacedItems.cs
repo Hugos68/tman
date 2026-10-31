@@ -6,21 +6,21 @@ using Tman.Core.Maps;
 
 namespace Tman.Core.Alterations.Internal
 {
-    public class ItemFinishes(IReadOnlyDictionary<Selector, Item> finishes, Func<Placement, bool>? filter = null) : Alteration
+    public class RelativelyPlacedItems(IReadOnlyDictionary<Selector, Item> selectorItemDictionary, Func<Placement, bool>? filter = null) : Alteration
     {
         protected override void Run(Map map)
         {
-            foreach (var (selector, finish) in finishes)
+            foreach (var (selector, item) in selectorItemDictionary)
             {
                 var sources = map.Of(selector).Where(placement => filter is null || filter(placement)).ToList();
                 if (sources.Count == 0)
                 {
                     continue;
                 }
-                map.Embed(finish);
+                map.Embed(item);
                 foreach (var source in sources)
                 {
-                    map.PlaceRelative(source, finish);
+                    map.PlaceRelative(source, item);
                 }
             }
         }
