@@ -4,19 +4,19 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using GBX.NET;
-using Tman.Core.Alterations.Internal;
+using Tman.Core.Alterations.Steps;
 using Tman.Core.Inventory;
 using Tman.Core.Inventory.Builders;
 using Tman.Core.Maps;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public class FloorFinish : Alteration
+    public class FloorFinish : StandardAlteration
     {
-        protected override IEnumerable<Alteration> PreappliedAlterations =>
+        protected override string DisplayName => "Floor Finish";
+
+        protected override IEnumerable<Alteration> Steps =>
         [
-            new ValidationRemoved(),
-            new LightmapRemoved(),
             new InventoryRemoved(placement => placement.IsFinish),
             new CheckpointsCleaned(),
             new ConditionalAlteration(
@@ -46,8 +46,7 @@ namespace Tman.Core.Alterations.Finishes
                         [Blocks.TrackWallDeadendRoundPillar.Variant(64)] = Custom.FloorFinishTrackWallDeadendRoundPillarV64,
                         [Blocks.TrackWallStraightPillar] = Custom.FloorFinishTrackWallStraightPillar,
                     },
-                    placement => !placement.IsFree && placement.IsGround)),
-            new MapNameEdited(name => name + " Floor Finish"),
+                    placement => !placement.IsFree && placement.IsGround))
         ];
 
         private static readonly Dictionary<Collections, (Block[] Tiles, float Bottom, float Top)> OpenWater = new()

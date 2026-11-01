@@ -1,18 +1,17 @@
 using System.Collections.Generic;
-using Tman.Core.Alterations.Internal;
+using Tman.Core.Alterations.Steps;
 using Tman.Core.Inventory;
 
 namespace Tman.Core.Alterations.Effects
 {
-    public class NoSteer : Alteration
+    public class NoSteer : StandardAlteration
     {
-        protected override IEnumerable<Alteration> PreappliedAlterations =>
+        protected override string DisplayName => "NoSteer";
+
+        protected override IEnumerable<Alteration> Steps =>
         [
-            new ValidationRemoved(),
-            new LightmapRemoved(),
             new StartEffect(Blocks.GateSpecialNoSteering, new(0,0,0)),
-            new CheckpointEffect(Blocks.GateSpecialNoSteering, new(0, 0, 0)),
-            new MapNameEdited(name => name + " NoSteer")
+            new CheckpointEffect(Blocks.GateSpecialNoSteering, new(0, 0, 0))
         ];
     }
 }

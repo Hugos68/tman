@@ -61,6 +61,13 @@ Every output map has its validation removed (no author time, no medals — valid
 | `Manslaughter` | Finishes | Every spectator stand is a finish. |
 | `Moth` | Finishes | Every light is a finish. |
 | `Jitter` | Other | Every block/item position and yawpitchroll is slightly changed |
+| `Road` | Surfaces | Every road, open road and platform drives on asphalt: road kinds become surface blocks with the asphalt deck, platforms their Tech twin. |
+| `Dirt` | Surfaces | The same with dirt. |
+| `Ice` | Surfaces | The same with ice. |
+| `Grass` | Surfaces | The same with grass. |
+| `Plastic` | Surfaces | The same with plastic. |
+
+The surface alterations build their blocks from the game's own files: copy `Stadium.pak`, `RedIsland.pak`, `WhiteShore.pak`, `GreenCoast.pak` and `BlueBay.pak` (from `Trackmania\Packs`) into a `Paks/` folder at the repository root. The first run on a map builds every road block it needs (about a second each) into `Cache/`; later runs reuse them.
 
 ## Where it comes from
 

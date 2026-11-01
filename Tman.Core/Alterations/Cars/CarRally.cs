@@ -1,18 +1,16 @@
 using System.Collections.Generic;
 using Tman.Core.Inventory;
-using Tman.Core.Alterations.Internal;
+using Tman.Core.Alterations.Steps;
 
 namespace Tman.Core.Alterations.Cars
 {
-    public class CarRally : Alteration
+    public class CarRally : StandardAlteration
     {
-        protected override IEnumerable<Alteration> PreappliedAlterations =>
-        [
-            new ValidationRemoved(),
-            new LightmapRemoved(),
-            new CarChange(Car.Rally),
-            new MapNameEdited(name => name + " Rally Car")
-        ];
+        protected override string DisplayName => "Rally Car";
 
+        protected override IEnumerable<Alteration> Steps =>
+        [
+            new CarChange(Car.Rally)
+        ];
     }
 }

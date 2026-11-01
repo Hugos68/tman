@@ -1,18 +1,17 @@
 using System.Collections.Generic;
-using Tman.Core.Alterations.Internal;
+using Tman.Core.Alterations.Steps;
 using Tman.Core.Inventory;
 
 namespace Tman.Core.Alterations.Checkpoints
 {
-    public class Checkpointless : Alteration
+    public class Checkpointless : StandardAlteration
     {
 
-        protected override IEnumerable<Alteration> PreappliedAlterations =>
+        protected override string DisplayName => "Checkpointless";
+
+        protected override IEnumerable<Alteration> Steps =>
         [
-            new ValidationRemoved(),
-            new LightmapRemoved(),
-            new InventoryRemoved(placement => placement.IsCheckpoint),
-            new MapNameEdited(name => name + " Checkpointless")
+            new InventoryRemoved(placement => placement.IsCheckpoint)
         ];
     }
 }

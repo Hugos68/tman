@@ -1,19 +1,18 @@
 using System.Collections.Generic;
-using Tman.Core.Alterations.Internal;
+using Tman.Core.Alterations.Steps;
 using Tman.Core.Inventory;
 using Tman.Core.Maps;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public class Manslaughter : Alteration
+    public class Manslaughter : StandardAlteration
     {
-        protected override IEnumerable<Alteration> PreappliedAlterations =>
+        protected override string DisplayName => "Manslaughter";
+
+        protected override IEnumerable<Alteration> Steps =>
         [
-            new ValidationRemoved(),
-            new LightmapRemoved(),
             new InventoryRemoved(placement => placement.IsFinish),
             new CheckpointsCleaned(),
-            new MapNameEdited(name => name + " Manslaughter"),
             new RelativelyPlacedItems(new Dictionary<Selector, Item>
             {
                 [Blocks.StandCornerIn] = Custom.FinishStandCornerIn,

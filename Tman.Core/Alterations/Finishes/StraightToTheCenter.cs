@@ -1,20 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using GBX.NET;
-using Tman.Core.Alterations.Internal;
+using Tman.Core.Alterations.Steps;
 using Tman.Core.Inventory;
 using Tman.Core.Maps;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public class StraightToTheCenter : Alteration
+    public class StraightToTheCenter : StandardAlteration
     {
-        protected override IEnumerable<Alteration> PreappliedAlterations =>
+        protected override string DisplayName => "Straight to the Center";
+
+        protected override IEnumerable<Alteration> Steps =>
         [
-            new ValidationRemoved(),
-            new LightmapRemoved(),
-            new CheckpointsCleaned(),
-            new MapNameEdited(name => name + " Straight to the Center")
+            new CheckpointsCleaned()
         ];
 
         protected override void Run(Map map)

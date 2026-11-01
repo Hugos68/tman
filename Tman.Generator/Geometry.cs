@@ -4,6 +4,7 @@ using System.Linq;
 using GBX.NET;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Plug;
+using Tman.Paks;
 
 namespace Tman.Generator
 {

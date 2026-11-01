@@ -4,7 +4,7 @@ using System.Linq;
 using Tman.Core.Inventory;
 using Tman.Core.Maps;
 
-namespace Tman.Core.Alterations.Internal
+namespace Tman.Core.Alterations.Steps
 {
     public class RelativelyPlacedItems(IReadOnlyDictionary<Selector, Item> selectorItemDictionary, Func<Placement, bool>? filter = null) : Alteration
     {

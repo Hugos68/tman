@@ -1,16 +1,15 @@
 using System.Collections.Generic;
-using Tman.Core.Alterations.Internal;
+using Tman.Core.Alterations.Steps;
 
 namespace Tman.Core.Alterations.Checkpoints
 {
-    public class StraightToTheFinish : Alteration
+    public class StraightToTheFinish : StandardAlteration
     {
-        protected override IEnumerable<Alteration> PreappliedAlterations =>
+        protected override string DisplayName => "Straight to the Finish";
+
+        protected override IEnumerable<Alteration> Steps =>
         [
-            new ValidationRemoved(),
-            new LightmapRemoved(),
-            new CheckpointsCleaned(),
-            new MapNameEdited(name => name + " Straight to the Finish")
+            new CheckpointsCleaned()
         ];
     }
 }

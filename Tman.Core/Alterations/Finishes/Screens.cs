@@ -1,19 +1,18 @@
 using System.Collections.Generic;
-using Tman.Core.Alterations.Internal;
+using Tman.Core.Alterations.Steps;
 using Tman.Core.Inventory;
 using Tman.Core.Maps;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public class Screens : Alteration
+    public class Screens : StandardAlteration
     {
-        protected override IEnumerable<Alteration> PreappliedAlterations =>
+        protected override string DisplayName => "Screens";
+
+        protected override IEnumerable<Alteration> Steps =>
         [
-            new ValidationRemoved(),
-            new LightmapRemoved(),
             new InventoryRemoved(placement => placement.IsFinish),
             new CheckpointsCleaned(),
-            new MapNameEdited(name => name + " Screens"),
             new RelativelyPlacedItems(new Dictionary<Selector, Item>
             {
                 [Blocks.TechnicsScreen1x1Straight] = Custom.FinishScreen1x1Straight,

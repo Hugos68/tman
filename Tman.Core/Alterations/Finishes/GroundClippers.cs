@@ -1,21 +1,20 @@
 using System.Collections.Generic;
 using System.Linq;
-using Tman.Core.Alterations.Internal;
+using Tman.Core.Alterations.Steps;
 using Tman.Core.Inventory;
 using Tman.Core.Inventory.Builders;
 using Tman.Core.Maps;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public class GroundClippers : Alteration
+    public class GroundClippers : StandardAlteration
     {
-        protected override IEnumerable<Alteration> PreappliedAlterations =>
+        protected override string DisplayName => "Ground Clippers";
+
+        protected override IEnumerable<Alteration> Steps =>
         [
-            new ValidationRemoved(),
-            new LightmapRemoved(),
             new InventoryRemoved(placement => placement.IsFinish),
-            new CheckpointsCleaned(),
-            new MapNameEdited(name => name + " Ground Clippers")
+            new CheckpointsCleaned()
         ];
 
         private static readonly Dictionary<Collections, (Block[] Tiles, float Bed)> Floors = new()
