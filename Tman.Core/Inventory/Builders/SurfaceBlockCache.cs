@@ -11,7 +11,7 @@ namespace Tman.Core.Inventory.Builders
     {
         private const string FolderName = "Cache";
 
-        private static readonly Lazy<string> Root = new(() => Path.Combine(Directory.GetParent(GamePaks.Directory)!.FullName, FolderName, "Blocks", PakStamp()));
+        private static readonly Lazy<string> Root = new(() => Path.Combine(Directory.GetParent(GamePaks.Directory)!.FullName, FolderName, "Blocks", $"{PakStamp()}-{BuilderStamp()}"));
 
         public static byte[] GetOrBuild(SurfaceBlockFile file)
         {
@@ -25,6 +25,8 @@ namespace Tman.Core.Inventory.Builders
             File.WriteAllBytes(path, bytes);
             return bytes;
         }
+
+        private static string BuilderStamp() => typeof(SurfaceBlockBuilder).Assembly.ManifestModule.ModuleVersionId.ToString("N")[..8];
 
         private static string PakStamp()
         {
