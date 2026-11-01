@@ -15,7 +15,8 @@ namespace Tman.Core.Inventory
         public static readonly Surface Plastic = new("Plastic", "Plastic");
 
         public static readonly Surface Wood = new("Wood", "Wood");
+        public static readonly Surface Metal = new("Metal", "Metal");
 
-        public static readonly IReadOnlyList<Surface> All = [Road, Dirt, Ice, Grass, Plastic, Wood];
+        public static readonly IReadOnlyList<Surface> All = [Road, Dirt, Ice, Grass, Plastic, Wood, Metal];
     }
 }
