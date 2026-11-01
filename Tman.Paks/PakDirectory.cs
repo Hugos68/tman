@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Tman.Paks.Installations;
 
 namespace Tman.Paks
 {
@@ -9,9 +10,11 @@ namespace Tman.Paks
     {
         public const string FolderName = "Paks";
 
-        private const string GamePacksFolder = @"Trackmania\Packs";
+        private const string PacksFolder = "Packs";
 
-        private static readonly string[] InstallationRoots =
+        private const string GameFolder = "Trackmania";
+
+        private static readonly string[] LauncherRoots =
         [
             @"Ubisoft\Ubisoft Game Launcher\games",
             @"Steam\steamapps\common",
@@ -20,18 +23,24 @@ namespace Tman.Paks
 
         public static string Find()
         {
-            var candidates = Installations().Concat(Ancestors()).ToList();
+            var candidates = Installations().Select(game => Path.Combine(game, PacksFolder)).Concat(Ancestors()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             return candidates.FirstOrDefault(Holds)
                 ?? throw new DirectoryNotFoundException($"No Trackmania installation found and no {FolderName}/ folder with the game's .pak files above {AppContext.BaseDirectory}; looked in: {string.Join(", ", candidates)}");
         }
 
-        private static IEnumerable<string> Installations()
+        private static IEnumerable<string> Installations() =>
+            SteamLibraries.GameFolders()
+                .Concat(UbisoftInstalls.GameFolders())
+                .Concat(EpicInstalls.GameFolders())
+                .Concat(ProgramFilesGameFolders());
+
+        private static IEnumerable<string> ProgramFilesGameFolders()
         {
             foreach (var programs in new[] { Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) }.Where(folder => folder.Length > 0).Distinct())
             {
-                foreach (var root in InstallationRoots)
+                foreach (var root in LauncherRoots)
                 {
-                    yield return Path.Combine(programs, root, GamePacksFolder);
+                    yield return Path.Combine(programs, root, GameFolder);
                 }
             }
         }
