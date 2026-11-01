@@ -12,6 +12,8 @@ namespace Tman.Core.Inventory
 
         private const string RoadDirt = Materials + "RoadDirt";
 
+        private const string RoadDirtFullColorize = Materials + "RoadDirtFullColorize";
+
         private const string RoadIce = Materials + "RoadIce";
 
         private const string RoadBump = Materials + "RoadBump";
@@ -32,6 +34,9 @@ namespace Tman.Core.Inventory
             new("RoadBump", Decks(RoadBump), null),
             new("SnowRoad", Decks(SnowRoad), Surface.Wood),
             new("RallyRoadDirt", Decks(RoadDirt), Surface.Dirt),
+            new("RallyCastleRoad", Decks(RoadDirt, RoadDirtFullColorize), Surface.Dirt),
+            new("ToRoadDirt", Decks(RoadDirt), Surface.Dirt),
+            new("TrackWallToRoadTech", Decks(RoadTech), Surface.Road),
             new("OpenTech", Decks(PlatformTech), Surface.Road),
             new("OpenDirt", Decks(PlatformTech), Surface.Dirt),
             new("OpenGrass", Decks(PlatformTech), Surface.Grass),
@@ -47,7 +52,9 @@ namespace Tman.Core.Inventory
             ? null
             : All.Where(family => block.Id.StartsWith(family.Prefix, StringComparison.Ordinal)).OrderByDescending(family => family.Prefix.Length).FirstOrDefault();
 
-        public bool IsDeck(string link) => DeckMaterials.Contains(link);
+        public bool IsDeck(string link) => DeckMaterials.Contains(link) || AllDeckMaterials.Value.Contains(link);
+
+        private static readonly Lazy<IReadOnlySet<string>> AllDeckMaterials = new(() => Decks([.. All.SelectMany(family => family.DeckMaterials)]));
 
         public string? DeckOverlay(string link)
         {
