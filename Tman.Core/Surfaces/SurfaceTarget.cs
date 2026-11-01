@@ -17,7 +17,7 @@ namespace Tman.Core.Surfaces
             [Surface.Grass] = new(Modifiers + @"PlatformGrass\PlatformTech", CPlugSurface.MaterialId.Green),
             [Surface.Plastic] = new(Modifiers + @"PlatformPlastic\PlatformTech", CPlugSurface.MaterialId.Plastic),
             [Surface.Wood] = new(Materials + "ThemeSnowRoad", CPlugSurface.MaterialId.Wood),
-            [Surface.Metal] = new(Materials + "Structure", CPlugSurface.MaterialId.ResonantMetal)
+            [Surface.Metal] = new(Materials + "Structure", CPlugSurface.MaterialId.Metal)
         };
 
         public static SurfaceTarget Of(Surface surface) => BySurface[surface];
