@@ -27,53 +27,53 @@ namespace Tman.Core.Maps
 
         static Map()
         {
-            GBX.NET.Gbx.LZO = new Lzo();
+            Gbx.LZO = new Lzo();
         }
 
-        internal CGameCtnChallenge Gbx { get; }
+        internal CGameCtnChallenge Challenge { get; }
 
-        internal Map(CGameCtnChallenge gbx)
+        internal Map(CGameCtnChallenge challenge)
         {
-            Gbx = gbx;
+            Challenge = challenge;
         }
 
-        public static Map Load(string path) => new(GBX.NET.Gbx.ParseNode<CGameCtnChallenge>(path, new() { SafeSkippableChunks = true }));
+        public static Map Load(string path) => new(Gbx.ParseNode<CGameCtnChallenge>(path, new() { SafeSkippableChunks = true }));
 
-        public void Save(string path) => Gbx.Save(path);
+        public void Save(string path) => Challenge.Save(path);
 
         public string Name
         {
-            get => Gbx.MapName;
-            set => Gbx.MapName = value;
+            get => Challenge.MapName;
+            set => Challenge.MapName = value;
         }
 
-        public string Uid => Gbx.MapUid;
+        public string Uid => Challenge.MapUid;
 
-        public Int3 Size => Gbx.Size;
+        public Int3 Size => Challenge.Size;
 
-        public string Decoration => Gbx.Decoration.Id;
+        public string Decoration => Challenge.Decoration.Id;
 
-        internal Collections Collection => Gbx.GetEnvironment() is "Stadium2020" ? Collections.Stadium : Enum.Parse<Collections>(Gbx.GetEnvironment());
+        internal Collections Collection => Challenge.GetEnvironment() is "Stadium2020" ? Collections.Stadium : Enum.Parse<Collections>(Challenge.GetEnvironment());
 
         internal int GroundRow => Collection switch
         {
             Collections.RedIsland or Collections.WhiteShore => VistaGroundRowHigh,
             Collections.BlueBay or Collections.GreenCoast => VistaGroundRowLow,
-            _ => Gbx.DecoBaseHeightOffset
+            _ => Challenge.DecoBaseHeightOffset
         };
 
         internal Car Car
         {
-            set => Gbx.PlayerModel = new Ident(CarModels[value], CarCollectionId, "");
+            set => Challenge.PlayerModel = new Ident(CarModels[value], CarCollectionId, "");
         }
 
         public int Laps
         {
-            get => Gbx.NbLaps;
+            get => Challenge.NbLaps;
             set
             {
-                Gbx.IsLapRace = true;
-                Gbx.NbLaps = value;
+                Challenge.IsLapRace = true;
+                Challenge.NbLaps = value;
             }
         }
 
@@ -82,11 +82,11 @@ namespace Tman.Core.Maps
         internal bool Supports(Item item) => item.Collections.HasFlag(Collection);
 
         internal IEnumerable<Placement> Placements =>
-            (Gbx.Blocks ?? []).Select(block => new Placement(block))
-                .Concat((Gbx.AnchoredObjects ?? []).Select(item => new Placement(item)));
+            (Challenge.Blocks ?? []).Select(block => new Placement(block))
+                .Concat((Challenge.AnchoredObjects ?? []).Select(item => new Placement(item)));
 
         internal IEnumerable<Placement> Terrain =>
-            (Gbx.Blocks ?? []).Concat(Gbx.BakedBlocks ?? []).Where(block => !block.IsFree).Select(block => new Placement(block));
+            (Challenge.Blocks ?? []).Concat(Challenge.BakedBlocks ?? []).Where(block => !block.IsFree).Select(block => new Placement(block));
 
         internal List<Placement> Of(Selector selector) => Placements.Where(selector.Matches).ToList();
 
@@ -97,14 +97,14 @@ namespace Tman.Core.Maps
         {
             if (placement.Block is not null)
             {
-                Gbx.RemoveBlock(placement.Block);
+                Challenge.RemoveBlock(placement.Block);
             }
             else
             {
-                Gbx.AnchoredObjects?.Remove(placement.Item!);
+                Challenge.AnchoredObjects?.Remove(placement.Item!);
             }
         }
 
-        public void GenerateUid() => Gbx.GenerateMapUid();
+        public void GenerateUid() => Challenge.GenerateMapUid();
     }
 }

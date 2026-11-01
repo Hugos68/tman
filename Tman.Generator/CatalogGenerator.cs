@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using GBX.NET;
 using GBX.NET.Engines.Game;
 using GBX.NET.Engines.GameData;
@@ -67,8 +68,8 @@ namespace Tman.Generator
                 }
                 var own = KindTokens.First(k => k.Kind == waypoint).Token;
                 var at = name.IndexOf(own, StringComparison.Ordinal);
-                var sideGate = gates ? System.Text.RegularExpressions.Regex.Match(name, "^Gate(Start|Checkpoint|Multilap)(Left|Right)([0-9]+)m$") : System.Text.RegularExpressions.Match.Empty;
-                var finishGate = gates ? System.Text.RegularExpressions.Regex.Match(name, "^GateFinish([0-9]+)m$") : System.Text.RegularExpressions.Match.Empty;
+                var sideGate = gates ? Regex.Match(name, "^Gate(Start|Checkpoint|Multilap)(Left|Right)([0-9]+)m$") : System.Text.RegularExpressions.Match.Empty;
+                var finishGate = gates ? Regex.Match(name, "^GateFinish([0-9]+)m$") : System.Text.RegularExpressions.Match.Empty;
                 foreach (var (kind, token) in KindTokens)
                 {
                     if (kind == waypoint)
@@ -238,21 +239,21 @@ namespace Tman.Generator
 
         public static List<ItemRow> Custom(string projectRoot, string subdirectory)
         {
-            var root = System.IO.Path.GetFullPath(projectRoot);
-            var files = Directory.Exists(System.IO.Path.Combine(root, subdirectory))
-                ? Directory.EnumerateFiles(System.IO.Path.Combine(root, subdirectory), "*.Item.Gbx", SearchOption.AllDirectories).Where(f => f.EndsWith(".Item.Gbx", StringComparison.Ordinal)).ToList()
+            var root = Path.GetFullPath(projectRoot);
+            var files = Directory.Exists(Path.Combine(root, subdirectory))
+                ? Directory.EnumerateFiles(Path.Combine(root, subdirectory), "*.Item.Gbx", SearchOption.AllDirectories).Where(f => f.EndsWith(".Item.Gbx", StringComparison.Ordinal)).ToList()
                 : [];
-            files.Sort((a, b) => ComparePaths(System.IO.Path.GetRelativePath(root, a), System.IO.Path.GetRelativePath(root, b)));
+            files.Sort((a, b) => ComparePaths(Path.GetRelativePath(root, a), Path.GetRelativePath(root, b)));
             var rows = new List<ItemRow>();
             var seen = new HashSet<string>(StringComparer.Ordinal);
             foreach (var path in files)
             {
-                var file = System.IO.Path.GetFileName(path);
+                var file = Path.GetFileName(path);
                 if (!seen.Add(file))
                 {
                     continue;
                 }
-                var relative = System.IO.Path.GetRelativePath(root, path).Replace('\\', '/');
+                var relative = Path.GetRelativePath(root, path).Replace('\\', '/');
                 int? waypoint = null;
                 var size = new Vec3(0, 0, 0);
                 CGameItemModel? item = null;
@@ -279,8 +280,8 @@ namespace Tman.Generator
 
         private static int ComparePaths(string a, string b)
         {
-            var pa = a.Split(System.IO.Path.DirectorySeparatorChar);
-            var pb = b.Split(System.IO.Path.DirectorySeparatorChar);
+            var pa = a.Split(Path.DirectorySeparatorChar);
+            var pb = b.Split(Path.DirectorySeparatorChar);
             for (var i = 0; i < Math.Min(pa.Length, pb.Length); i++)
             {
                 var c = string.CompareOrdinal(pa[i], pb[i]);

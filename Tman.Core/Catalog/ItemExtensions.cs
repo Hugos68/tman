@@ -21,7 +21,7 @@ namespace Tman.Core.Catalog
         {
             if (item.Path is null)
             {
-                return new Ident(item.Id, map.Gbx.MapInfo.Collection, item.Author);
+                return new Ident(item.Id, map.Challenge.MapInfo.Collection, item.Author);
             }
             if (!Idents.TryGetValue(item, out var ident))
             {

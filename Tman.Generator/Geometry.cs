@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GBX.NET;
+using GBX.NET.Components;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Plug;
 using Tman.Paks;
@@ -91,7 +92,7 @@ namespace Tman.Generator
 
         private readonly record struct Owner(string Logical, int Ancestor);
 
-        private void Slot(object? node, GBX.NET.Components.GbxRefTableFile? file, Owner owner, Xform at)
+        private void Slot(object? node, GbxRefTableFile? file, Owner owner, Xform at)
         {
             if (node is not null)
             {
@@ -167,7 +168,7 @@ namespace Tman.Generator
             }
         }
 
-        private static bool SameShape(CPlugSurface? a, GBX.NET.Components.GbxRefTableFile? af, CPlugSurface? b, GBX.NET.Components.GbxRefTableFile? bf)
+        private static bool SameShape(CPlugSurface? a, GbxRefTableFile? af, CPlugSurface? b, GbxRefTableFile? bf)
         {
             if (a is not null || b is not null)
             {

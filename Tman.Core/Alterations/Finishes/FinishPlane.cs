@@ -12,6 +12,16 @@ namespace Tman.Core.Alterations.Finishes
 {
     internal static class FinishPlane
     {
+        private const float LightmapHalf = 0.5f;
+
+        private const float LightmapMargin = 0.01f;
+
+        private const float LightmapIslandSize = LightmapHalf - 2 * LightmapMargin;
+
+        private const float MinimumExtent = 1e-3f;
+
+        private const int TextureRepeats = 4;
+
         public readonly record struct Box(float X0, float X1, float Z0, float Z1, float Y0, float Y1);
 
         public enum Side { North, South, East, West }
@@ -27,9 +37,9 @@ namespace Tman.Core.Alterations.Finishes
         public static void Place(Map map, string templatePath, string ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps, bool visible)
         {
             var path = Path.Combine(Path.GetTempPath(), ident);
-            File.WriteAllBytes(path, Build(templatePath, ident, map.Gbx.MapInfo.Collection, boxes, ramps, visible));
+            File.WriteAllBytes(path, Build(templatePath, ident, map.Challenge.MapInfo.Collection, boxes, ramps, visible));
             map.Embed(path);
-            map.Gbx.PlaceAnchoredObject(new Ident(ident, map.Gbx.MapInfo.Collection, ident), Vec3.Zero, Vec3.Zero, Vec3.Zero);
+            map.Challenge.PlaceAnchoredObject(new Ident(ident, map.Challenge.MapInfo.Collection, ident), Vec3.Zero, Vec3.Zero, Vec3.Zero);
         }
 
         public static byte[] Build(string templatePath, string ident, Id collection, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps) => Build(templatePath, ident, collection, boxes, ramps, true);
@@ -124,19 +134,19 @@ namespace Tman.Core.Alterations.Finishes
                     return (Vec2.Zero, 1);
                 }
                 var min = new Vec2(corners.Min(v => v.X), corners.Min(v => v.Z));
-                var extent = Math.Max(Math.Max(corners.Max(v => v.X) - min.X, corners.Max(v => v.Z) - min.Y), 1e-3f);
-                return (min, 0.48f / extent);
+                var extent = Math.Max(Math.Max(corners.Max(v => v.X) - min.X, corners.Max(v => v.Z) - min.Y), MinimumExtent);
+                return (min, LightmapIslandSize / extent);
             }
             var upIsland = Island(up);
             var downIsland = Island(down);
-            Vec2[] texCoords = [new Vec2(4, 4), new Vec2(4, 0), new Vec2(0, 0), new Vec2(0, 4)];
+            Vec2[] texCoords = [new Vec2(TextureRepeats, TextureRepeats), new Vec2(TextureRepeats, 0), new Vec2(0, 0), new Vec2(0, TextureRepeats)];
             var result = new CPlugCrystal.Face[faces.Count];
             for (var i = 0; i < faces.Count; i++)
             {
                 var f = faces[i];
                 var facesUp = Vec3.GetCrossProduct(f[1] - f[0], f[2] - f[0]).Y > 0;
                 var island = facesUp ? upIsland : downIsland;
-                var origin = facesUp ? new Vec2(0.01f, 0.01f) : new Vec2(0.51f, 0.01f);
+                var origin = facesUp ? new Vec2(LightmapMargin, LightmapMargin) : new Vec2(LightmapHalf + LightmapMargin, LightmapMargin);
                 var vertices = new CPlugCrystal.Vertex[f.Length];
                 for (var k = 0; k < f.Length; k++)
                 {

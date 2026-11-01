@@ -11,7 +11,7 @@ namespace Tman.Core.Maps
 
         internal void Embed(string path)
         {
-            Gbx.UpdateEmbeddedZipData(zip =>
+            Challenge.UpdateEmbeddedZipData(zip =>
             {
                 var name = Path.GetFileName(path);
                 if (zip.GetEntry(name) is not null)
@@ -27,7 +27,7 @@ namespace Tman.Core.Maps
 
         internal void EmbedSurfaceBlock(SurfaceBlockFile file, byte[] bytes)
         {
-            Gbx.UpdateEmbeddedZipData(zip =>
+            Challenge.UpdateEmbeddedZipData(zip =>
             {
                 if (zip.GetEntry(file.EmbeddedEntry) is not null)
                 {

@@ -16,17 +16,17 @@ namespace Tman.Generator
 
             var coreOption = new Option<DirectoryInfo>("--core")
             {
-                Description = "The Tman.Core project directory (Inventory/Generated is written, Assets/Items is scanned).",
+                Description = "The Tman.Core project directory (Catalog/Generated is written, Assets/Items is scanned).",
                 DefaultValueFactory = _ => new DirectoryInfo(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "Tman.Core")))
             };
 
-            var rootCommand = new RootCommand("Regenerate the Tman.Core inventory catalog from the game's pak files and the custom items.");
+            var rootCommand = new RootCommand("Regenerate the Tman.Core catalog from the game's pak files and the custom items.");
             rootCommand.Options.Add(paksOption);
             rootCommand.Options.Add(coreOption);
             rootCommand.SetAction(parseResult =>
             {
                 var core = parseResult.GetValue(coreOption)!.FullName;
-                CatalogGenerator.Run(parseResult.GetValue(paksOption)!.FullName, Path.Combine(core, "Inventory", "Generated"), core, Path.Combine("Assets", "Items"));
+                CatalogGenerator.Run(parseResult.GetValue(paksOption)!.FullName, Path.Combine(core, "Catalog", "Generated"), core, Path.Combine("Assets", "Items"));
                 return 0;
             });
 

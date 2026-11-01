@@ -16,7 +16,7 @@ namespace Tman.Core.Maps
                 return;
             }
             var pose = placement.Pose(this);
-            Gbx.TryCreateChunk<CGameCtnChallenge.Chunk0304305F>(out _);
+            Challenge.TryCreateChunk<CGameCtnChallenge.Chunk0304305F>(out _);
             block.IsFree = true;
             block.IsGround = false;
             block.Coord = new Int3(-1, 0, -1);

@@ -48,7 +48,7 @@ namespace Tman.Core.Maps
         private Placement Replace(Placement source, Block model, DirectionOffset rotation, bool sameFamily)
         {
             var block = source.Block!;
-            Gbx.RemoveBlock(block);
+            Challenge.RemoveBlock(block);
             return PlaceBlock(Copy(block, model, rotation, block.WaypointSpecialProperty, sameFamily));
         }
 

@@ -10,6 +10,6 @@ namespace Tman.Core.Catalog
         WhiteShore = 4,
         GreenCoast = 8,
         BlueBay = 16,
-        All = 31
+        All = Stadium | RedIsland | WhiteShore | GreenCoast | BlueBay
     }
 }

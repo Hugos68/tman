@@ -34,7 +34,7 @@ namespace Tman.Core.Maps
 
         internal Placement Place(Item model, Vec3 position, Vec3 yawPitchRoll = default)
         {
-            var item = Gbx.PlaceAnchoredObject(model.Ident(this), position, yawPitchRoll, Vec3.Zero);
+            var item = Challenge.PlaceAnchoredObject(model.Ident(this), position, yawPitchRoll, Vec3.Zero);
             item.WaypointSpecialProperty = Property(null, model.Waypoint);
             return new Placement(item);
         }
@@ -49,14 +49,14 @@ namespace Tman.Core.Maps
 
         internal Placement PlaceBlock(CGameCtnBlock block)
         {
-            Gbx.PlaceBlock(block);
+            Challenge.PlaceBlock(block);
             return new Placement(block);
         }
 
         internal Placement PlaceLike(Placement source, Item model, float yaw)
         {
             var item = source.Item!;
-            var copy = Gbx.PlaceAnchoredObject(model.Ident(this), item.AbsolutePositionInMap, item.YawPitchRoll + new Vec3(yaw, 0, 0), item.PivotPosition);
+            var copy = Challenge.PlaceAnchoredObject(model.Ident(this), item.AbsolutePositionInMap, item.YawPitchRoll + new Vec3(yaw, 0, 0), item.PivotPosition);
             copy.BlockUnitCoord = item.BlockUnitCoord;
             copy.AnchorTreeId = item.AnchorTreeId;
             copy.Flags = item.Flags;

@@ -86,7 +86,7 @@ namespace Tman.Generator
         {
             var cs = new StringBuilder();
             cs.Append(CatalogGenerator.Header).Append(CatalogGenerator.Common);
-            cs.Append("public static class Blocks\n{\n");
+            cs.Append("internal static class Blocks\n{\n");
             var used = new HashSet<string>(StringComparer.Ordinal);
             var idents = new List<(string Ident, string Id)>();
             foreach (var (id, b) in blocks)
@@ -126,7 +126,7 @@ namespace Tman.Generator
         {
             var cs = new StringBuilder();
             cs.Append(CatalogGenerator.Header).Append(CatalogGenerator.Common);
-            cs.Append($"public static class {className}\n{{\n");
+            cs.Append($"internal static class {className}\n{{\n");
             var used = new HashSet<string>(StringComparer.Ordinal);
             var idents = new List<(string Ident, string Id)>();
             foreach (var it in items)

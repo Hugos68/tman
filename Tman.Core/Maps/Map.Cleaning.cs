@@ -6,7 +6,7 @@ namespace Tman.Core.Maps
     {
         internal void RemoveValidation()
         {
-            var gbx = Gbx;
+            var gbx = Challenge;
             gbx.AuthorTime = new(-1);
             gbx.GoldTime = new(-1);
             gbx.SilverTime = new(-1);
@@ -26,7 +26,7 @@ namespace Tman.Core.Maps
 
         internal void RemoveLightmap()
         {
-            var gbx = Gbx;
+            var gbx = Challenge;
             gbx.HasLightmaps = false;
             gbx.LightmapCache = null;
             gbx.LightmapFrames = null;
