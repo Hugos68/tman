@@ -1,18 +1,17 @@
 using System.Collections.Generic;
-using Tman.Core.Alterations.Internal;
+using Tman.Core.Alterations.Steps;
 using Tman.Core.Inventory;
 
 namespace Tman.Core.Alterations.Effects
 {
-    public class SlowMotion : Alteration
+    public class SlowMotion : StandardAlteration
     {
-        protected override IEnumerable<Alteration> PreappliedAlterations =>
+        protected override string DisplayName => "SlowMotion";
+
+        protected override IEnumerable<Alteration> Steps =>
         [
-            new ValidationRemoved(),
-            new LightmapRemoved(),
             new StartEffect(Blocks.GateSpecialSlowMotion, new(0,0,0)),
-            new CheckpointEffect(Blocks.GateSpecialSlowMotion, new(0, 0, 0)),
-            new MapNameEdited(name => name + " SlowMotion")
+            new CheckpointEffect(Blocks.GateSpecialSlowMotion, new(0, 0, 0))
         ];
     }
 }

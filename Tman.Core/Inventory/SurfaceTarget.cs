@@ -1,0 +1,23 @@
+using System.Collections.Generic;
+using GBX.NET.Engines.Plug;
+
+namespace Tman.Core.Inventory
+{
+    public sealed record SurfaceTarget(string Link, CPlugSurface.MaterialId Physics)
+    {
+        private const string Materials = @"Stadium\Media\Material\";
+
+        private const string Modifiers = @"Stadium\Media\Modifier\";
+
+        private static readonly Dictionary<Surface, SurfaceTarget> BySurface = new()
+        {
+            [Surface.Road] = new(Materials + "PlatformTech", CPlugSurface.MaterialId.Asphalt),
+            [Surface.Dirt] = new(Modifiers + @"PlatformDirt\PlatformTech", CPlugSurface.MaterialId.Dirt),
+            [Surface.Ice] = new(Modifiers + @"PlatformIce\PlatformTech", CPlugSurface.MaterialId.Ice),
+            [Surface.Grass] = new(Modifiers + @"PlatformGrass\PlatformTech", CPlugSurface.MaterialId.Grass),
+            [Surface.Plastic] = new(Modifiers + @"PlatformPlastic\PlatformTech", CPlugSurface.MaterialId.Plastic),
+        };
+
+        public static SurfaceTarget Of(Surface surface) => BySurface[surface];
+    }
+}

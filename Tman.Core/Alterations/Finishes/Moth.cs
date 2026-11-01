@@ -1,19 +1,18 @@
 using System.Collections.Generic;
-using Tman.Core.Alterations.Internal;
+using Tman.Core.Alterations.Steps;
 using Tman.Core.Inventory;
 using Tman.Core.Maps;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public class Moth : Alteration
+    public class Moth : StandardAlteration
     {
-        protected override IEnumerable<Alteration> PreappliedAlterations =>
+        protected override string DisplayName => "Moth";
+
+        protected override IEnumerable<Alteration> Steps =>
         [
-            new ValidationRemoved(),
-            new LightmapRemoved(),
             new InventoryRemoved(placement => placement.IsFinish),
             new CheckpointsCleaned(),
-            new MapNameEdited(name => name + " Moth"),
             new RelativelyPlacedItems(new Dictionary<Selector, Item>
             {
                 [Items.Lamp] = Custom.FinishLamp,

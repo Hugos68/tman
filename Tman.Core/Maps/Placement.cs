@@ -8,6 +8,10 @@ namespace Tman.Core.Maps
 {
     public sealed class Placement
     {
+        private const int ItemVariantShift = 8;
+
+        private const int ItemVariantMask = 0xFF;
+
         internal CGameCtnBlock? Block { get; }
 
         internal CGameCtnAnchoredObject? Item { get; }
@@ -29,8 +33,8 @@ namespace Tman.Core.Maps
         public uint Flags => Block is not null ? (uint)Block.Flags : (uint)Item!.Flags;
 
         public int Variant => Block is not null
-            ? (Block.Flags & 0x3F) + 64 * ((Block.Flags >> 21) & 0x7F)
-            : (Item!.Flags >> 8) & 0xFF;
+            ? BlockFlags.CombinedVariant(Block.Flags)
+            : (Item!.Flags >> ItemVariantShift) & ItemVariantMask;
 
         public Int3 Cell => Block?.Coord ?? Int3.Zero;
 

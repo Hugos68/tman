@@ -2,20 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GBX.NET;
-using Tman.Core.Alterations.Internal;
+using Tman.Core.Alterations.Steps;
 using Tman.Core.Inventory;
 using Tman.Core.Maps;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public class StraightToTheFinishAndBack : Alteration
+    public class StraightToTheFinishAndBack : StandardAlteration
     {
-        protected override IEnumerable<Alteration> PreappliedAlterations =>
+        protected override string DisplayName => "Straight to the Finish and Back";
+
+        protected override IEnumerable<Alteration> Steps =>
         [
-            new ValidationRemoved(),
-            new LightmapRemoved(),
-            new CheckpointsCleaned(),
-            new MapNameEdited(name => name + " Straight to the Finish and Back")
+            new CheckpointsCleaned()
         ];
 
         protected override void Run(Map map)
@@ -53,14 +52,14 @@ namespace Tman.Core.Alterations.Finishes
 
         private static void ReplaceRing(Map map, Placement ring)
         {
-            var pillar = ring.IsGround ? 0 : ring.Variant / 64;
+            var pillar = ring.IsGround ? 0 : ring.Variant / BlockFlags.VariantsPerAdditionalVariant;
             Place(map, ring, pillar == 1 ? Custom.CheckpointRingPillar : pillar == 2 ? Custom.CheckpointRingInPillar : Custom.CheckpointRing);
             map.Remove(ring);
         }
 
         private static void ReplaceSegment(Map map, Placement segment, HashSet<string> segments)
         {
-            var inPillar = segment.Variant / 64;
+            var inPillar = segment.Variant / BlockFlags.VariantsPerAdditionalVariant;
             Place(map, segment, Custom.CheckpointExpandable);
             if (!segments.Contains(Key(map, segment, new Vec3(0, -MapConstants.CellHeight, 0))))
             {

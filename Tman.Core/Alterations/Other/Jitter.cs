@@ -1,26 +1,20 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using GBX.NET;
-using Tman.Core.Alterations.Internal;
+using Tman.Core.Alterations.Steps;
 using Tman.Core.Maps;
 
 namespace Tman.Core.Alterations.Other
 {
-    public class Jitter : Alteration
+    public class Jitter : StandardAlteration
     {
         private const float Shift = 0.25f;
 
         private const float Tilt = MathF.PI / 45;
 
-        protected override IEnumerable<Alteration> PreappliedAlterations =>
-        [
-            new ValidationRemoved(),
-            new LightmapRemoved(),
-            new MapNameEdited(name => name + " Jitter")
-        ];
+        protected override string DisplayName => "Jitter";
 
         protected override void Run(Map map)
         {
@@ -36,7 +30,7 @@ namespace Tman.Core.Alterations.Other
                 }
                 var pose = placement.Pose(map);
                 var random = new Random(Seed($"{map.Name}|{placement.Id}|{pose.Coords}"));
-                Map.Nudge(placement, new Vec3(Spread(random, Shift), Spread(random, Shift), Spread(random, Shift)), new Vec3(Spread(random, Tilt), Spread(random, Tilt), Spread(random, Tilt)));
+                MapMoving.Nudge(placement, new Vec3(Spread(random, Shift), Spread(random, Shift), Spread(random, Shift)), new Vec3(Spread(random, Tilt), Spread(random, Tilt), Spread(random, Tilt)));
             }
         }
 

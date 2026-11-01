@@ -4,12 +4,17 @@
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Tman.Core</RootNamespace>
     <Nullable>enable</Nullable>
+    <NoWarn>GBXNET10001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="GBX.NET" Version="2.4.5" />
     <PackageReference Include="GBX.NET.LZO" Version="2.1.6" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Tman.Paks/Tman.Paks.csproj" />
   </ItemGroup>
 
   <ItemGroup>

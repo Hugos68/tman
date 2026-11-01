@@ -1,0 +1,234 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using GBX.NET;
+using GBX.NET.Engines.Plug;
+using Tman.Paks;
+
+namespace Tman.Core.Inventory.Builders
+{
+    public static class SurfaceBlockMesh
+    {
+        private const string MaterialExtension = ".Material.Gbx";
+
+        public static CPlugStaticObjectModel Merge(IReadOnlyList<PrefabMerge.Part> parts, RoadFamily family, SurfaceTarget target, MaterialDressing dressing)
+        {
+            var collidable = parts.First(part => Shape(part)?.Surf is CPlugSurface.Mesh);
+            var model = (CPlugStaticObjectModel)collidable.Model.DeepClone();
+            model.Mesh = (CPlugSolid2Model)Solid(collidable).DeepClone();
+            model.Shape = (CPlugSurface)Shape(collidable)!.DeepClone();
+            var solid = model.Mesh;
+            var shape = model.Shape;
+            var source = (CPlugSurface.Mesh)shape.Surf!;
+            var mesh = new CPlugSurface.Mesh { Version = source.Version, OctreeVersion = source.OctreeVersion, GameplayMainDir = source.GameplayMainDir };
+            shape.Surf = mesh;
+            var visuals = new List<CPlugVisual>();
+            var geoms = new List<CPlugSolid2Model.ShadedGeom>();
+            var materials = new List<CPlugSolid2Model.Material>();
+            var materialIndices = new Dictionary<(string Link, CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay), int>();
+            var vertices = new List<Vec3>();
+            var triangles = new List<CPlugSurface.Mesh.Triangle>();
+            var surfaceMaterials = new List<CPlugSurface.SurfMaterial>();
+            foreach (var part in parts)
+            {
+                var partSolid = Solid(part);
+                var partShape = Shape(part);
+                var links = Links(part, partSolid, partShape);
+                var materialMap = new int[links.Length];
+                for (var slot = 0; slot < links.Length; slot++)
+                {
+                    var deck = IsDeck(links[slot], family);
+                    var link = deck ? target.Link : dressing.Dress(links[slot]);
+                    var (physics, gameplay) = SurfaceOf(link);
+                    var key = (link, deck ? target.Physics : physics, gameplay);
+                    if (!materialIndices.TryGetValue(key, out var index))
+                    {
+                        index = materials.Count;
+                        materials.Add(UserMaterial(key.Item1, key.Item2, key.Item3));
+                        materialIndices[key] = index;
+                    }
+                    materialMap[slot] = index;
+                }
+                var visualBase = visuals.Count;
+                foreach (var visual in partSolid.Visuals ?? [])
+                {
+                    visuals.Add(Transformed((CPlugVisual3D)visual.DeepClone(), part.Position, part.Rotation));
+                }
+                foreach (var geom in partSolid.ShadedGeoms ?? [])
+                {
+                    geoms.Add(new CPlugSolid2Model.ShadedGeom
+                    {
+                        VisualIndex = geom.VisualIndex + visualBase,
+                        MaterialIndex = materialMap[geom.MaterialIndex],
+                        U01 = geom.U01,
+                        LodMask = geom.LodMask,
+                        U02 = geom.U02
+                    });
+                }
+                if (partShape?.Surf is not CPlugSurface.Mesh partMesh)
+                {
+                    continue;
+                }
+                var slots = ShapeSlots(part, partShape, family, target, dressing);
+                var vertexBase = vertices.Count;
+                var surfaceBase = surfaceMaterials.Count;
+                vertices.AddRange(partMesh.Vertices!.Select(vertex => PrefabMerge.Rotate(part.Rotation, vertex) + part.Position));
+                foreach (var triangle in partMesh.Triangles!)
+                {
+                    var slot = slots[triangle.SurfaceIndex];
+                    triangles.Add(new CPlugSurface.Mesh.Triangle
+                    {
+                        Indices = triangle.Indices + new Int3(vertexBase, vertexBase, vertexBase),
+                        SurfaceIndex = (short)(triangle.SurfaceIndex + surfaceBase),
+                        U02 = slot.Deck ? (byte)target.Physics : triangle.U02,
+                        U03 = triangle.U03
+                    });
+                }
+                surfaceMaterials.AddRange(slots.Select(slot => new CPlugSurface.SurfMaterial { SurfaceId = slot.Physics }));
+            }
+            solid.Visuals = [.. visuals];
+            solid.ShadedGeoms = [.. geoms];
+            solid.CustomMaterials = [.. materials];
+            solid.Materials = null;
+            solid.MaterialIds = [];
+            solid.MaterialInsts = null;
+            solid.Lights = [];
+            solid.LightUserModels = [];
+            solid.LightInsts = [];
+            solid.FileWriteTime = null;
+            solid.Boxes = [Bounds(vertices.Concat(visuals.SelectMany(visual => ((CPlugVisual3D)visual).VertexStreams![0].Positions!)))];
+            mesh.Vertices = [.. vertices];
+            mesh.Triangles = [.. triangles];
+            shape.Materials = [.. surfaceMaterials];
+            return model;
+        }
+
+        private static CPlugVisual3D Transformed(CPlugVisual3D visual, Vec3 position, Quat rotation)
+        {
+            if (PrefabMerge.IsIdentity(position, rotation))
+            {
+                return visual;
+            }
+            visual.VertexStreams = [.. (visual.VertexStreams ?? []).Select(stream => (CPlugVertexStream)stream.DeepClone())];
+            foreach (var stream in visual.VertexStreams)
+            {
+                if (stream.Positions is { } positions)
+                {
+                    stream.Positions = [.. positions.Select(vertex => PrefabMerge.Rotate(rotation, vertex) + position)];
+                }
+                if (stream.Normals is { } normals)
+                {
+                    stream.Normals = [.. normals.Select(normal => PrefabMerge.Rotate(rotation, normal))];
+                }
+            }
+            if (visual.Tangents is { } tangents)
+            {
+                visual.Tangents = [.. tangents.Select(tangent => PrefabMerge.Rotate(rotation, tangent))];
+            }
+            if (visual.BiTangents is { } biTangents)
+            {
+                visual.BiTangents = [.. biTangents.Select(biTangent => PrefabMerge.Rotate(rotation, biTangent))];
+            }
+            visual.BoundingBox = Bounds(visual.VertexStreams![0].Positions!);
+            return visual;
+        }
+
+        private static BoxAligned Bounds(IEnumerable<Vec3> points)
+        {
+            var list = points.ToList();
+            var min = new Vec3(list.Min(p => p.X), list.Min(p => p.Y), list.Min(p => p.Z));
+            var max = new Vec3(list.Max(p => p.X), list.Max(p => p.Y), list.Max(p => p.Z));
+            var center = (min + max) * 0.5f;
+            var half = (max - min) * 0.5f;
+            return new BoxAligned(center.X, center.Y, center.Z, half.X, half.Y, half.Z);
+        }
+
+        private static CPlugSolid2Model Solid(PrefabMerge.Part part) =>
+            part.Model.Mesh ?? (part.Model.MeshFile is { } file ? GamePaks.Store.Open(PakStore.Logical(part.OwnerPath, part.Owner.RefTable!.AncestorLevel, file.FilePath))?.Node as CPlugSolid2Model : null)
+            ?? throw new InvalidOperationException($"{part.OwnerPath} has a static object without a mesh");
+
+        private static CPlugSurface? Shape(PrefabMerge.Part part) =>
+            part.Model.Shape ?? (part.Model.ShapeFile is { } file ? GamePaks.Store.Open(PakStore.Logical(part.OwnerPath, part.Owner.RefTable!.AncestorLevel, file.FilePath))?.Node as CPlugSurface : null);
+
+        private static string[] Links(PrefabMerge.Part part, CPlugSolid2Model solid, CPlugSurface? shape)
+        {
+            if (solid.Materials is { } externals)
+            {
+                return [.. externals.Select((material, index) => material.File is { } file ? Resolve(part, file.FilePath) : ShapeLink(part, shape, index))];
+            }
+            return [.. (solid.MaterialIds ?? []).Select(id => $@"{solid.MaterialsFolderName}{id}")];
+        }
+
+        private static string ShapeLink(PrefabMerge.Part part, CPlugSurface? shape, int index) =>
+            shape?.Materials?.ElementAtOrDefault(index)?.MaterialFile is { } file
+                ? Resolve(part, file.FilePath)
+                : throw new InvalidOperationException($"Material {index} of {part.OwnerPath} has no file");
+
+        private static (bool Deck, CPlugSurface.MaterialId Physics)[] ShapeSlots(PrefabMerge.Part part, CPlugSurface shape, RoadFamily family, SurfaceTarget target, MaterialDressing dressing) =>
+            [.. shape.Materials!.Select(material =>
+            {
+                if (material.MaterialFile is { } file)
+                {
+                    var link = Resolve(part, file.FilePath);
+                    return IsDeck(link, family) ? (true, target.Physics) : (false, PhysicsOf(dressing.Dress(link)));
+                }
+                return material.Material is { } node ? (false, node.SurfaceId) : (false, material.SurfaceId ?? CPlugSurface.MaterialId.Asphalt);
+            })];
+
+        private static string Resolve(PrefabMerge.Part part, string filePath)
+        {
+            var logical = PakStore.Logical(part.OwnerPath, part.Owner.RefTable!.AncestorLevel, filePath);
+            return logical.EndsWith(MaterialExtension, StringComparison.OrdinalIgnoreCase) ? logical[..^MaterialExtension.Length] : logical;
+        }
+
+        private static bool IsDeck(string link, RoadFamily family) => string.Equals(link, family.DeckMaterial, StringComparison.OrdinalIgnoreCase);
+
+        private const string GameplayMaterials = @"Effects\Media\Material\Collision";
+
+        private static readonly Dictionary<string, (CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay)> SurfaceByLink = new(StringComparer.OrdinalIgnoreCase);
+
+        private static (CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay) SurfaceOf(string link)
+        {
+            if (!SurfaceByLink.TryGetValue(link, out var surface))
+            {
+                surface = link.StartsWith(GameplayMaterials, StringComparison.OrdinalIgnoreCase)
+                    ? CollisionMaterial(link[GameplayMaterials.Length..])
+                    : GamePaks.Store.Open(link + MaterialExtension)?.Node is CPlugMaterial material
+                        ? (material.SurfaceId, material.GameplayId)
+                        : OutsideTheEnvironmentPaks;
+                SurfaceByLink[link] = surface;
+            }
+            return surface;
+        }
+
+        private static readonly (CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay) OutsideTheEnvironmentPaks = (CPlugSurface.MaterialId.Asphalt, CPlugSurface.GameplayId.None);
+
+        private static (CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay) CollisionMaterial(string name) =>
+            Enum.TryParse<CPlugSurface.GameplayId>(name, out var gameplay) ? (CPlugSurface.MaterialId.Asphalt, gameplay)
+            : Enum.TryParse<CPlugSurface.MaterialId>(name, out var physics) ? (physics, CPlugSurface.GameplayId.None)
+            : throw new InvalidOperationException($"Unknown collision material {name}");
+
+        private static CPlugSurface.MaterialId PhysicsOf(string link) => SurfaceOf(link).Physics;
+
+        private static CPlugSolid2Model.Material UserMaterial(string link, CPlugSurface.MaterialId physics, CPlugSurface.GameplayId gameplay)
+        {
+            var instance = new CPlugMaterialUserInst();
+            instance.CreateChunk<CPlugMaterialUserInst.Chunk090FD000>().Version = 11;
+            instance.CreateChunk<CPlugMaterialUserInst.Chunk090FD001>().Version = 5;
+            instance.CreateChunk<CPlugMaterialUserInst.Chunk090FD002>();
+            instance.IsUsingGameMaterial = true;
+            instance.MaterialName = "";
+            instance.Model = "";
+            instance.BaseTexture = "";
+            instance.Link = link;
+            instance.SurfacePhysicId = physics;
+            instance.SurfaceGameplayId = gameplay;
+            instance.Csts = [];
+            instance.Color = [];
+            instance.UvAnims = [];
+            instance.UserTextures = [];
+            instance.HidingGroup = "";
+            return new CPlugSolid2Model.Material { MaterialName = "", MaterialUserInst = instance };
+        }
+    }
+}

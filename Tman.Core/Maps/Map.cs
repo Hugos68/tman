@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 using GBX.NET;
 using GBX.NET.Engines.Game;
-using GBX.NET.Engines.GameData;
 using GBX.NET.LZO;
 using Tman.Core.Inventory;
 
@@ -13,15 +10,11 @@ namespace Tman.Core.Maps
 {
     public sealed class Map
     {
-        private const int AdditionalVariantMask = 0x7F << 21;
+        private const int VistaGroundRowHigh = 15;
 
-        private static readonly Dictionary<Waypoint, string> WaypointTags = new()
-        {
-            [Waypoint.Start] = "Spawn",
-            [Waypoint.Checkpoint] = "Checkpoint",
-            [Waypoint.Finish] = "Goal",
-            [Waypoint.StartFinish] = "StartFinish",
-        };
+        private const int VistaGroundRowLow = 5;
+
+        private const int CarCollectionId = 10003;
 
         private static readonly Dictionary<Car, string> CarModels = new()
         {
@@ -63,14 +56,14 @@ namespace Tman.Core.Maps
 
         public int GroundRow => Collection switch
         {
-            Collections.RedIsland or Collections.WhiteShore => 15,
-            Collections.BlueBay or Collections.GreenCoast => 5,
+            Collections.RedIsland or Collections.WhiteShore => VistaGroundRowHigh,
+            Collections.BlueBay or Collections.GreenCoast => VistaGroundRowLow,
             _ => Gbx.DecoBaseHeightOffset
         };
 
         public Car Car
         {
-            set => Gbx.PlayerModel = new Ident(CarModels[value], 10003, "");
+            set => Gbx.PlayerModel = new Ident(CarModels[value], CarCollectionId, "");
         }
 
         public int Laps
@@ -99,206 +92,6 @@ namespace Tman.Core.Maps
         public List<Placement> Waypoints(Waypoint waypoint) =>
             Placements.Where(placement => placement.IsWaypoint && placement.Waypoint == waypoint).ToList();
 
-        public Placement PlaceRelative(Placement source, Item model, Vec3 offset = default)
-        {
-            var position = source.Pose(this);
-            position.Move(offset);
-            return Place(model, position.Coords, position.YawPitchRoll);
-        }
-
-        public Placement PlaceRelative(Placement source, Block model, Vec3 offset = default)
-        {
-            var position = source.Pose(this);
-            position.Move(offset);
-            var block = new CGameCtnBlock
-            {
-                Name = model.Id,
-                Coord = source.Cell,
-                Direction = Direction.North,
-                IsFree = true,
-                AbsolutePositionInMap = position.Coords,
-                YawPitchRoll = position.YawPitchRoll,
-                WaypointSpecialProperty = WaypointProperty(null, model.Waypoint)
-            };
-            Gbx.PlaceBlock(block);
-            return new Placement(block);
-        }
-
-        public Placement Place(Item model, Vec3 position, Vec3 yawPitchRoll = default)
-        {
-            var item = Gbx.PlaceAnchoredObject(model.Ident(this), position, yawPitchRoll, Vec3.Zero);
-            item.WaypointSpecialProperty = WaypointProperty(null, model.Waypoint);
-            return new Placement(item);
-        }
-
-        public Placement PlaceLike(Placement source, Waypoint kind) => source.IsBlock
-            ? PlaceBlock(Copy(source.Block!, Twin(source.BlockModel, kind, source.Id), Turn(source.Waypoint, kind), null, true))
-            : PlaceLike(source, Twin(source.ItemModel, kind, source.Id), HalfTurn(source, kind));
-
-        public Placement PlaceLike(Placement source, Block model) => PlaceBlock(Copy(source.Block!, model, DirectionOffset.None, null, false));
-
-        public Placement PlaceLike(Placement source, Item model) => PlaceLike(source, model, 0);
-
-        public Placement Replace(Placement source, Waypoint kind)
-        {
-            if (source.IsBlock)
-            {
-                return Replace(source, Twin(source.BlockModel, kind, source.Id), Turn(source.Waypoint, kind), true);
-            }
-            var item = source.Item!;
-            item.YawPitchRoll += new Vec3(HalfTurn(source, kind), 0, 0);
-            return Replace(source, Twin(source.ItemModel, kind, source.Id));
-        }
-
-        public Placement Replace(Placement source, Block model, DirectionOffset rotation) => Replace(source, model, rotation, false);
-
-        private Placement Replace(Placement source, Block model, DirectionOffset rotation, bool sameFamily)
-        {
-            var block = source.Block!;
-            Gbx.RemoveBlock(block);
-            return PlaceBlock(Copy(block, model, rotation, block.WaypointSpecialProperty, sameFamily));
-        }
-
-        public Placement Replace(Placement source, Item model)
-        {
-            var item = source.Item!;
-            item.ItemModel = model.Ident(this);
-            item.WaypointSpecialProperty = WaypointProperty(item.WaypointSpecialProperty, model.Waypoint);
-            return source;
-        }
-
-        public void Link(IReadOnlyCollection<Placement> checkpoints)
-        {
-            if (checkpoints.Count < 2)
-            {
-                return;
-            }
-            var order = Placements.Where(placement => placement.IsWaypoint && placement.Property!.Tag == "LinkedCheckpoint").Select(placement => placement.Property!.Order).DefaultIfEmpty(0).Max() + 1;
-            foreach (var checkpoint in checkpoints)
-            {
-                var property = checkpoint.Property ?? throw new InvalidOperationException($"{checkpoint.Id} is not a waypoint");
-                property.Tag = "LinkedCheckpoint";
-                property.Order = order;
-            }
-        }
-
-        public void Free(Placement placement)
-        {
-            var block = placement.Block!;
-            if (block.IsFree)
-            {
-                return;
-            }
-            var pose = placement.Pose(this);
-            Gbx.TryCreateChunk<CGameCtnChallenge.Chunk0304305F>(out _);
-            block.IsFree = true;
-            block.IsGround = false;
-            block.Coord = new Int3(-1, 0, -1);
-            block.Direction = Direction.North;
-            block.AbsolutePositionInMap = pose.Coords;
-            block.YawPitchRoll = pose.YawPitchRoll;
-        }
-
-        public static void Nudge(Placement placement, Vec3 offset, Vec3 yawPitchRoll)
-        {
-            if (placement.Block is { } block)
-            {
-                block.AbsolutePositionInMap += offset;
-                block.YawPitchRoll += yawPitchRoll;
-                return;
-            }
-            placement.Item!.AbsolutePositionInMap += offset;
-            placement.Item.YawPitchRoll += yawPitchRoll;
-        }
-
-        public void Translate(Placement placement, Vec3 offset)
-        {
-            if (placement.Block is { IsFree: false } block && offset.X % MapConstants.CellSize == 0 && offset.Y % MapConstants.CellHeight == 0 && offset.Z % MapConstants.CellSize == 0)
-            {
-                var coord = block.Coord + new Int3((int)(offset.X / MapConstants.CellSize), (int)(offset.Y / MapConstants.CellHeight), (int)(offset.Z / MapConstants.CellSize));
-                if (coord.X < 0 || coord.Y < 0 || coord.Z < 0 || coord.X >= Size.X || coord.Y >= Size.Y || coord.Z >= Size.Z)
-                {
-                    throw new InvalidOperationException($"{placement.Id} at {block.Coord} cannot move by {offset}: outside the map");
-                }
-                block.Coord = coord;
-                return;
-            }
-            if (placement.IsBlock)
-            {
-                Free(placement);
-            }
-            Nudge(placement, offset, Vec3.Zero);
-        }
-
-        private Placement PlaceBlock(CGameCtnBlock block)
-        {
-            Gbx.PlaceBlock(block);
-            return new Placement(block);
-        }
-
-        private Placement PlaceLike(Placement source, Item model, float yaw)
-        {
-            var item = source.Item!;
-            var copy = Gbx.PlaceAnchoredObject(model.Ident(this), item.AbsolutePositionInMap, item.YawPitchRoll + new Vec3(yaw, 0, 0), item.PivotPosition);
-            copy.BlockUnitCoord = item.BlockUnitCoord;
-            copy.AnchorTreeId = item.AnchorTreeId;
-            copy.Flags = item.Flags;
-            copy.Scale = item.Scale;
-            copy.PackDesc = item.PackDesc;
-            copy.Color = item.Color;
-            copy.WaypointSpecialProperty = WaypointProperty(null, model.Waypoint);
-            return new Placement(copy);
-        }
-
-        private static CGameCtnBlock Copy(CGameCtnBlock block, Block model, DirectionOffset rotation, CGameWaypointSpecialProperty? property, bool sameFamily)
-        {
-            var copy = new CGameCtnBlock
-            {
-                Name = model.Id,
-                Coord = block.Coord,
-                Direction = block.Direction.Turn(rotation),
-                Flags = sameFamily ? block.Flags : block.Flags & ~AdditionalVariantMask,
-                AbsolutePositionInMap = block.AbsolutePositionInMap,
-                YawPitchRoll = block.YawPitchRoll,
-                Color = block.Color,
-                LightmapQuality = block.LightmapQuality
-            };
-            if (block.Skin is not null)
-            {
-                copy.Skin = block.Skin;
-            }
-            copy.WaypointSpecialProperty = WaypointProperty(property, model.Waypoint);
-            return copy;
-        }
-
-        private static Block Twin(Block? model, Waypoint kind, string id) =>
-            model?.As(kind) ?? throw new InvalidOperationException($"{id} has no {kind} twin");
-
-        private static Item Twin(Item? model, Waypoint kind, string id) =>
-            model?.As(kind) ?? throw new InvalidOperationException($"{id} has no {kind} twin");
-
-        private static float HalfTurn(Placement source, Waypoint kind) => Items.HalfTurned.Contains((source.Id, kind)) ? MathF.PI : 0;
-
-        private static DirectionOffset Turn(Waypoint from, Waypoint to) =>
-            (from, to) is (Waypoint.Start, Waypoint.Finish) or (Waypoint.Finish, Waypoint.Start) ? DirectionOffset.Half : DirectionOffset.None;
-
-        private static CGameWaypointSpecialProperty? WaypointProperty(CGameWaypointSpecialProperty? current, Waypoint kind)
-        {
-            if (kind == Waypoint.None)
-            {
-                return null;
-            }
-            var property = current;
-            if (property is null)
-            {
-                property = new CGameWaypointSpecialProperty();
-                property.CreateChunk<CGameWaypointSpecialProperty.Chunk2E009000>().Version = 2;
-                property.CreateChunk<CGameWaypointSpecialProperty.Chunk2E009001>();
-            }
-            property.Tag = WaypointTags[kind];
-            return property;
-        }
-
         public void Remove(Placement placement)
         {
             if (placement.Block is not null)
@@ -309,52 +102,6 @@ namespace Tman.Core.Maps
             {
                 Gbx.AnchoredObjects?.Remove(placement.Item!);
             }
-        }
-
-        public void Embed(Item custom) => Embed(custom.FullPath());
-
-        internal void Embed(string path)
-        {
-            Gbx.UpdateEmbeddedZipData(zip =>
-            {
-                var name = Path.GetFileName(path);
-                if (zip.GetEntry(name) is not null)
-                {
-                    return;
-                }
-                var entry = zip.CreateEntry(name);
-                using var entryStream = entry.Open();
-                using var fileStream = File.OpenRead(path);
-                fileStream.CopyTo(entryStream);
-            });
-        }
-
-        public void RemoveValidation()
-        {
-            Gbx.AuthorTime = new(-1);
-            Gbx.GoldTime = new(-1);
-            Gbx.SilverTime = new(-1);
-            Gbx.BronzeTime = new(-1);
-            Gbx.ChallengeParameters?.RaceValidateGhost = null;
-            if (Gbx.Xml is not null)
-            {
-                var header = XElement.Parse(Gbx.Xml);
-                header.Element("desc")?.SetAttributeValue("validated", "0");
-                foreach (var time in new[] { "bronze", "silver", "gold", "authortime" })
-                {
-                    header.Element("times")?.SetAttributeValue(time, "-1");
-                }
-                Gbx.Xml = header.ToString(SaveOptions.DisableFormatting);
-            }
-        }
-
-        public void RemoveLightmap()
-        {
-            Gbx.HasLightmaps = false;
-            Gbx.LightmapCache = null;
-            Gbx.LightmapFrames = null;
-            Gbx.LightmapCacheSmall = null;
-            Gbx.LightmapCacheData = null;
         }
 
         public void GenerateUid() => Gbx.GenerateMapUid();
