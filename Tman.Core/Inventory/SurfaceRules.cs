@@ -36,7 +36,7 @@ namespace Tman.Core.Inventory
         }
 
         public static SurfaceBlock? SurfaceBlockOf(Block block, Surface surface) =>
-            RoadFamily.Of(block) is { } family && family.NativeSurface != surface ? new SurfaceBlock(surface, block) : null;
+            DeckFamily.Of(block) is { } family && family.NativeSurface != surface ? new SurfaceBlock(surface, block) : null;
 
         private static readonly string[] PenaltySurfaces = ["", "Dirt", "Ice"];
     }
