@@ -67,6 +67,7 @@ Every output map has its validation removed (no author time, no medals — valid
 | `Grass` | Surfaces | The same with grass. |
 | `Plastic` | Surfaces | The same with plastic. |
 | `Wood` | Surface | The same with wood. |
+| `Metal` | Surface | The same with metal. |
  
 The surface alterations build their blocks from the game's own files: copy `Stadium.pak`, `RedIsland.pak`, `WhiteShore.pak`, `GreenCoast.pak` and `BlueBay.pak` (from `Trackmania\Packs`) into a `Paks/` folder at the repository root. The first run on a map builds every road block it needs (about a second each) into `Cache/`; later runs reuse them.
 
