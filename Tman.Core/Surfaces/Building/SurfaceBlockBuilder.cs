@@ -57,7 +57,9 @@ namespace Tman.Core.Surfaces.Building
             foreach (var mobil in (variant.Mobils ?? []).Select(variations => variations[0]))
             {
                 var prefab = PakStore.Logical(infoPath, ancestor, mobil.PrefabFidFile!.FilePath);
-                parts.AddRange(PrefabParts.Collect(store, prefab, mobil.HasGeomTransformation ? mobil.GeomTranslation : Vec3.Zero, Quat.Identity));
+                var position = mobil.HasGeomTransformation ? mobil.GeomTranslation : Vec3.Zero;
+                var rotation = mobil.HasGeomTransformation ? Transforms.FromEulerDegrees(mobil.GeomRotation) : Quat.Identity;
+                parts.AddRange(PrefabParts.Collect(store, prefab, position, rotation));
             }
             var family = DeckFamily.Of(file.Block.Archetype) ?? throw new InvalidOperationException($"{file.Block.Archetype.Id} is not a road kind");
             var model = SurfaceBlockMesh.Merge(parts, family, SurfaceTarget.Of(file.Block.Surface), MaterialDressing.For(file.Collection, infoPath, info, ancestor));
