@@ -95,15 +95,15 @@ namespace Tman.Core.Inventory.Builders
             return stream.ToArray();
         }
 
-        private static readonly Lazy<Dictionary<(string Environment, string Kind), string>> BlockInfoIndex = new(() =>
+        private static readonly Lazy<Dictionary<string, string>> BlockInfoIndex = new(() =>
         {
-            var index = new Dictionary<(string, string), string>();
+            var index = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             foreach (var entry in GamePaks.Store.Entries)
             {
                 var segments = entry.Split('\\');
                 if (segments.Length > 3 && segments[1] + "\\" + segments[2] == BlockInfoClassic && entry.EndsWith(BlockInfoExtension, StringComparison.OrdinalIgnoreCase))
                 {
-                    index.TryAdd((segments[0], segments[^1][..^BlockInfoExtension.Length]), entry);
+                    index.TryAdd(segments[0] + "\\" + segments[^1][..^BlockInfoExtension.Length], entry);
                 }
             }
             return index;
@@ -113,7 +113,7 @@ namespace Tman.Core.Inventory.Builders
         {
             foreach (var environment in collection == Collections.Stadium ? [StadiumFolder] : new[] { collection.ToString(), StadiumFolder })
             {
-                if (BlockInfoIndex.Value.TryGetValue((environment, archetype.Id), out var path) && store.Open(path)?.Node is CGameCtnBlockInfo info)
+                if (BlockInfoIndex.Value.TryGetValue(environment + "\\" + archetype.Id, out var path) && store.Open(path)?.Node is CGameCtnBlockInfo info)
                 {
                     return (path, info);
                 }
