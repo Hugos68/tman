@@ -30,7 +30,7 @@ namespace Tman.Core.Alterations.Other
                 }
                 var pose = placement.Pose(map);
                 var random = new Random(Seed($"{map.Name}|{placement.Id}|{pose.Coords}"));
-                MapMoving.Nudge(placement, new Vec3(Spread(random, Shift), Spread(random, Shift), Spread(random, Shift)), new Vec3(Spread(random, Tilt), Spread(random, Tilt), Spread(random, Tilt)));
+                Map.Nudge(placement, new Vec3(Spread(random, Shift), Spread(random, Shift), Spread(random, Shift)), new Vec3(Spread(random, Tilt), Spread(random, Tilt), Spread(random, Tilt)));
             }
         }
 

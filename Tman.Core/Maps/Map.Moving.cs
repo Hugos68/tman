@@ -6,17 +6,17 @@ using Tman.Core.Maps.Geometry;
 
 namespace Tman.Core.Maps
 {
-    public static class MapMoving
+    public sealed partial class Map
     {
-        public static void Free(this Map map, Placement placement)
+        public void Free(Placement placement)
         {
             var block = placement.Block!;
             if (block.IsFree)
             {
                 return;
             }
-            var pose = placement.Pose(map);
-            map.Gbx.TryCreateChunk<CGameCtnChallenge.Chunk0304305F>(out _);
+            var pose = placement.Pose(this);
+            Gbx.TryCreateChunk<CGameCtnChallenge.Chunk0304305F>(out _);
             block.IsFree = true;
             block.IsGround = false;
             block.Coord = new Int3(-1, 0, -1);
@@ -37,12 +37,12 @@ namespace Tman.Core.Maps
             placement.Item.YawPitchRoll += yawPitchRoll;
         }
 
-        public static void Translate(this Map map, Placement placement, Vec3 offset)
+        public void Translate(Placement placement, Vec3 offset)
         {
             if (placement.Block is { IsFree: false } block && offset.X % MapConstants.CellSize == 0 && offset.Y % MapConstants.CellHeight == 0 && offset.Z % MapConstants.CellSize == 0)
             {
                 var coord = block.Coord + new Int3((int)(offset.X / MapConstants.CellSize), (int)(offset.Y / MapConstants.CellHeight), (int)(offset.Z / MapConstants.CellSize));
-                if (coord.X < 0 || coord.Y < 0 || coord.Z < 0 || coord.X >= map.Size.X || coord.Y >= map.Size.Y || coord.Z >= map.Size.Z)
+                if (coord.X < 0 || coord.Y < 0 || coord.Z < 0 || coord.X >= Size.X || coord.Y >= Size.Y || coord.Z >= Size.Z)
                 {
                     throw new InvalidOperationException($"{placement.Id} at {block.Coord} cannot move by {offset}: outside the map");
                 }
@@ -51,7 +51,7 @@ namespace Tman.Core.Maps
             }
             if (placement.IsBlock)
             {
-                map.Free(placement);
+                Free(placement);
             }
             Nudge(placement, offset, Vec3.Zero);
         }

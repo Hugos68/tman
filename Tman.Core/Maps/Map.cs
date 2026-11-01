@@ -9,7 +9,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Maps
 {
-    public sealed class Map
+    public sealed partial class Map
     {
         private const int VistaGroundRowHigh = 15;
 

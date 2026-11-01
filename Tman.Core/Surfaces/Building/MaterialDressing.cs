@@ -3,21 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using GBX.NET.Engines.Game;
 using GBX.NET.Engines.Plug;
-using Tman.Paks;
 using Tman.Core.Catalog;
 using Tman.Core.Game;
+using Tman.Paks;
 
 namespace Tman.Core.Surfaces.Building
 {
-    public sealed class MaterialDressing(Collections collection, IReadOnlyList<string> modifierFolders)
+    internal sealed class MaterialDressing(Collections collection, IReadOnlyList<string> modifierFolders)
     {
-        private const string MaterialExtension = ".Material.Gbx";
-
         private const string TerrainModifierExtension = ".TerrainModifier.Gbx";
 
-        private const string EnvironmentSkinFolder = @"\Media\Modifier\StadiumOnTerrain\";
-
-        private const string GameplayMaterials = @"Effects\Media\Material\Collision";
+        private const string EnvironmentSkinFolder = @"Media\Modifier\StadiumOnTerrain";
 
         private const string InWorld = "InWorld";
 
@@ -54,54 +50,45 @@ namespace Tman.Core.Surfaces.Building
 
         public static string? OverlayTwin(string plain)
         {
-            var stem = plain[(plain.LastIndexOf('\\') + 1)..];
-            var folder = plain[..(plain.LastIndexOf('\\') + 1)];
-            var painted = stem.StartsWith(Decal, StringComparison.Ordinal) ? Decal + Paint + stem[Decal.Length..] : Paint + stem;
-            return new[] { plain, folder + painted }.FirstOrDefault(Exists);
+            var name = PakPath.Name(plain);
+            var painted = name.StartsWith(Decal, StringComparison.Ordinal) ? Decal + Paint + name[Decal.Length..] : Paint + name;
+            return new[] { plain, PakPath.Join(PakPath.Folder(plain), painted) }.FirstOrDefault(GameMaterials.Exists);
         }
 
-        public bool IsGameplayStrip(string link) => link.StartsWith(GameplayMaterials, StringComparison.OrdinalIgnoreCase);
-
-        public CPlugSurface.GameplayId Gameplay(string link)
+        public CPlugSurface.GameplayId Gameplay(string collisionLink)
         {
             foreach (var folder in modifierFolders)
             {
-                if (GamePaks.Store.Open($@"{folder}\{Collision}{MaterialExtension}")?.Node is CPlugMaterial material)
+                if (GamePaks.Store.Open(PakPath.Join(folder, Collision) + GameMaterials.Extension)?.Node is CPlugMaterial material)
                 {
                     return material.GameplayId;
                 }
             }
-            return GameplayOf(link[GameplayMaterials.Length..]);
+            return GameMaterials.GameplayOfCollision(collisionLink);
         }
-
-        public static CPlugSurface.GameplayId GameplayOf(string collisionName) =>
-            Enum.GetValues<CPlugSurface.GameplayId>()
-                .Where(gameplay => collisionName.StartsWith(gameplay.ToString(), StringComparison.Ordinal))
-                .OrderByDescending(gameplay => gameplay.ToString().Length)
-                .FirstOrDefault(CPlugSurface.GameplayId.None);
 
         private string Resolve(string link)
         {
-            var stem = link[(link.LastIndexOf('\\') + 1)..];
+            var name = PakPath.Name(link);
             if (collection != Collections.Stadium)
             {
-                foreach (var candidate in new[] { stem, stem + InWorld })
+                foreach (var candidate in new[] { name, name + InWorld })
                 {
-                    var skinned = collection + EnvironmentSkinFolder + candidate;
-                    if (Exists(skinned))
+                    var skinned = PakPath.Join(PakPath.Join(collection.ToString(), EnvironmentSkinFolder), candidate);
+                    if (GameMaterials.Exists(skinned))
                     {
                         return skinned;
                     }
                 }
             }
-            var unbranded = stem.Replace(Placeholder, "", StringComparison.Ordinal);
+            var unbranded = name.Replace(Placeholder, "", StringComparison.Ordinal);
             var plain = unbranded.Replace(Special, "", StringComparison.Ordinal);
             foreach (var folder in modifierFolders)
             {
-                foreach (var candidate in new[] { stem, unbranded, plain })
+                foreach (var candidate in new[] { name, unbranded, plain })
                 {
-                    var modified = folder + "\\" + candidate;
-                    if (candidate.Length > 0 && Exists(modified))
+                    var modified = PakPath.Join(folder, candidate);
+                    if (candidate.Length > 0 && GameMaterials.Exists(modified))
                     {
                         return modified;
                     }
@@ -109,7 +96,5 @@ namespace Tman.Core.Surfaces.Building
             }
             return link;
         }
-
-        public static bool Exists(string link) => GamePaks.Store.Resolve(link + MaterialExtension) is not null;
     }
 }

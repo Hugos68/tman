@@ -8,7 +8,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Maps
 {
-    public static class MapWaypoints
+    public sealed partial class Map
     {
         private const string LinkedCheckpointTag = "LinkedCheckpoint";
 
@@ -20,13 +20,13 @@ namespace Tman.Core.Maps
             [Waypoint.StartFinish] = "StartFinish",
         };
 
-        public static void Link(this Map map, IReadOnlyCollection<Placement> checkpoints)
+        public void Link(IReadOnlyCollection<Placement> checkpoints)
         {
             if (checkpoints.Count < 2)
             {
                 return;
             }
-            var order = map.Placements.Where(placement => placement.IsWaypoint && placement.Property!.Tag == LinkedCheckpointTag).Select(placement => placement.Property!.Order).DefaultIfEmpty(0).Max() + 1;
+            var order = Placements.Where(placement => placement.IsWaypoint && placement.Property!.Tag == LinkedCheckpointTag).Select(placement => placement.Property!.Order).DefaultIfEmpty(0).Max() + 1;
             foreach (var checkpoint in checkpoints)
             {
                 var property = checkpoint.Property ?? throw new InvalidOperationException($"{checkpoint.Id} is not a waypoint");

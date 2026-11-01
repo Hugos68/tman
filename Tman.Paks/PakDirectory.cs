@@ -25,7 +25,7 @@ namespace Tman.Paks
         {
             var candidates = Installations().Select(game => Path.Combine(game, PacksFolder)).Concat(Ancestors()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             return candidates.FirstOrDefault(Holds)
-                ?? throw new DirectoryNotFoundException($"No Trackmania installation found and no {FolderName}/ folder with the game's .pak files above {AppContext.BaseDirectory}; looked in: {string.Join(", ", candidates)}");
+                ?? throw new DirectoryNotFoundException($"No Trackmania installation found and no {FolderName}/ folder with the game's {PakStore.Extension} files above {AppContext.BaseDirectory}; looked in: {string.Join(", ", candidates)}");
         }
 
         private static IEnumerable<string> Installations() =>
@@ -53,6 +53,6 @@ namespace Tman.Paks
             }
         }
 
-        private static bool Holds(string directory) => PakStore.Paks.All(pak => File.Exists(Path.Combine(directory, pak.Name + ".pak")));
+        private static bool Holds(string directory) => PakStore.Paks.All(pak => File.Exists(Path.Combine(directory, pak.Name + PakStore.Extension)));
     }
 }

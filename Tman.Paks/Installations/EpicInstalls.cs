@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace Tman.Paks.Installations
 {
-    public static class EpicInstalls
+    internal static class EpicInstalls
     {
         private const string ManifestsFolder = @"Epic\EpicGamesLauncher\Data\Manifests";
 

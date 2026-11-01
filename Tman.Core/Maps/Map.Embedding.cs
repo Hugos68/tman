@@ -5,13 +5,13 @@ using Tman.Core.Surfaces;
 
 namespace Tman.Core.Maps
 {
-    public static class MapEmbedding
+    public sealed partial class Map
     {
-        public static void Embed(this Map map, Item custom) => map.Embed(custom.FullPath());
+        public void Embed(Item custom) => Embed(custom.FullPath());
 
-        internal static void Embed(this Map map, string path)
+        internal void Embed(string path)
         {
-            map.Gbx.UpdateEmbeddedZipData(zip =>
+            Gbx.UpdateEmbeddedZipData(zip =>
             {
                 var name = Path.GetFileName(path);
                 if (zip.GetEntry(name) is not null)
@@ -25,9 +25,9 @@ namespace Tman.Core.Maps
             });
         }
 
-        internal static void EmbedSurfaceBlock(this Map map, SurfaceBlockFile file, byte[] bytes)
+        internal void EmbedSurfaceBlock(SurfaceBlockFile file, byte[] bytes)
         {
-            map.Gbx.UpdateEmbeddedZipData(zip =>
+            Gbx.UpdateEmbeddedZipData(zip =>
             {
                 if (zip.GetEntry(file.EmbeddedEntry) is not null)
                 {

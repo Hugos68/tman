@@ -5,12 +5,17 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using GBX.NET;
+using GBX.NET.LZO;
 using GBX.NET.PAK;
 
 namespace Tman.Paks
 {
     public sealed class PakStore : IDisposable
     {
+        public const string Extension = ".pak";
+
+        private const int ReadBufferSize = 65536;
+
         public static readonly IReadOnlyList<(string Name, string Key)> Paks =
         [
             ("Stadium", "B773D73047A4104857722366D78D28A6"),
@@ -27,14 +32,14 @@ namespace Tman.Paks
 
         public PakStore(string directory)
         {
-            Gbx.LZO = new GBX.NET.LZO.Lzo();
+            Gbx.LZO = new Lzo();
             foreach (var (name, key) in Paks)
             {
-                var pak = Pak.Parse(File.OpenRead(Path.Combine(directory, name + ".pak")), Convert.FromHexString(key), KeyType.EncryptionKey);
+                var pak = Pak.Parse(File.OpenRead(Path.Combine(directory, name + Extension)), Convert.FromHexString(key), KeyType.EncryptionKey);
                 paks.Add(pak);
                 foreach (var (path, file) in pak.Files)
                 {
-                    var logical = path.Replace('/', '\\');
+                    var logical = path.Replace('/', PakPath.Separator);
                     var upper = logical.ToUpperInvariant();
                     if (index.TryAdd(upper, (pak, file)))
                     {
@@ -48,7 +53,7 @@ namespace Tman.Paks
 
         public string? Resolve(string logical)
         {
-            foreach (var candidate in Names.Candidates(logical))
+            foreach (var candidate in HashedNames.Candidates(logical))
             {
                 if (index.ContainsKey(candidate.ToUpperInvariant()))
                 {
@@ -101,7 +106,7 @@ namespace Tman.Paks
             {
                 using var stream = pak.OpenFile(file, out _);
                 var raw = new MemoryStream();
-                var buffer = new byte[65536];
+                var buffer = new byte[ReadBufferSize];
                 while (true)
                 {
                     var n = stream.Read(buffer, 0, buffer.Length);
@@ -124,13 +129,13 @@ namespace Tman.Paks
 
         public static string Logical(string ownerLogical, int ancestorLevel, string filePath)
         {
-            var segments = ownerLogical.Split('\\').ToList();
+            var segments = ownerLogical.Split(PakPath.Separator).ToList();
             segments.RemoveAt(segments.Count - 1);
             for (var i = 0; i < ancestorLevel; i++)
             {
                 segments.RemoveAt(segments.Count - 1);
             }
-            foreach (var segment in filePath.Replace('/', '\\').Split('\\'))
+            foreach (var segment in filePath.Replace('/', PakPath.Separator).Split(PakPath.Separator))
             {
                 if (segment == "..")
                 {
@@ -141,7 +146,7 @@ namespace Tman.Paks
                     segments.Add(segment);
                 }
             }
-            return string.Join('\\', segments);
+            return string.Join(PakPath.Separator, segments);
         }
 
         public void Dispose()

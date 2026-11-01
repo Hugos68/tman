@@ -6,13 +6,21 @@ using GBX.NET.Engines.Plug;
 
 namespace Tman.Core.Surfaces.Building
 {
-    public static class LightmapAtlas
+    internal static class LightmapAtlas
     {
-        private static int LightmapSet(CPlugVisual3D visual) => visual.VertexStreams![0].UVs!.Keys.Max();
-
         private const float Margin = 0.002f;
 
         private const float ShrinkStep = 0.97f;
+
+        private const float MinimumArea = 1e-3f;
+
+        private const float MinimumExtent = 1e-6f;
+
+        private const float MinimumAspect = 0.1f;
+
+        private const float MaximumAspect = 10f;
+
+        private static int LightmapSet(CPlugVisual3D visual) => visual.VertexStreams![0].UVs!.Keys.Max();
 
         private sealed record Island(IReadOnlyList<CPlugVisual3D> Visuals, Vec2 Min, Vec2 Max, float Width, float Height)
         {
@@ -39,7 +47,7 @@ namespace Tman.Core.Surfaces.Building
             var uvs = visuals.SelectMany(visual => visual.VertexStreams![0].UVs![LightmapSet(visual)]).ToList();
             var min = new Vec2(uvs.Min(uv => uv.X), uvs.Min(uv => uv.Y));
             var max = new Vec2(uvs.Max(uv => uv.X), uvs.Max(uv => uv.Y));
-            return new Layout(min, max, MathF.Sqrt(visuals.Sum(Area) / MathF.Max(visuals.Sum(UvArea), 1e-6f)));
+            return new Layout(min, max, MathF.Sqrt(visuals.Sum(Area) / MathF.Max(visuals.Sum(UvArea), MinimumExtent)));
         }
 
         private static Island? Measure(IReadOnlyList<CPlugVisual3D> visuals)
@@ -52,8 +60,8 @@ namespace Tman.Core.Surfaces.Building
             var uvs = mapped.SelectMany(visual => visual.VertexStreams![0].UVs![LightmapSet(visual)]).ToList();
             var min = new Vec2(uvs.Min(uv => uv.X), uvs.Min(uv => uv.Y));
             var max = new Vec2(uvs.Max(uv => uv.X), uvs.Max(uv => uv.Y));
-            var side = MathF.Sqrt(Math.Max(mapped.Sum(Area), 1e-3f));
-            var aspect = MathF.Sqrt(Math.Clamp((max.X - min.X) / MathF.Max(max.Y - min.Y, 1e-6f), 0.1f, 10f));
+            var side = MathF.Sqrt(Math.Max(mapped.Sum(Area), MinimumArea));
+            var aspect = MathF.Sqrt(Math.Clamp((max.X - min.X) / MathF.Max(max.Y - min.Y, MinimumExtent), MinimumAspect, MaximumAspect));
             return new Island(mapped, min, max, side * aspect, side / aspect);
         }
 
@@ -92,7 +100,9 @@ namespace Tman.Core.Surfaces.Building
             return area;
         }
 
-        private static float Cross(Vec3 u, Vec3 v) => MathF.Sqrt(MathF.Pow(u.Y * v.Z - u.Z * v.Y, 2) + MathF.Pow(u.Z * v.X - u.X * v.Z, 2) + MathF.Pow(u.X * v.Y - u.Y * v.X, 2));
+        private static float Cross(Vec3 u, Vec3 v) => MathF.Sqrt(Squared(u.Y * v.Z - u.Z * v.Y) + Squared(u.Z * v.X - u.X * v.Z) + Squared(u.X * v.Y - u.Y * v.X));
+
+        private static float Squared(float value) => value * value;
 
         private static float Pack(List<Island> islands)
         {
@@ -139,7 +149,7 @@ namespace Tman.Core.Surfaces.Building
         private static void Remap(Island island)
         {
             var size = island.Max - island.Min;
-            var scale = new Vec2(island.Width * island.Scale / MathF.Max(size.X, 1e-6f), island.Height * island.Scale / MathF.Max(size.Y, 1e-6f));
+            var scale = new Vec2(island.Width * island.Scale / MathF.Max(size.X, MinimumExtent), island.Height * island.Scale / MathF.Max(size.Y, MinimumExtent));
             foreach (var visual in island.Visuals)
             {
                 var stream = visual.VertexStreams![0];

@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Tman.Core.Catalog;
+using Tman.Paks;
 
 namespace Tman.Core.Surfaces
 {
-    public sealed record DeckFamily(string Prefix, IReadOnlySet<string> DeckMaterials, Surface? NativeSurface)
+    internal sealed record DeckFamily(string Prefix, IReadOnlySet<string> DeckMaterials, Surface? NativeSurface)
     {
         private const string Materials = @"Stadium\Media\Material\";
 
@@ -59,13 +60,13 @@ namespace Tman.Core.Surfaces
 
         public string? DeckOverlay(string link)
         {
-            var stem = link[(link.LastIndexOf('\\') + 1)..];
+            var name = PakPath.Name(link);
             foreach (var deck in DeckMaterials)
             {
-                var suffix = On + deck[(deck.LastIndexOf('\\') + 1)..];
-                if (stem.EndsWith(suffix, StringComparison.Ordinal) && stem.Length > suffix.Length)
+                var suffix = On + PakPath.Name(deck);
+                if (name.EndsWith(suffix, StringComparison.Ordinal) && name.Length > suffix.Length)
                 {
-                    return link[..(link.LastIndexOf('\\') + 1)] + stem[..^suffix.Length];
+                    return PakPath.Join(PakPath.Folder(link), name[..^suffix.Length]);
                 }
             }
             return null;

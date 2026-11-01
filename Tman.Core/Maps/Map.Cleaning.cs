@@ -2,11 +2,11 @@ using System.Xml.Linq;
 
 namespace Tman.Core.Maps
 {
-    public static class MapCleaning
+    public sealed partial class Map
     {
-        public static void RemoveValidation(this Map map)
+        public void RemoveValidation()
         {
-            var gbx = map.Gbx;
+            var gbx = Gbx;
             gbx.AuthorTime = new(-1);
             gbx.GoldTime = new(-1);
             gbx.SilverTime = new(-1);
@@ -24,9 +24,9 @@ namespace Tman.Core.Maps
             }
         }
 
-        public static void RemoveLightmap(this Map map)
+        public void RemoveLightmap()
         {
-            var gbx = map.Gbx;
+            var gbx = Gbx;
             gbx.HasLightmaps = false;
             gbx.LightmapCache = null;
             gbx.LightmapFrames = null;
