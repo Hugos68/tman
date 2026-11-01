@@ -53,15 +53,18 @@ namespace Tman.Core.Inventory.Builders
             }
             var family = RoadFamily.Of(file.Block.Archetype) ?? throw new InvalidOperationException($"{file.Block.Archetype.Id} is not a road kind");
             var model = SurfaceBlockMesh.Merge(parts, family, SurfaceTarget.Of(file.Block.Surface), MaterialDressing.For(file.Collection, infoPath, info, ancestor));
-            return Shell(file, variant, model, infoPath, ancestor, store);
+            return Shell(file, info, variant, model, infoPath, ancestor, store);
         }
 
-        private static byte[] Shell(SurfaceBlockFile file, CGameCtnBlockInfoVariant variant, CPlugStaticObjectModel model, string infoPath, int ancestor, PakStore store)
+        private static byte[] Shell(SurfaceBlockFile file, CGameCtnBlockInfo info, CGameCtnBlockInfoVariant variant, CPlugStaticObjectModel model, string infoPath, int ancestor, PakStore store)
         {
             var item = GBX.NET.Gbx.Parse<CGameItemModel>(Assets.Data(Template));
             var collection = CollectionIds.Of(file.Collection);
             item.Node.Ident = new Ident(file.Ident, collection, file.RecordAuthor);
             item.Node.Name = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(file.FileName));
+            item.Node.PageName = file.Block.Archetype.Id;
+            item.Node.Description = file.Block.Name;
+            item.Node.IconWebP = info.IconWebP;
             var edition = (CGameBlockItem)item.Node.EntityModelEdition!;
             edition.ArchetypeBlockInfoId = file.Block.Archetype.Id;
             edition.ArchetypeBlockInfoCollectionId = collection;

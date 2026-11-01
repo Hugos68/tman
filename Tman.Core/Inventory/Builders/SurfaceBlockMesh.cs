@@ -132,7 +132,7 @@ namespace Tman.Core.Inventory.Builders
             visual.VertexStreams = [.. (visual.VertexStreams ?? []).Select(stream =>
             {
                 var copy = (CPlugVertexStream)stream.DeepClone();
-                copy.UVs = stream.UVs is null ? null : new SortedDictionary<int, Vec2[]>(stream.UVs.ToDictionary(set => set.Key, set => set.Value.ToArray()));
+                copy.UVs = new SortedDictionary<int, Vec2[]>((stream.UVs ?? []).ToDictionary(set => set.Key, set => set.Value.ToArray()));
                 return copy;
             })];
             return visual;
@@ -217,7 +217,7 @@ namespace Tman.Core.Inventory.Builders
             return logical.EndsWith(MaterialExtension, StringComparison.OrdinalIgnoreCase) ? logical[..^MaterialExtension.Length] : logical;
         }
 
-        private static bool IsDeck(string link, RoadFamily family) => string.Equals(link, family.DeckMaterial, StringComparison.OrdinalIgnoreCase);
+        private static bool IsDeck(string link, RoadFamily family) => family.IsDeck(link);
 
         private static bool IsGameplayStrip(string link) => link.StartsWith(GameplayMaterials, StringComparison.OrdinalIgnoreCase);
 
