@@ -68,8 +68,8 @@ namespace Tman.Generator
                 }
                 var own = KindTokens.First(k => k.Kind == waypoint).Token;
                 var at = name.IndexOf(own, StringComparison.Ordinal);
-                var sideGate = gates ? Regex.Match(name, "^Gate(Start|Checkpoint|Multilap)(Left|Right)([0-9]+)m$") : System.Text.RegularExpressions.Match.Empty;
-                var finishGate = gates ? Regex.Match(name, "^GateFinish([0-9]+)m$") : System.Text.RegularExpressions.Match.Empty;
+                var sideGate = gates ? Regex.Match(name, "^Gate(Start|Checkpoint|Multilap)(Left|Right)([0-9]+)m$") : Match.Empty;
+                var finishGate = gates ? Regex.Match(name, "^GateFinish([0-9]+)m$") : Match.Empty;
                 foreach (var (kind, token) in KindTokens)
                 {
                     if (kind == waypoint)

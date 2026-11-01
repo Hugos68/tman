@@ -11,7 +11,7 @@ namespace Tman.Core.Alterations.Steps.Waypoints
     {
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [
-            new InventoryRemoved(
+            new PlacementsRemoved(
                 placement => placement.IsCheckpoint && (!placement.IsBlock || placement.BlockModel == Blocks.GateCheckpoint)
             ),
         ];

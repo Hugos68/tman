@@ -8,7 +8,7 @@
 | `Tman.Interface` | The command line (`tman`). A graphical interface would be another project referencing `Tman.Core`. |
 | `Tman.Paks` | Reads the game's pak files: the per-pak keys, the hashed-name resolver, the `Paks/` folder lookup. Used by `Tman.Core` (surface blocks) and `Tman.Generator`. |
 | `Tman.Tests` | Unit tests of the rules in `Tman.Core` (`dotnet test`). |
-| `Tman.Generator` | A development tool: regenerates the game catalog in `Tman.Core/Inventory/Generated` from the game's pak files and the custom items in `Tman.Core/Assets/Items`. Not needed to run tman. |
+| `Tman.Generator` | A development tool: regenerates the game catalog in `Tman.Core/Catalog/Generated` from the game's pak files and the custom items in `Tman.Core/Assets/Items`. Not needed to run tman. |
 
 `Tman.sln` builds all five.
 
@@ -35,27 +35,31 @@ Tman.Core/
 ├─ Alterations/              the alterations, one folder per family (Cars, Checkpoints, Effects, Finishes, Other, Surfaces)
 │  ├─ Alteration.cs          the base class: pre-applied steps, Run, a new map UID
 │  ├─ StandardAlteration.cs  what every user-facing alteration derives from: validation and lightmap removed, Steps, Run, the map renamed
+│  ├─ Finishes/              the finish alterations and FinishPlane, the finish item built per map
 │  ├─ Steps/                 the reusable steps alterations are composed from (each one is itself an Alteration)
+│  │  └─ Waypoints/          the steps that act on starts, checkpoints and finishes
 │  └─ Surfaces/              SurfaceAlteration (the mechanism) and one three-line class per surface
-├─ Inventory/                what the game has
-│  ├─ Block.cs, Item.cs, Collections.cs, Waypoint.cs, Car.cs     the catalog types
-│  ├─ BlockFlags.cs          the meaning of a block record's flag bits
-│  ├─ Surface.cs, SurfaceBlock.cs, SurfaceBlockKey.cs, SurfaceBlockFile.cs, SurfaceRules.cs, RoadFamily.cs, SurfaceTarget.cs   the surface alterations' vocabulary and rules
-│  ├─ Generated/             Blocks.g.cs, Items.g.cs, Custom.g.cs — written by Tman.Generator, never edited by hand
-│  └─ Builders/              items and blocks built at run time: FinishPlane (one finish item per map), SurfaceBlockBuilder (one custom block per road kind, variant, environment and surface, from the game's paks)
+├─ Catalog/                  what the game has: Block, Item, Collections, Waypoint, Car, BlockFlags, CollectionIds
+│  └─ Generated/             Blocks.g.cs, Items.g.cs, Custom.g.cs — written by Tman.Generator, never edited by hand
+├─ Surfaces/                 the surface alterations' vocabulary and rules: Surface, SurfaceTarget, SurfaceRules, DeckFamily, SurfaceBlock, SurfaceBlockKey, SurfaceBlockFile
+│  └─ Building/              one custom block per road kind, variant, environment and surface, built from the game's paks: SurfaceBlockBuilder, SurfaceBlockMesh, GameMaterials, MaterialDressing, LightmapAtlas, LodLevels, SurfaceBlockCache
+├─ Game/                     the game's own files: GamePaks (the pak store), PrefabParts (a prefab flattened into placed static objects), Transforms
 ├─ Maps/                     a map and what is in it
 │  ├─ Map.cs                 load, save, metadata, queries, removal
-│  ├─ MapPlacing.cs          Place, PlaceRelative, PlaceLike
-│  ├─ MapReplacing.cs        Replace (by block, item, waypoint kind or surface block)
-│  ├─ MapMoving.cs           Free, Nudge, Translate
-│  ├─ MapWaypoints.cs        waypoint properties and checkpoint links
-│  ├─ MapEmbedding.cs        custom items and surface blocks embedded into the map
-│  ├─ MapCleaning.cs         validation and lightmap removal
-│  └─ Placement.cs, Selector.cs, Position.cs, MapConstants.cs
+│  ├─ Map.Placing.cs         Place, PlaceRelative, PlaceLike
+│  ├─ Map.Replacing.cs       Replace (by block, item, waypoint kind or surface block)
+│  ├─ Map.Moving.cs          Free, Nudge, Translate
+│  ├─ Map.Waypoints.cs       waypoint properties and checkpoint links
+│  ├─ Map.Embedding.cs       custom items and surface blocks embedded into the map
+│  ├─ Map.Cleaning.cs        validation and lightmap removal
+│  ├─ Placements/            Placement (a block or item in the map), Selector, PlacementExtensions
+│  └─ Geometry/              Position, Direction, DirectionOffset, MapConstants
 └─ Assets/                   Data/ (lookup tables, the game-made custom block shell), Items/<Category>/<Family>/*.Item.Gbx (custom items)
 ```
 
-Namespaces follow the folders (`Tman.Core.Alterations.Finishes`, `Tman.Core.Inventory`, `Tman.Core.Maps`). The `Map*` classes are extension classes over `Map`: call sites read `map.Replace(...)`, the file tells which concern the method belongs to.
+Namespaces follow the folders (`Tman.Core.Alterations.Finishes`, `Tman.Core.Catalog`, `Tman.Core.Surfaces.Building`, `Tman.Core.Maps.Placements`). `Map` is one partial class split by concern: call sites read `map.Replace(...)`, the file name tells which concern the method belongs to.
+
+Everything is `internal` unless Tman.Interface needs it (`Alteration`, the alterations, `Map.Load` and `Map.Save`), every class that is not a base class is `sealed`, and every number that is not zero or one has a name.
 
 ### The catalog
 
@@ -90,12 +94,12 @@ public class Checkpointless : StandardAlteration
 
     protected override IEnumerable<Alteration> Steps =>
     [
-        new InventoryRemoved(placement => placement.IsCheckpoint)
+        new PlacementsRemoved(placement => placement.IsCheckpoint)
     ];
 }
 ```
 
-Override `Run(Map map)` when the alteration needs logic of its own (it runs after the steps). Steps live in `Alterations/Steps`: `InventoryRemoved`, `CheckpointsCleaned`, `BlocksReplaced` (a rule from block to block), `SurfaceBlocksPlaced` (a rule from block to surface block), `RelativelyPlacedItems` (an item at every placement matching a selector), the `WaypointEffect` subclasses for gates at starts and checkpoints, `ConditionalAlteration` for environment-specific steps. A new family is a new folder; the command line discovers alterations by type. Add the alteration to the table in `README.md`.
+Override `Run(Map map)` when the alteration needs logic of its own (it runs after the steps). Steps live in `Alterations/Steps`: `PlacementsRemoved`, `CheckpointsCleaned`, `BlocksReplaced` (a rule from block to block), `SurfaceBlocksPlaced` (a rule from block to surface block), `RelativelyPlacedItems` (an item at every placement matching a selector), the `WaypointEffect` subclasses for gates at starts and checkpoints, `ConditionalAlteration` for environment-specific steps. A new family is a new folder; the command line discovers alterations by type. Add the alteration to the table in `README.md`.
 
 Rules of the house: no comments, no optional knobs, no strings where the catalog has a name, no unexplained numbers (name the constant where the rule lives), nothing that reads a file outside `Assets/`. Fail loudly (throw) rather than skip when a map cannot be altered as asked.
 
@@ -115,7 +119,7 @@ Items live in `Tman.Core/Assets/Items/<Category>/<Family>/`. An item's internal 
 dotnet run --project Tman.Generator -- --paks <directory with the five .pak files>
 ```
 
-Writes `Blocks.g.cs`, `Items.g.cs` and `Custom.g.cs` into `Tman.Core/Inventory/Generated` (`--core` points at another `Tman.Core` directory). Run it after a game update that changes blocks or items, and after any change in `Assets/Items`. The generated files are committed; a diff in them is reviewed like any other.
+Writes `Blocks.g.cs`, `Items.g.cs` and `Custom.g.cs` into `Tman.Core/Catalog/Generated` (`--core` points at another `Tman.Core` directory). Run it after a game update that changes blocks or items, and after any change in `Assets/Items`. The generated files are committed; a diff in them is reviewed like any other.
 
 ## Verifying a change
 

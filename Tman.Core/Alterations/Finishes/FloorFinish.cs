@@ -19,7 +19,7 @@ namespace Tman.Core.Alterations.Finishes
 
         protected override IEnumerable<Alteration> Steps =>
         [
-            new InventoryRemoved(placement => placement.IsFinish),
+            new PlacementsRemoved(placement => placement.IsFinish),
             new CheckpointsCleaned(),
             new ConditionalAlteration(
                 map => map.Collection == Collections.Stadium,

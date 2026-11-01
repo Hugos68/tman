@@ -5,11 +5,11 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Steps
 {
-    internal sealed class InventoryRemoved(Func<Placement, bool> predicate) : Alteration
+    internal sealed class PlacementsRemoved(Predicate<Placement> predicate) : Alteration
     {
         protected override void Run(Map map)
         {
-            foreach (var placement in map.Placements.Where(predicate).ToList())
+            foreach (var placement in map.Placements.Where(placement => predicate(placement)).ToList())
             {
                 map.Remove(placement);
             }

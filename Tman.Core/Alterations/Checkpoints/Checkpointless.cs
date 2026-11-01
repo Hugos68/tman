@@ -10,7 +10,7 @@ namespace Tman.Core.Alterations.Checkpoints
 
         protected override IEnumerable<Alteration> Steps =>
         [
-            new InventoryRemoved(placement => placement.IsCheckpoint)
+            new PlacementsRemoved(placement => placement.IsCheckpoint)
         ];
     }
 }
