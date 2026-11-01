@@ -1,7 +1,10 @@
 using System;
 using GBX.NET;
-using Tman.Core.Inventory;
-using Tman.Core.Inventory.Builders;
+using Tman.Core.Catalog;
+using Tman.Core.Surfaces;
+using Tman.Core.Surfaces.Building;
+using Tman.Core.Maps.Geometry;
+using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Maps
 {

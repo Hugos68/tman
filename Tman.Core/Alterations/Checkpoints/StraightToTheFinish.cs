@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Tman.Core.Alterations.Steps;
+using Tman.Core.Alterations.Steps.Waypoints;
 
 namespace Tman.Core.Alterations.Checkpoints
 {

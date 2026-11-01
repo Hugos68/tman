@@ -4,7 +4,8 @@ using System.Linq;
 using GBX.NET;
 using GBX.NET.Engines.Game;
 using GBX.NET.LZO;
-using Tman.Core.Inventory;
+using Tman.Core.Catalog;
+using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Maps
 {

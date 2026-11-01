@@ -1,7 +1,9 @@
 using GBX.NET;
 using GBX.NET.Engines.Game;
 using GBX.NET.Engines.GameData;
-using Tman.Core.Inventory;
+using Tman.Core.Catalog;
+using Tman.Core.Maps.Geometry;
+using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Maps
 {

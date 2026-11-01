@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Tman.Core.Inventory;
+using Tman.Core.Catalog;
 using Tman.Core.Alterations.Steps;
 
 namespace Tman.Core.Alterations.Cars

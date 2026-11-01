@@ -1,4 +1,4 @@
-using Tman.Core.Inventory;
+using Tman.Core.Catalog;
 using Tman.Core.Maps;
 
 namespace Tman.Core.Alterations.Steps

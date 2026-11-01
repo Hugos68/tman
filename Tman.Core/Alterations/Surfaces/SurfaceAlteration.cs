@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Tman.Core.Alterations.Steps;
-using Tman.Core.Inventory;
+using Tman.Core.Catalog;
+using Tman.Core.Surfaces;
 
 namespace Tman.Core.Alterations.Surfaces
 {

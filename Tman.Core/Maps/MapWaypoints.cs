@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using GBX.NET.Engines.Game;
 using GBX.NET.Engines.GameData;
-using Tman.Core.Inventory;
+using Tman.Core.Catalog;
+using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Maps
 {

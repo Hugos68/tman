@@ -1,6 +1,7 @@
 using System.IO;
 using System.IO.Compression;
-using Tman.Core.Inventory;
+using Tman.Core.Catalog;
+using Tman.Core.Surfaces;
 
 namespace Tman.Core.Maps
 {

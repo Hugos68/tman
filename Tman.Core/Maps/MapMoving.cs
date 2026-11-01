@@ -1,6 +1,8 @@
 using System;
 using GBX.NET;
 using GBX.NET.Engines.Game;
+using Tman.Core.Maps.Placements;
+using Tman.Core.Maps.Geometry;
 
 namespace Tman.Core.Maps
 {

@@ -3,8 +3,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using GBX.NET;
-using Tman.Core.Alterations.Steps;
 using Tman.Core.Maps;
+using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Other
 {

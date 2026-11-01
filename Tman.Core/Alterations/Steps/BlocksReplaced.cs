@@ -1,7 +1,8 @@
 using System;
 using System.Linq;
-using Tman.Core.Inventory;
+using Tman.Core.Catalog;
 using Tman.Core.Maps;
+using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Steps
 {
