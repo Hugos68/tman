@@ -25,12 +25,14 @@ namespace Tman.Core.Inventory.Builders
             var mesh = new CPlugSurface.Mesh { Version = source.Version, OctreeVersion = source.OctreeVersion, GameplayMainDir = source.GameplayMainDir };
             shape.Surf = mesh;
             var visuals = new List<CPlugVisual>();
+            var islands = new List<IReadOnlyList<CPlugVisual3D>>();
             var geoms = new List<CPlugSolid2Model.ShadedGeom>();
             var materials = new List<CPlugSolid2Model.Material>();
             var materialIndices = new Dictionary<(string Link, CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay), int>();
             var vertices = new List<Vec3>();
             var triangles = new List<CPlugSurface.Mesh.Triangle>();
-            var surfaceMaterials = new List<CPlugSurface.SurfMaterial>();
+            var surfaceSlots = 0;
+
             foreach (var part in parts)
             {
                 var partSolid = Solid(part);
@@ -52,10 +54,14 @@ namespace Tman.Core.Inventory.Builders
                     materialMap[slot] = index;
                 }
                 var visualBase = visuals.Count;
+                var partVisuals = new List<CPlugVisual3D>();
                 foreach (var visual in partSolid.Visuals ?? [])
                 {
-                    visuals.Add(Transformed((CPlugVisual3D)visual.DeepClone(), part.Position, part.Rotation));
+                    var copy = Transformed(Detached((CPlugVisual3D)visual.DeepClone()), part.Position, part.Rotation);
+                    visuals.Add(copy);
+                    partVisuals.Add(copy);
                 }
+                islands.Add(partVisuals);
                 foreach (var geom in partSolid.ShadedGeoms ?? [])
                 {
                     geoms.Add(new CPlugSolid2Model.ShadedGeom
@@ -73,7 +79,8 @@ namespace Tman.Core.Inventory.Builders
                 }
                 var slots = ShapeSlots(part, partShape, family, target, dressing);
                 var vertexBase = vertices.Count;
-                var surfaceBase = surfaceMaterials.Count;
+                var surfaceBase = surfaceSlots;
+                surfaceSlots += slots.Length;
                 vertices.AddRange(partMesh.Vertices!.Select(vertex => PrefabMerge.Rotate(part.Rotation, vertex) + part.Position));
                 foreach (var triangle in partMesh.Triangles!)
                 {
@@ -86,7 +93,12 @@ namespace Tman.Core.Inventory.Builders
                         U03 = triangle.U03
                     });
                 }
-                surfaceMaterials.AddRange(slots.Select(slot => new CPlugSurface.SurfMaterial { SurfaceId = slot.Physics }));
+
+            }
+            var atlasHeight = LightmapAtlas.Repack(islands);
+            if (solid.PreLightGenerator is { } lightmap)
+            {
+                lightmap.U07 = atlasHeight;
             }
             solid.Visuals = [.. visuals];
             solid.ShadedGeoms = [.. geoms];
@@ -101,7 +113,7 @@ namespace Tman.Core.Inventory.Builders
             solid.Boxes = [Bounds(vertices.Concat(visuals.SelectMany(visual => ((CPlugVisual3D)visual).VertexStreams![0].Positions!)))];
             mesh.Vertices = [.. vertices];
             mesh.Triangles = [.. triangles];
-            shape.Materials = [.. surfaceMaterials];
+            shape.Materials = [];
             return model;
         }
 
@@ -115,14 +127,24 @@ namespace Tman.Core.Inventory.Builders
             return copy;
         }
 
+        private static CPlugVisual3D Detached(CPlugVisual3D visual)
+        {
+            visual.VertexStreams = [.. (visual.VertexStreams ?? []).Select(stream =>
+            {
+                var copy = (CPlugVertexStream)stream.DeepClone();
+                copy.UVs = stream.UVs is null ? null : new SortedDictionary<int, Vec2[]>(stream.UVs.ToDictionary(set => set.Key, set => set.Value.ToArray()));
+                return copy;
+            })];
+            return visual;
+        }
+
         private static CPlugVisual3D Transformed(CPlugVisual3D visual, Vec3 position, Quat rotation)
         {
             if (PrefabMerge.IsIdentity(position, rotation))
             {
                 return visual;
             }
-            visual.VertexStreams = [.. (visual.VertexStreams ?? []).Select(stream => (CPlugVertexStream)stream.DeepClone())];
-            foreach (var stream in visual.VertexStreams)
+            foreach (var stream in visual.VertexStreams!)
             {
                 if (stream.Positions is { } positions)
                 {
@@ -182,7 +204,7 @@ namespace Tman.Core.Inventory.Builders
                 if (material.MaterialFile is { } file)
                 {
                     var link = Resolve(part, file.FilePath);
-                    return IsDeck(link, family) ? (true, target.Physics) : (false, PhysicsOf(dressing.Dress(link)));
+                    return IsDeck(link, family) || IsGameplayStrip(link) ? (true, target.Physics) : (false, PhysicsOf(dressing.Dress(link)));
                 }
                 return material.Material is { } node ? (false, node.SurfaceId) : (false, material.SurfaceId ?? CPlugSurface.MaterialId.Asphalt);
             })];
@@ -196,6 +218,8 @@ namespace Tman.Core.Inventory.Builders
         }
 
         private static bool IsDeck(string link, RoadFamily family) => string.Equals(link, family.DeckMaterial, StringComparison.OrdinalIgnoreCase);
+
+        private static bool IsGameplayStrip(string link) => link.StartsWith(GameplayMaterials, StringComparison.OrdinalIgnoreCase);
 
         private const string GameplayMaterials = @"Effects\Media\Material\Collision";
 

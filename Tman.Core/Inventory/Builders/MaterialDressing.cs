@@ -15,6 +15,8 @@ namespace Tman.Core.Inventory.Builders
 
         private const string InWorld = "InWorld";
 
+        private const string Special = "Special";
+
         private readonly Dictionary<string, string> dressed = new(StringComparer.OrdinalIgnoreCase);
 
         public static MaterialDressing For(Collections collection, string infoPath, CGameCtnBlockInfo info, int ancestor)
@@ -44,22 +46,27 @@ namespace Tman.Core.Inventory.Builders
                 foreach (var candidate in new[] { stem, stem + InWorld })
                 {
                     var skinned = collection + EnvironmentSkinFolder + candidate;
-                    if (GamePaks.Store.Resolve(skinned + MaterialExtension) is not null)
+                    if (Exists(skinned))
                     {
                         return skinned;
                     }
                 }
-                return link;
             }
             if (modifierFolder is not null)
             {
-                var modified = modifierFolder + "\\" + stem;
-                if (GamePaks.Store.Resolve(modified + MaterialExtension) is not null)
+                var modifierName = modifierFolder[(modifierFolder.LastIndexOf('\\') + 1)..];
+                foreach (var candidate in new[] { stem, stem.Replace(modifierName, "", StringComparison.Ordinal).Replace(Special, "", StringComparison.Ordinal) })
                 {
-                    return modified;
+                    var modified = modifierFolder + "\\" + candidate;
+                    if (candidate.Length > 0 && Exists(modified))
+                    {
+                        return modified;
+                    }
                 }
             }
             return link;
         }
+
+        private static bool Exists(string link) => GamePaks.Store.Resolve(link + MaterialExtension) is not null;
     }
 }
