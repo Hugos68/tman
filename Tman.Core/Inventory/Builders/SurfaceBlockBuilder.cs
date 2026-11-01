@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using GBX.NET;
+using GBX.NET.Components;
 using GBX.NET.Engines.Game;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Plug;
@@ -65,14 +66,14 @@ namespace Tman.Core.Inventory.Builders
             edition.ArchetypeBlockInfoId = file.Block.Archetype.Id;
             edition.ArchetypeBlockInfoCollectionId = collection;
             var properties = new CGameBlockItem.MobilProperties { Flags = StaticObjectFlag, StaticObject = model };
-            if (variant.WaypointTriggerSolidFile is { } triggerFile && store.Open(PakStore.Logical(infoPath, ancestor, triggerFile.FilePath))?.Node is CPlugSurface trigger)
+            if (TriggerShapeFile(variant) is { } triggerFile && store.Open(PakStore.Logical(infoPath, ancestor, triggerFile.FilePath)) is { Node: CPlugSurface trigger } triggerGbx)
             {
-                properties.Shape = trigger;
+                properties.Shape = SurfaceBlockMesh.Standalone(trigger, triggerGbx, PakStore.Logical(infoPath, ancestor, triggerFile.FilePath));
                 properties.Flags |= TriggerFlag;
             }
-            if (variant.SpawnTrans is { } spawn && spawn != Vec3.Zero)
+            if (SpawnBox(variant) is { } spawn && spawn != default)
             {
-                properties.U01 = new BoxAligned(spawn.X, spawn.Y, spawn.Z, 0, 0, 0);
+                properties.U01 = spawn;
                 properties.Flags |= SpawnFlag;
             }
             edition.CustomizedVariants[0] = new CGameBlockItem.Mobil { Id = SurfaceBlockKey.Of(file.Ground, file.AdditionalVariant), Properties = properties };
@@ -106,6 +107,12 @@ namespace Tman.Core.Inventory.Builders
             }
             throw new InvalidOperationException($"No block definition for {archetype.Id} in {collection}");
         }
+
+        private static GbxRefTableFile? TriggerShapeFile(CGameCtnBlockInfoVariant variant) =>
+            variant.Chunks.OfType<CGameCtnBlockInfoVariant.Chunk0315B006>().FirstOrDefault()?.U03File;
+
+        private static BoxAligned? SpawnBox(CGameCtnBlockInfoVariant variant) =>
+            variant.Chunks.OfType<CGameCtnBlockInfoVariant.Chunk0315B008>().FirstOrDefault()?.U02;
 
         private static CGameCtnBlockInfoVariant? Variant(CGameCtnBlockInfo info, bool ground, int additional) => (ground, additional) switch
         {

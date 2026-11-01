@@ -11,6 +11,8 @@ namespace Tman.Core.Inventory.Builders
     {
         private const string MaterialExtension = ".Material.Gbx";
 
+        private const float DefaultTextureSizeInMeters = 1;
+
         public static CPlugStaticObjectModel Merge(IReadOnlyList<PrefabMerge.Part> parts, RoadFamily family, SurfaceTarget target, MaterialDressing dressing)
         {
             var collidable = parts.First(part => Shape(part)?.Surf is CPlugSurface.Mesh);
@@ -103,6 +105,16 @@ namespace Tman.Core.Inventory.Builders
             return model;
         }
 
+        public static CPlugSurface Standalone(CPlugSurface surface, Gbx owner, string ownerPath)
+        {
+            var copy = (CPlugSurface)surface.DeepClone();
+            copy.Materials = [.. (surface.Materials ?? []).Select(material => new CPlugSurface.SurfMaterial
+            {
+                SurfaceId = material.MaterialFile is { } file ? PhysicsOf(ResolveLink(ownerPath, owner, file.FilePath)) : material.Material?.SurfaceId ?? material.SurfaceId ?? CPlugSurface.MaterialId.Asphalt
+            })];
+            return copy;
+        }
+
         private static CPlugVisual3D Transformed(CPlugVisual3D visual, Vec3 position, Quat rotation)
         {
             if (PrefabMerge.IsIdentity(position, rotation))
@@ -175,9 +187,11 @@ namespace Tman.Core.Inventory.Builders
                 return material.Material is { } node ? (false, node.SurfaceId) : (false, material.SurfaceId ?? CPlugSurface.MaterialId.Asphalt);
             })];
 
-        private static string Resolve(PrefabMerge.Part part, string filePath)
+        private static string Resolve(PrefabMerge.Part part, string filePath) => ResolveLink(part.OwnerPath, part.Owner, filePath);
+
+        private static string ResolveLink(string ownerPath, Gbx owner, string filePath)
         {
-            var logical = PakStore.Logical(part.OwnerPath, part.Owner.RefTable!.AncestorLevel, filePath);
+            var logical = PakStore.Logical(ownerPath, owner.RefTable!.AncestorLevel, filePath);
             return logical.EndsWith(MaterialExtension, StringComparison.OrdinalIgnoreCase) ? logical[..^MaterialExtension.Length] : logical;
         }
 
@@ -223,6 +237,7 @@ namespace Tman.Core.Inventory.Builders
             instance.Link = link;
             instance.SurfacePhysicId = physics;
             instance.SurfaceGameplayId = gameplay;
+            instance.TextureSizeInMeters = DefaultTextureSizeInMeters;
             instance.Csts = [];
             instance.Color = [];
             instance.UvAnims = [];
