@@ -55,7 +55,7 @@ namespace Tman.Core.Surfaces.Building
             return new[] { plain, PakPath.Join(PakPath.Folder(plain), painted) }.FirstOrDefault(GameMaterials.Exists);
         }
 
-        public CPlugSurface.GameplayId Gameplay(string collisionLink)
+        public CPlugSurface.GameplayId StripGameplay(string collisionLink)
         {
             foreach (var folder in modifierFolders)
             {

@@ -10,7 +10,7 @@ namespace Tman.Core.Alterations.Cars
 
         protected override IEnumerable<Alteration> Steps =>
         [
-            new CarChange(Car.Sport)
+            new CarChanged(Car.Sport)
         ];
     }
 }

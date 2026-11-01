@@ -41,7 +41,7 @@ namespace Tman.Core.Surfaces.Building
                     var overlay = family.DeckOverlay(links[slot]);
                     var strip = GameMaterials.IsGameplayCollision(links[slot]);
                     var link = deck || overlay is not null ? target.Link : dressing.Dress(links[slot]);
-                    var (physics, gameplay) = strip ? (target.Physics, dressing.Gameplay(links[slot])) : GameMaterials.SurfaceOf(link);
+                    var (physics, gameplay) = strip ? (target.Physics, dressing.StripGameplay(links[slot])) : GameMaterials.SurfaceOf(link);
                     materialMap[slot] = materials.IndexOf(link, deck || overlay is not null ? target.Physics : physics, gameplay);
                     if (overlay is not null && MaterialDressing.OverlayTwin(overlay) is { } twin)
                     {
@@ -146,7 +146,7 @@ namespace Tman.Core.Surfaces.Building
                 if (material.MaterialFile is { } file)
                 {
                     var link = PartGeometry.Link(part, file.FilePath);
-                    return GameMaterials.IsGameplayCollision(link) ? new SlotTreatment(true, target.Physics, dressing.Gameplay(link))
+                    return GameMaterials.IsGameplayCollision(link) ? new SlotTreatment(true, target.Physics, dressing.StripGameplay(link))
                         : family.IsDeck(link) || family.DeckOverlay(link) is not null ? new SlotTreatment(true, target.Physics, null)
                         : new SlotTreatment(false, GameMaterials.PhysicsOf(dressing.Dress(link)), null);
                 }
