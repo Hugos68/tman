@@ -7,7 +7,7 @@ using Tman.Paks;
 
 namespace Tman.Core.Inventory.Builders
 {
-    public sealed class MaterialDressing(Collections collection, IReadOnlyList<string> modifierFolders, bool platform)
+    public sealed class MaterialDressing(Collections collection, IReadOnlyList<string> modifierFolders)
     {
         private const string MaterialExtension = ".Material.Gbx";
 
@@ -23,19 +23,17 @@ namespace Tman.Core.Inventory.Builders
 
         private const string Placeholder = "Turbo";
 
-        private const string Platform = "Platform";
-
         private const string Collision = "Collision";
 
         private readonly Dictionary<string, string> dressed = new(StringComparer.OrdinalIgnoreCase);
 
-        public static MaterialDressing For(Collections collection, string infoPath, CGameCtnBlockInfo info, int ancestor, DeckFamily family)
+        public static MaterialDressing For(Collections collection, string infoPath, CGameCtnBlockInfo info, int ancestor)
         {
             var folders = new[] { info.MaterialModifierFile?.FilePath, info.MaterialModifier2File?.FilePath }
                 .Where(modifier => modifier is not null && modifier.EndsWith(TerrainModifierExtension, StringComparison.OrdinalIgnoreCase))
                 .Select(modifier => PakStore.Logical(infoPath, ancestor, modifier!.Trim())[..^TerrainModifierExtension.Length])
                 .ToList();
-            return new MaterialDressing(collection, folders, family.Prefix.StartsWith(Platform, StringComparison.Ordinal));
+            return new MaterialDressing(collection, folders);
         }
 
         public string Dress(string link)
@@ -81,7 +79,7 @@ namespace Tman.Core.Inventory.Builders
             var plain = unbranded.Replace(Special, "", StringComparison.Ordinal);
             foreach (var folder in modifierFolders)
             {
-                foreach (var candidate in platform ? new[] { stem, unbranded + Platform, unbranded, plain + Platform, plain } : new[] { stem, unbranded, plain })
+                foreach (var candidate in new[] { stem, unbranded, plain })
                 {
                     var modified = folder + "\\" + candidate;
                     if (candidate.Length > 0 && Exists(modified))

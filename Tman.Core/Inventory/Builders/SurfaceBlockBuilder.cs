@@ -52,7 +52,7 @@ namespace Tman.Core.Inventory.Builders
                 parts.AddRange(PrefabMerge.Collect(store, prefab, mobil.HasGeomTransformation ? mobil.GeomTranslation : Vec3.Zero, new Quat(0, 0, 0, 1)));
             }
             var family = DeckFamily.Of(file.Block.Archetype) ?? throw new InvalidOperationException($"{file.Block.Archetype.Id} is not a road kind");
-            var model = SurfaceBlockMesh.Merge(parts, family, SurfaceTarget.Of(file.Block.Surface), MaterialDressing.For(file.Collection, infoPath, info, ancestor, family));
+            var model = SurfaceBlockMesh.Merge(parts, family, SurfaceTarget.Of(file.Block.Surface), MaterialDressing.For(file.Collection, infoPath, info, ancestor));
             return Shell(file, info, variant, model, infoPath, ancestor, store);
         }
 
