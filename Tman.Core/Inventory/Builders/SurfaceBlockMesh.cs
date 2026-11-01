@@ -13,7 +13,7 @@ namespace Tman.Core.Inventory.Builders
 
         private const float DefaultTextureSizeInMeters = 1;
 
-        public static CPlugStaticObjectModel Merge(IReadOnlyList<PrefabMerge.Part> parts, RoadFamily family, SurfaceTarget target, MaterialDressing dressing)
+        public static CPlugStaticObjectModel Merge(IReadOnlyList<PrefabMerge.Part> parts, DeckFamily family, SurfaceTarget target, MaterialDressing dressing)
         {
             var collidable = parts.First(part => Shape(part)?.Surf is CPlugSurface.Mesh);
             var model = (CPlugStaticObjectModel)collidable.Model.DeepClone();
@@ -32,6 +32,7 @@ namespace Tman.Core.Inventory.Builders
             var vertices = new List<Vec3>();
             var triangles = new List<CPlugSurface.Mesh.Triangle>();
             var surfaceSlots = 0;
+            var lodDistances = LodLevels.Merge(parts.Select(part => Solid(part).LodMaxDistAtFov90 ?? []));
 
             foreach (var part in parts)
             {
@@ -39,19 +40,19 @@ namespace Tman.Core.Inventory.Builders
                 var partShape = Shape(part);
                 var links = Links(part, partSolid, partShape);
                 var materialMap = new int[links.Length];
+                var overlayMap = new int?[links.Length];
                 for (var slot = 0; slot < links.Length; slot++)
                 {
                     var deck = IsDeck(links[slot], family);
-                    var link = deck ? target.Link : dressing.Dress(links[slot]);
-                    var (physics, gameplay) = SurfaceOf(link);
-                    var key = (link, deck ? target.Physics : physics, gameplay);
-                    if (!materialIndices.TryGetValue(key, out var index))
+                    var overlay = family.DeckOverlay(links[slot]);
+                    var strip = dressing.IsGameplayStrip(links[slot]);
+                    var link = deck || overlay is not null ? target.Link : dressing.Dress(links[slot]);
+                    var (physics, gameplay) = strip ? (target.Physics, dressing.Gameplay(links[slot])) : SurfaceOf(link);
+                    materialMap[slot] = MaterialIndex(materials, materialIndices, link, deck || overlay is not null ? target.Physics : physics, gameplay);
+                    if (overlay is not null && MaterialDressing.Exists(overlay))
                     {
-                        index = materials.Count;
-                        materials.Add(UserMaterial(key.Item1, key.Item2, key.Item3));
-                        materialIndices[key] = index;
+                        overlayMap[slot] = MaterialIndex(materials, materialIndices, overlay, CPlugSurface.MaterialId.NotCollidable, CPlugSurface.GameplayId.None);
                     }
-                    materialMap[slot] = index;
                 }
                 var visualBase = visuals.Count;
                 var partVisuals = new List<CPlugVisual3D>();
@@ -64,14 +65,29 @@ namespace Tman.Core.Inventory.Builders
                 islands.Add(partVisuals);
                 foreach (var geom in partSolid.ShadedGeoms ?? [])
                 {
+                    var lodMask = LodLevels.Remap(geom.LodMask, partSolid.LodMaxDistAtFov90 ?? [], lodDistances);
                     geoms.Add(new CPlugSolid2Model.ShadedGeom
                     {
                         VisualIndex = geom.VisualIndex + visualBase,
                         MaterialIndex = materialMap[geom.MaterialIndex],
                         U01 = geom.U01,
-                        LodMask = geom.LodMask,
+                        LodMask = lodMask,
                         U02 = geom.U02
                     });
+                    if (overlayMap[geom.MaterialIndex] is { } overlayIndex)
+                    {
+                        var decal = Detached((CPlugVisual3D)partVisuals[geom.VisualIndex].DeepClone());
+                        visuals.Add(decal);
+                        partVisuals.Add(decal);
+                        geoms.Add(new CPlugSolid2Model.ShadedGeom
+                        {
+                            VisualIndex = visuals.Count - 1,
+                            MaterialIndex = overlayIndex,
+                            U01 = geom.U01,
+                            LodMask = lodMask,
+                            U02 = geom.U02
+                        });
+                    }
                 }
                 if (partShape?.Surf is not CPlugSurface.Mesh partMesh)
                 {
@@ -90,11 +106,12 @@ namespace Tman.Core.Inventory.Builders
                         Indices = triangle.Indices + new Int3(vertexBase, vertexBase, vertexBase),
                         SurfaceIndex = (short)(triangle.SurfaceIndex + surfaceBase),
                         U02 = slot.Deck ? (byte)target.Physics : triangle.U02,
-                        U03 = triangle.U03
+                        U03 = slot.Gameplay is { } gameplay ? (byte)gameplay : triangle.U03
                     });
                 }
 
             }
+            solid.LodMaxDistAtFov90 = lodDistances;
             var atlasHeight = LightmapAtlas.Repack(islands);
             if (solid.PreLightGenerator is { } lightmap)
             {
@@ -198,15 +215,17 @@ namespace Tman.Core.Inventory.Builders
                 ? Resolve(part, file.FilePath)
                 : throw new InvalidOperationException($"Material {index} of {part.OwnerPath} has no file");
 
-        private static (bool Deck, CPlugSurface.MaterialId Physics)[] ShapeSlots(PrefabMerge.Part part, CPlugSurface shape, RoadFamily family, SurfaceTarget target, MaterialDressing dressing) =>
-            [.. shape.Materials!.Select(material =>
+        private static (bool Deck, CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId? Gameplay)[] ShapeSlots(PrefabMerge.Part part, CPlugSurface shape, DeckFamily family, SurfaceTarget target, MaterialDressing dressing) =>
+            [.. shape.Materials!.Select<CPlugSurface.SurfMaterial, (bool, CPlugSurface.MaterialId, CPlugSurface.GameplayId?)>(material =>
             {
                 if (material.MaterialFile is { } file)
                 {
                     var link = Resolve(part, file.FilePath);
-                    return IsDeck(link, family) || IsGameplayStrip(link) ? (true, target.Physics) : (false, PhysicsOf(dressing.Dress(link)));
+                    return dressing.IsGameplayStrip(link) ? (true, target.Physics, dressing.Gameplay(link))
+                        : IsDeck(link, family) || family.DeckOverlay(link) is not null ? (true, target.Physics, null)
+                        : (false, PhysicsOf(dressing.Dress(link)), null);
                 }
-                return material.Material is { } node ? (false, node.SurfaceId) : (false, material.SurfaceId ?? CPlugSurface.MaterialId.Asphalt);
+                return material.Material is { } node ? (false, node.SurfaceId, null) : (false, material.SurfaceId ?? CPlugSurface.MaterialId.Asphalt, null);
             })];
 
         private static string Resolve(PrefabMerge.Part part, string filePath) => ResolveLink(part.OwnerPath, part.Owner, filePath);
@@ -214,14 +233,33 @@ namespace Tman.Core.Inventory.Builders
         private static string ResolveLink(string ownerPath, Gbx owner, string filePath)
         {
             var logical = PakStore.Logical(ownerPath, owner.RefTable!.AncestorLevel, filePath);
-            return logical.EndsWith(MaterialExtension, StringComparison.OrdinalIgnoreCase) ? logical[..^MaterialExtension.Length] : logical;
+            var link = logical.EndsWith(MaterialExtension, StringComparison.OrdinalIgnoreCase) ? logical[..^MaterialExtension.Length] : logical;
+            if (GamePaks.Store.Resolve(link + MaterialExtension) is not null)
+            {
+                return link;
+            }
+            var environmentMaterial = $@"{link[..link.IndexOf('\\')]}{EnvironmentMaterials}{link[(link.LastIndexOf('\\') + 1)..]}";
+            return GamePaks.Store.Resolve(environmentMaterial + MaterialExtension) is null ? link : environmentMaterial;
         }
 
-        private static bool IsDeck(string link, RoadFamily family) => family.IsDeck(link);
+        private static bool IsDeck(string link, DeckFamily family) => family.IsDeck(link);
 
-        private static bool IsGameplayStrip(string link) => link.StartsWith(GameplayMaterials, StringComparison.OrdinalIgnoreCase);
+        private static int MaterialIndex(List<CPlugSolid2Model.Material> materials, Dictionary<(string Link, CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay), int> indices, string link, CPlugSurface.MaterialId physics, CPlugSurface.GameplayId gameplay)
+        {
+            var key = (link, physics, gameplay);
+            if (!indices.TryGetValue(key, out var index))
+            {
+                index = materials.Count;
+                materials.Add(UserMaterial(link, physics, gameplay));
+                indices[key] = index;
+            }
+            return index;
+        }
+
 
         private const string GameplayMaterials = @"Effects\Media\Material\Collision";
+
+        private const string EnvironmentMaterials = @"\Media\Material\";
 
         private static readonly Dictionary<string, (CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay)> SurfaceByLink = new(StringComparer.OrdinalIgnoreCase);
 

@@ -46,13 +46,13 @@ namespace Tman.Core.Inventory.Builders
             var variant = Variant(info, file.Ground, file.AdditionalVariant) ?? throw new InvalidOperationException($"{file.Block.Archetype.Id} has no {(file.Ground ? "ground" : "air")} variant {file.AdditionalVariant}");
             var ancestor = store.Open(infoPath)!.RefTable!.AncestorLevel;
             var parts = new List<PrefabMerge.Part>();
-            foreach (var mobil in (variant.Mobils ?? []).SelectMany(row => row))
+            foreach (var mobil in (variant.Mobils ?? []).Select(variations => variations[0]))
             {
                 var prefab = PakStore.Logical(infoPath, ancestor, mobil.PrefabFidFile!.FilePath);
                 parts.AddRange(PrefabMerge.Collect(store, prefab, mobil.HasGeomTransformation ? mobil.GeomTranslation : Vec3.Zero, new Quat(0, 0, 0, 1)));
             }
-            var family = RoadFamily.Of(file.Block.Archetype) ?? throw new InvalidOperationException($"{file.Block.Archetype.Id} is not a road kind");
-            var model = SurfaceBlockMesh.Merge(parts, family, SurfaceTarget.Of(file.Block.Surface), MaterialDressing.For(file.Collection, infoPath, info, ancestor));
+            var family = DeckFamily.Of(file.Block.Archetype) ?? throw new InvalidOperationException($"{file.Block.Archetype.Id} is not a road kind");
+            var model = SurfaceBlockMesh.Merge(parts, family, SurfaceTarget.Of(file.Block.Surface), MaterialDressing.For(file.Collection, infoPath, info, ancestor, family));
             return Shell(file, info, variant, model, infoPath, ancestor, store);
         }
 
@@ -69,6 +69,11 @@ namespace Tman.Core.Inventory.Builders
             edition.ArchetypeBlockInfoId = file.Block.Archetype.Id;
             edition.ArchetypeBlockInfoCollectionId = collection;
             var properties = new CGameBlockItem.MobilProperties { Flags = StaticObjectFlag, StaticObject = model };
+            if (info.WayPointType == CGameCtnBlockInfo.EWayPointType.None)
+            {
+                edition.CustomizedVariants[0] = new CGameBlockItem.Mobil { Id = SurfaceBlockKey.Of(file.Ground, file.AdditionalVariant), Properties = properties };
+                return Bytes(item);
+            }
             if (TriggerShapeFile(variant) is { } triggerFile && store.Open(PakStore.Logical(infoPath, ancestor, triggerFile.FilePath)) is { Node: CPlugSurface trigger } triggerGbx)
             {
                 properties.Shape = SurfaceBlockMesh.Standalone(trigger, triggerGbx, PakStore.Logical(infoPath, ancestor, triggerFile.FilePath));
@@ -80,6 +85,11 @@ namespace Tman.Core.Inventory.Builders
                 properties.Flags |= SpawnFlag;
             }
             edition.CustomizedVariants[0] = new CGameBlockItem.Mobil { Id = SurfaceBlockKey.Of(file.Ground, file.AdditionalVariant), Properties = properties };
+            return Bytes(item);
+        }
+
+        private static byte[] Bytes(Gbx<CGameItemModel> item)
+        {
             using var stream = new MemoryStream();
             item.Save(stream);
             return stream.ToArray();

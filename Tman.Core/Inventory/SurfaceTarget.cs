@@ -16,6 +16,7 @@ namespace Tman.Core.Inventory
             [Surface.Ice] = new(Modifiers + @"PlatformIce\PlatformTech", CPlugSurface.MaterialId.Ice),
             [Surface.Grass] = new(Modifiers + @"PlatformGrass\PlatformTech", CPlugSurface.MaterialId.Grass),
             [Surface.Plastic] = new(Modifiers + @"PlatformPlastic\PlatformTech", CPlugSurface.MaterialId.Plastic),
+            [Surface.Wood] = new(Materials + "ThemeSnowRoad", CPlugSurface.MaterialId.Wood),
         };
 
         public static SurfaceTarget Of(Surface surface) => BySurface[surface];
