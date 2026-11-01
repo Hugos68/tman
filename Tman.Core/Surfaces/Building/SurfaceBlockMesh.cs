@@ -107,9 +107,7 @@ namespace Tman.Core.Surfaces.Building
             solid.LodMaxDistAtFov90 = lodDistances;
             if (LightmapAtlas.Repack(islands) is { } layout && solid.PreLightGenerator is { } lightmap)
             {
-                lightmap.U02 = parts.Max(part => PartGeometry.Solid(part).PreLightGenerator?.U02 ?? 0);
-                lightmap.U06 = layout.Max.X;
-                lightmap.U07 = layout.Max.Y;
+                solid.PreLightGenerator = PreLight(lightmap, parts.Max(part => PartGeometry.Solid(part).PreLightGenerator?.U02 ?? 0), layout);
             }
             solid.Visuals = [.. visuals];
             solid.ShadedGeoms = [.. geoms];
@@ -152,6 +150,25 @@ namespace Tman.Core.Surfaces.Building
                 }
                 return new SlotTreatment(false, material.Material?.SurfaceId ?? material.SurfaceId ?? CPlugSurface.MaterialId.Asphalt, null);
             })];
+
+        private static CPlugSolid2Model.PreLightGen PreLight(CPlugSolid2Model.PreLightGen source, float metersPerUv, LightmapAtlas.Layout layout) => new()
+        {
+            Version = source.Version,
+            U01 = source.U01,
+            U02 = metersPerUv,
+            U03 = source.U03,
+            U04 = source.U04,
+            U05 = source.U05,
+            U06 = layout.Max.X,
+            U07 = layout.Max.Y,
+            U08 = source.U08,
+            U09 = source.U09,
+            U10 = source.U10,
+            U11 = source.U11,
+            SpriteCount = source.SpriteCount,
+            U12 = source.U12,
+            UvGroups = source.UvGroups
+        };
 
         private static CPlugVisual3D DecalCopy(CPlugVisual3D visual)
         {
