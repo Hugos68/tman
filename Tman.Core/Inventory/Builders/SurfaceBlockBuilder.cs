@@ -109,11 +109,25 @@ namespace Tman.Core.Inventory.Builders
             return index;
         });
 
+        private static readonly Lazy<Dictionary<string, string>> RenamedBlockInfoIndex = new(() =>
+        {
+            var index = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var (key, path) in BlockInfoIndex.Value)
+            {
+                if (GamePaks.Store.Open(path)?.Node is CGameCtnBlockInfo info && !string.Equals(info.Ident.Id, key[(key.IndexOf('\\') + 1)..], StringComparison.OrdinalIgnoreCase))
+                {
+                    index.TryAdd(key[..(key.IndexOf('\\') + 1)] + info.Ident.Id, path);
+                }
+            }
+            return index;
+        });
+
         private static (string Path, CGameCtnBlockInfo Info) BlockInfo(PakStore store, Block archetype, Collections collection)
         {
             foreach (var environment in collection == Collections.Stadium ? [StadiumFolder] : new[] { collection.ToString(), StadiumFolder })
             {
-                if (BlockInfoIndex.Value.TryGetValue(environment + "\\" + archetype.Id, out var path) && store.Open(path)?.Node is CGameCtnBlockInfo info)
+                var key = environment + "\\" + archetype.Id;
+                if ((BlockInfoIndex.Value.TryGetValue(key, out var path) || RenamedBlockInfoIndex.Value.TryGetValue(key, out path)) && store.Open(path)?.Node is CGameCtnBlockInfo info)
                 {
                     return (path, info);
                 }
