@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 
-namespace Tman
+namespace Tman.Core
 {
-    public static class Assets
+    internal static class Assets
     {
         public static readonly string Root = AppContext.BaseDirectory;
 

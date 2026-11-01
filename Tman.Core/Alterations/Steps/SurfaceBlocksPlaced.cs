@@ -1,21 +1,13 @@
 using System;
-using System.Linq;
-using Tman.Core.Inventory;
+using Tman.Core.Catalog;
 using Tman.Core.Maps;
+using Tman.Core.Maps.Placements;
+using Tman.Core.Surfaces;
 
 namespace Tman.Core.Alterations.Steps
 {
-    public class SurfaceBlocksPlaced(Func<Block, SurfaceBlock?> replacement) : Alteration
+    internal sealed class SurfaceBlocksPlaced(Func<Block, SurfaceBlock?> replacement) : BlockReplacement<SurfaceBlock>(replacement)
     {
-        protected override void Run(Map map)
-        {
-            foreach (var placement in map.Placements.OnlyBlocks().ToList())
-            {
-                if (placement.BlockModel is { } model && replacement(model) is { } target)
-                {
-                    map.Replace(placement, target);
-                }
-            }
-        }
+        protected override void Replace(Map map, Placement placement, SurfaceBlock target) => map.Replace(placement, target);
     }
 }

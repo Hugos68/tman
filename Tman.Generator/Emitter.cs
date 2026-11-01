@@ -7,7 +7,7 @@ using Tman.Paks;
 
 namespace Tman.Generator
 {
-    public static class Emitter
+    internal static class Emitter
     {
         private static readonly string[] Keywords = ["abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const", "continue", "decimal", "default", "delegate", "do", "double", "else", "enum", "event", "explicit", "extern", "false", "finally", "fixed", "float", "for", "foreach", "goto", "if", "implicit", "in", "int", "interface", "internal", "is", "lock", "long", "namespace", "new", "null", "object", "operator", "out", "override", "params", "private", "protected", "public", "readonly", "ref", "return", "sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "string", "struct", "switch", "this", "throw", "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while", "record", "var"];
 
@@ -86,7 +86,7 @@ namespace Tman.Generator
         {
             var cs = new StringBuilder();
             cs.Append(CatalogGenerator.Header).Append(CatalogGenerator.Common);
-            cs.Append("public static class Blocks\n{\n");
+            cs.Append("internal static class Blocks\n{\n");
             var used = new HashSet<string>(StringComparer.Ordinal);
             var idents = new List<(string Ident, string Id)>();
             foreach (var (id, b) in blocks)
@@ -126,7 +126,7 @@ namespace Tman.Generator
         {
             var cs = new StringBuilder();
             cs.Append(CatalogGenerator.Header).Append(CatalogGenerator.Common);
-            cs.Append($"public static class {className}\n{{\n");
+            cs.Append($"internal static class {className}\n{{\n");
             var used = new HashSet<string>(StringComparer.Ordinal);
             var idents = new List<(string Ident, string Id)>();
             foreach (var it in items)

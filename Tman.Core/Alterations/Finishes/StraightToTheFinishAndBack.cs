@@ -2,13 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GBX.NET;
-using Tman.Core.Alterations.Steps;
-using Tman.Core.Inventory;
+using Tman.Core.Alterations.Steps.Waypoints;
+using Tman.Core.Catalog;
 using Tman.Core.Maps;
+using Tman.Core.Maps.Geometry;
+using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public class StraightToTheFinishAndBack : StandardAlteration
+    public sealed class StraightToTheFinishAndBack : StandardAlteration
     {
         protected override string DisplayName => "Straight to the Finish and Back";
 

@@ -1,9 +1,8 @@
-using Tman.Core.Inventory;
 using Tman.Core.Maps;
 
 namespace Tman.Core.Alterations.Steps
 {
-    public class ValidationRemoved : Alteration
+    internal sealed class ValidationRemoved : Alteration
     {
         protected override void Run(Map map) => map.RemoveValidation();
     }

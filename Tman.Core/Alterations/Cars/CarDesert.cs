@@ -1,16 +1,16 @@
 using System.Collections.Generic;
-using Tman.Core.Inventory;
+using Tman.Core.Catalog;
 using Tman.Core.Alterations.Steps;
 
 namespace Tman.Core.Alterations.Cars
 {
-    public class CarDesert : StandardAlteration
+    public sealed class CarDesert : StandardAlteration
     {
         protected override string DisplayName => "Desert Car";
 
         protected override IEnumerable<Alteration> Steps =>
         [
-            new CarChange(Car.Desert)
+            new CarChanged(Car.Desert)
         ];
     }
 }

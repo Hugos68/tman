@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using Tman.Core.Alterations.Steps;
+using Tman.Core.Alterations.Steps.Waypoints;
 
 namespace Tman.Core.Alterations.Checkpoints
 {
-    public class StraightToTheFinish : StandardAlteration
+    public sealed class StraightToTheFinish : StandardAlteration
     {
         protected override string DisplayName => "Straight to the Finish";
 

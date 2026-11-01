@@ -5,19 +5,21 @@ using System.Linq;
 using System.Text.Json;
 using GBX.NET;
 using Tman.Core.Alterations.Steps;
-using Tman.Core.Inventory;
-using Tman.Core.Inventory.Builders;
+using Tman.Core.Alterations.Steps.Waypoints;
+using Tman.Core.Catalog;
 using Tman.Core.Maps;
+using Tman.Core.Maps.Geometry;
+using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public class FloorFinish : StandardAlteration
+    public sealed class FloorFinish : StandardAlteration
     {
         protected override string DisplayName => "Floor Finish";
 
         protected override IEnumerable<Alteration> Steps =>
         [
-            new InventoryRemoved(placement => placement.IsFinish),
+            new PlacementsRemoved(placement => placement.IsFinish),
             new CheckpointsCleaned(),
             new ConditionalAlteration(
                 map => map.Collection == Collections.Stadium,
@@ -61,6 +63,10 @@ namespace Tman.Core.Alterations.Finishes
 
         private const int Ring = 16;
 
+        private const int FootprintFlagsMask = 0x0FE01FFF;
+
+        private const int LastSubcell = MapConstants.SubcellsPerCell - 1;
+
         protected override void Run(Map map)
         {
             var collection = map.Collection;
@@ -99,24 +105,24 @@ namespace Tman.Core.Alterations.Finishes
                         Add(cells, block.Cell.Z, block.Cell.X);
                     }
                 }
-                else if (footprints.TryGetValue((block.Id, block.Flags & 0x0FE01FFF), out var deep))
+                else if (footprints.TryGetValue((block.Id, block.Flags & FootprintFlagsMask), out var deep))
                 {
-                    for (var zi = 0; zi < 8; zi++)
+                    for (var zi = 0; zi < MapConstants.SubcellsPerCell; zi++)
                     {
-                        for (var xi = 0; xi < 8; xi++)
+                        for (var xi = 0; xi < MapConstants.SubcellsPerCell; xi++)
                         {
-                            if ((deep & (1UL << (zi * 8 + xi))) == 0)
+                            if ((deep & (1UL << (zi * MapConstants.SubcellsPerCell + xi))) == 0)
                             {
                                 continue;
                             }
                             var (x, z) = block.Direction switch
                             {
-                                Direction.East => (7 - zi, xi),
-                                Direction.South => (7 - xi, 7 - zi),
-                                Direction.West => (zi, 7 - xi),
+                                Direction.East => (LastSubcell - zi, xi),
+                                Direction.South => (LastSubcell - xi, LastSubcell - zi),
+                                Direction.West => (zi, LastSubcell - xi),
                                 _ => (xi, zi),
                             };
-                            Add(squares, block.Cell.Z * 8 + z, block.Cell.X * 8 + x);
+                            Add(squares, block.Cell.Z * MapConstants.SubcellsPerCell + z, block.Cell.X * MapConstants.SubcellsPerCell + x);
                         }
                     }
                 }
@@ -213,7 +219,7 @@ namespace Tman.Core.Alterations.Finishes
             {
                 foreach (var (flags, mask) in masks)
                 {
-                    table[(tile, uint.Parse(flags, NumberStyles.HexNumber, CultureInfo.InvariantCulture) & 0x0FE01FFF)] = ulong.Parse(mask, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+                    table[(tile, uint.Parse(flags, NumberStyles.HexNumber, CultureInfo.InvariantCulture) & FootprintFlagsMask)] = ulong.Parse(mask, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
                 }
             }
             return table;

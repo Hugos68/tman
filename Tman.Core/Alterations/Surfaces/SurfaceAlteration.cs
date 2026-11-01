@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using Tman.Core.Alterations.Steps;
-using Tman.Core.Inventory;
+using Tman.Core.Catalog;
+using Tman.Core.Surfaces;
 
 namespace Tman.Core.Alterations.Surfaces
 {
     public abstract class SurfaceAlteration : StandardAlteration
     {
-        protected abstract Surface Surface { get; }
+        private protected abstract Surface Surface { get; }
 
         protected override string DisplayName => Surface.Name;
 

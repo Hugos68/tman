@@ -3,12 +3,12 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using GBX.NET;
-using Tman.Core.Alterations.Steps;
 using Tman.Core.Maps;
+using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Other
 {
-    public class Jitter : StandardAlteration
+    public sealed class Jitter : StandardAlteration
     {
         private const float Shift = 0.25f;
 
@@ -30,7 +30,7 @@ namespace Tman.Core.Alterations.Other
                 }
                 var pose = placement.Pose(map);
                 var random = new Random(Seed($"{map.Name}|{placement.Id}|{pose.Coords}"));
-                MapMoving.Nudge(placement, new Vec3(Spread(random, Shift), Spread(random, Shift), Spread(random, Shift)), new Vec3(Spread(random, Tilt), Spread(random, Tilt), Spread(random, Tilt)));
+                Map.Nudge(placement, new Vec3(Spread(random, Shift), Spread(random, Shift), Spread(random, Shift)), new Vec3(Spread(random, Tilt), Spread(random, Tilt), Spread(random, Tilt)));
             }
         }
 

@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using Tman.Core.Alterations.Steps;
-using Tman.Core.Inventory;
+using Tman.Core.Alterations.Steps.Waypoints;
+using Tman.Core.Catalog;
 
 namespace Tman.Core.Alterations.Effects
 {
-    public class SlowMotion : StandardAlteration
+    public sealed class SlowMotion : StandardAlteration
     {
         protected override string DisplayName => "SlowMotion";
 

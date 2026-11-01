@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
 namespace Tman.Paks.Installations
 {
-    public static class SteamLibraries
+    internal static class SteamLibraries
     {
         private const string SteamKey = @"Software\Valve\Steam";
 
@@ -40,7 +41,7 @@ namespace Tman.Paks.Installations
 
         private static string? SteamFolder() => OperatingSystem.IsWindows() ? WindowsSteamFolder() : null;
 
-        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows")]
         private static string? WindowsSteamFolder()
         {
             using var key = Registry.CurrentUser.OpenSubKey(SteamKey);

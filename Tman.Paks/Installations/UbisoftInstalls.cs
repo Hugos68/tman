@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using Microsoft.Win32;
 
 namespace Tman.Paks.Installations
 {
-    public static class UbisoftInstalls
+    internal static class UbisoftInstalls
     {
         private const string InstallsKey = @"SOFTWARE\WOW6432Node\Ubisoft\Launcher\Installs";
 
@@ -14,7 +15,7 @@ namespace Tman.Paks.Installations
 
         public static IEnumerable<string> GameFolders() => OperatingSystem.IsWindows() ? WindowsGameFolders() : [];
 
-        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows")]
         private static List<string> WindowsGameFolders()
         {
             using var installs = Registry.LocalMachine.OpenSubKey(InstallsKey);
@@ -28,7 +29,7 @@ namespace Tman.Paks.Installations
                 .Select(directory => Path.GetFullPath(directory!))];
         }
 
-        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows")]
         private static string? InstallDir(RegistryKey installs, string name)
         {
             using var install = installs.OpenSubKey(name);

@@ -1,9 +1,9 @@
-using Tman.Core.Inventory;
+using Tman.Core.Surfaces;
 
 namespace Tman.Core.Alterations.Surfaces
 {
-    public class Road : SurfaceAlteration
+    public sealed class Road : SurfaceAlteration
     {
-        protected override Surface Surface => Surface.Road;
+        private protected override Surface Surface => Surface.Road;
     }
 }
