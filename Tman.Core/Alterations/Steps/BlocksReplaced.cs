@@ -6,7 +6,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Steps
 {
-    public class BlocksReplaced(Func<Block, Block?> replacement) : Alteration
+    internal sealed class BlocksReplaced(Func<Block, Block?> replacement) : Alteration
     {
         protected override void Run(Map map)
         {

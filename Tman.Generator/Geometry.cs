@@ -8,7 +8,7 @@ using Tman.Paks;
 
 namespace Tman.Generator
 {
-    public readonly record struct Xform(float M0, float M1, float M2, float M3, float M4, float M5, float M6, float M7, float M8, float M9, float M10, float M11)
+    internal readonly record struct Xform(float M0, float M1, float M2, float M3, float M4, float M5, float M6, float M7, float M8, float M9, float M10, float M11)
     {
         public static readonly Xform Identity = new(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0);
 
@@ -50,7 +50,7 @@ namespace Tman.Generator
             M2 * a + M5 * b + M8 * c);
     }
 
-    public sealed class SizeWalk(PakStore store)
+    internal sealed class SizeWalk(PakStore store)
     {
         private float lx = float.PositiveInfinity, ly = float.PositiveInfinity, lz = float.PositiveInfinity;
         private float hx = float.NegativeInfinity, hy = float.NegativeInfinity, hz = float.NegativeInfinity;

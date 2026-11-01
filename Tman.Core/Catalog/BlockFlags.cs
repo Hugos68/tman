@@ -1,6 +1,6 @@
 namespace Tman.Core.Catalog
 {
-    public static class BlockFlags
+    internal static class BlockFlags
     {
         public const int BaseVariantMask = 0x3F;
 

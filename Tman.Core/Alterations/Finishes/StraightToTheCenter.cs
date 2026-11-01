@@ -9,7 +9,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public class StraightToTheCenter : StandardAlteration
+    public sealed class StraightToTheCenter : StandardAlteration
     {
         protected override string DisplayName => "Straight to the Center";
 

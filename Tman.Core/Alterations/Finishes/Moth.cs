@@ -6,7 +6,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public class Moth : StandardAlteration
+    public sealed class Moth : StandardAlteration
     {
         protected override string DisplayName => "Moth";
 

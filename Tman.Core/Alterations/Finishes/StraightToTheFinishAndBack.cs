@@ -10,7 +10,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public class StraightToTheFinishAndBack : StandardAlteration
+    public sealed class StraightToTheFinishAndBack : StandardAlteration
     {
         protected override string DisplayName => "Straight to the Finish and Back";
 

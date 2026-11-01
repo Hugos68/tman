@@ -3,7 +3,7 @@ using GBX.NET.Engines.Plug;
 
 namespace Tman.Core.Surfaces
 {
-    public sealed record SurfaceTarget(string Link, CPlugSurface.MaterialId Physics)
+    internal sealed record SurfaceTarget(string Link, CPlugSurface.MaterialId Physics)
     {
         private const string Materials = @"Stadium\Media\Material\";
 

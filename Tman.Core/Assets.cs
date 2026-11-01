@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Tman
 {
-    public static class Assets
+    internal static class Assets
     {
         public static readonly string Root = AppContext.BaseDirectory;
 

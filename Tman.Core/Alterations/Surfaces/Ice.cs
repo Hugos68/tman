@@ -2,8 +2,8 @@ using Tman.Core.Surfaces;
 
 namespace Tman.Core.Alterations.Surfaces
 {
-    public class Ice : SurfaceAlteration
+    public sealed class Ice : SurfaceAlteration
     {
-        protected override Surface Surface => Surface.Ice;
+        private protected override Surface Surface => Surface.Ice;
     }
 }

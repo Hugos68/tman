@@ -3,7 +3,7 @@ using GBX.NET;
 
 namespace Tman.Core.Catalog
 {
-    public static class CollectionIds
+    internal static class CollectionIds
     {
         private static readonly Dictionary<Collections, int> Numbers = new()
         {

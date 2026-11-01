@@ -5,7 +5,7 @@ using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace Tman.Core.Maps.Geometry
 {
-    public class Position(Vec3? coords, Vec3? yawPitchRoll)
+    internal sealed class Position(Vec3? coords, Vec3? yawPitchRoll)
     {
         public Vec3 Coords { get; set; } = coords ?? Vec3.Zero;
         public Vec3 YawPitchRoll { get; set; } = yawPitchRoll ?? Vec3.Zero;

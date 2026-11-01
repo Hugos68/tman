@@ -1,6 +1,6 @@
 namespace Tman.Core.Catalog
 {
-    public enum Waypoint
+    internal enum Waypoint
     {
         None,
         Start,

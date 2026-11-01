@@ -1,6 +1,6 @@
 namespace Tman.Core.Maps.Geometry
 {
-    public enum DirectionOffset
+    internal enum DirectionOffset
     {
         None = 0,
         Quarter = 1,

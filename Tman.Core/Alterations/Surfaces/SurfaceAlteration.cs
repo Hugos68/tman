@@ -7,7 +7,7 @@ namespace Tman.Core.Alterations.Surfaces
 {
     public abstract class SurfaceAlteration : StandardAlteration
     {
-        protected abstract Surface Surface { get; }
+        private protected abstract Surface Surface { get; }
 
         protected override string DisplayName => Surface.Name;
 

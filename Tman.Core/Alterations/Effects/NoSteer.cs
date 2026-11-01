@@ -4,7 +4,7 @@ using Tman.Core.Catalog;
 
 namespace Tman.Core.Alterations.Effects
 {
-    public class NoSteer : StandardAlteration
+    public sealed class NoSteer : StandardAlteration
     {
         protected override string DisplayName => "NoSteer";
 

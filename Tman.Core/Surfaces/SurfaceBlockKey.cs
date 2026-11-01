@@ -1,6 +1,6 @@
 namespace Tman.Core.Surfaces
 {
-    public static class SurfaceBlockKey
+    internal static class SurfaceBlockKey
     {
         public const int Ground = 0;
 

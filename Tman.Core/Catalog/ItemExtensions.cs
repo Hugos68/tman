@@ -7,7 +7,7 @@ using Tman.Core.Maps;
 
 namespace Tman.Core.Catalog
 {
-    public static class ItemExtensions
+    internal static class ItemExtensions
     {
         private static readonly Dictionary<Item, Ident> Idents = new();
 

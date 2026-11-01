@@ -1,6 +1,6 @@
 namespace Tman.Core.Catalog
 {
-    public enum Car
+    internal enum Car
     {
         Desert,
         Rally,

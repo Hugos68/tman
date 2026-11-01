@@ -7,7 +7,7 @@ namespace Tman.Core.Maps
 {
     public sealed partial class Map
     {
-        public void Embed(Item custom) => Embed(custom.FullPath());
+        internal void Embed(Item custom) => Embed(custom.FullPath());
 
         internal void Embed(string path)
         {

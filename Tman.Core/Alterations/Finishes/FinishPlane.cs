@@ -10,7 +10,7 @@ using Tman.Core.Maps.Geometry;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public static class FinishPlane
+    internal static class FinishPlane
     {
         public readonly record struct Box(float X0, float X1, float Z0, float Z1, float Y0, float Y1);
 

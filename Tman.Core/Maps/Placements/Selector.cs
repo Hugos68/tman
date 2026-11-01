@@ -2,7 +2,7 @@ using Tman.Core.Catalog;
 
 namespace Tman.Core.Maps.Placements
 {
-    public readonly record struct Selector(string Id, bool IsBlock, int? Variant)
+    internal readonly record struct Selector(string Id, bool IsBlock, int? Variant)
     {
         public static implicit operator Selector(Block block) => new(block.Id, true, null);
 

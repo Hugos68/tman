@@ -13,7 +13,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public class FloorFinish : StandardAlteration
+    public sealed class FloorFinish : StandardAlteration
     {
         protected override string DisplayName => "Floor Finish";
 

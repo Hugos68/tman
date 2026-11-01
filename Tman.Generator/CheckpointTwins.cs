@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Tman.Generator
 {
-    public static class CheckpointTwins
+    internal static class CheckpointTwins
     {
         public static readonly IReadOnlyList<(string Checkpoint, string Plain)> Twins =
         [

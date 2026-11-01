@@ -6,7 +6,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public class Flags : StandardAlteration
+    public sealed class Flags : StandardAlteration
     {
         protected override string DisplayName => "Flags";
 

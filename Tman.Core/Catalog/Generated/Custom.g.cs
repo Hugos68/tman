@@ -5,7 +5,7 @@ using GBX.NET;
 
 namespace Tman.Core.Catalog;
 
-public static class Custom
+internal static class Custom
 {
     public static readonly Item CheckpointExpandable = new("CheckpointExpandable.Item.Gbx", "CheckpointExpandable.Item.Gbx", "Assets/Items/Checkpoints/CheckpointExpandableGate/CheckpointExpandable.Item.Gbx", Collections.All, Waypoint.Checkpoint, 1, new Vec3(32.000f, 11.795f, 16.416f));
     public static readonly Item CheckpointExpandableBottom = new("CheckpointExpandableBottom.Item.Gbx", "CheckpointExpandableBottom.Item.Gbx", "Assets/Items/Checkpoints/CheckpointExpandableGate/CheckpointExpandableBottom.Item.Gbx", Collections.All, Waypoint.None, 1, new Vec3(32.200f, 1.492f, 2.183f));

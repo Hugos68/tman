@@ -9,14 +9,14 @@ namespace Tman.Core.Maps
 {
     public sealed partial class Map
     {
-        public Placement PlaceRelative(Placement source, Item model, Vec3 offset = default)
+        internal Placement PlaceRelative(Placement source, Item model, Vec3 offset = default)
         {
             var position = source.Pose(this);
             position.Move(offset);
             return Place(model, position.Coords, position.YawPitchRoll);
         }
 
-        public Placement PlaceRelative(Placement source, Block model, Vec3 offset = default)
+        internal Placement PlaceRelative(Placement source, Block model, Vec3 offset = default)
         {
             var position = source.Pose(this);
             position.Move(offset);
@@ -32,20 +32,20 @@ namespace Tman.Core.Maps
             });
         }
 
-        public Placement Place(Item model, Vec3 position, Vec3 yawPitchRoll = default)
+        internal Placement Place(Item model, Vec3 position, Vec3 yawPitchRoll = default)
         {
             var item = Gbx.PlaceAnchoredObject(model.Ident(this), position, yawPitchRoll, Vec3.Zero);
             item.WaypointSpecialProperty = Property(null, model.Waypoint);
             return new Placement(item);
         }
 
-        public Placement PlaceLike(Placement source, Waypoint kind) => source.IsBlock
+        internal Placement PlaceLike(Placement source, Waypoint kind) => source.IsBlock
             ? PlaceBlock(Copy(source.Block!, Twin(source.BlockModel, kind, source.Id), Turn(source.Waypoint, kind), null, true))
             : PlaceLike(source, Twin(source.ItemModel, kind, source.Id), HalfTurn(source, kind));
 
-        public Placement PlaceLike(Placement source, Block model) => PlaceBlock(Copy(source.Block!, model, DirectionOffset.None, null, false));
+        internal Placement PlaceLike(Placement source, Block model) => PlaceBlock(Copy(source.Block!, model, DirectionOffset.None, null, false));
 
-        public Placement PlaceLike(Placement source, Item model) => PlaceLike(source, model, 0);
+        internal Placement PlaceLike(Placement source, Item model) => PlaceLike(source, model, 0);
 
         internal Placement PlaceBlock(CGameCtnBlock block)
         {

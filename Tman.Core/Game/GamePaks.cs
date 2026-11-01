@@ -3,7 +3,7 @@ using Tman.Paks;
 
 namespace Tman.Core.Game
 {
-    public static class GamePaks
+    internal static class GamePaks
     {
         private static readonly Lazy<string> Folder = new(PakDirectory.Find);
 

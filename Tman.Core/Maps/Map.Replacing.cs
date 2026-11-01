@@ -10,7 +10,7 @@ namespace Tman.Core.Maps
 {
     public sealed partial class Map
     {
-        public Placement Replace(Placement source, Waypoint kind)
+        internal Placement Replace(Placement source, Waypoint kind)
         {
             if (source.IsBlock)
             {
@@ -21,11 +21,11 @@ namespace Tman.Core.Maps
             return Replace(source, Twin(source.ItemModel, kind, source.Id));
         }
 
-        public Placement Replace(Placement source, Block model) => Replace(source, model, DirectionOffset.None, true);
+        internal Placement Replace(Placement source, Block model) => Replace(source, model, DirectionOffset.None, true);
 
-        public Placement Replace(Placement source, Block model, DirectionOffset rotation) => Replace(source, model, rotation, false);
+        internal Placement Replace(Placement source, Block model, DirectionOffset rotation) => Replace(source, model, rotation, false);
 
-        public Placement Replace(Placement source, Item model)
+        internal Placement Replace(Placement source, Item model)
         {
             var item = source.Item!;
             item.ItemModel = model.Ident(this);
@@ -33,7 +33,7 @@ namespace Tman.Core.Maps
             return source;
         }
 
-        public Placement Replace(Placement source, SurfaceBlock model)
+        internal Placement Replace(Placement source, SurfaceBlock model)
         {
             var block = source.Block!;
             var file = new SurfaceBlockFile(model, block.IsGround, BlockFlags.AdditionalVariant(block.Flags), Collection);

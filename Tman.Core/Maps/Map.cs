@@ -53,16 +53,16 @@ namespace Tman.Core.Maps
 
         public string Decoration => Gbx.Decoration.Id;
 
-        public Collections Collection => Gbx.GetEnvironment() is "Stadium2020" ? Collections.Stadium : Enum.Parse<Collections>(Gbx.GetEnvironment());
+        internal Collections Collection => Gbx.GetEnvironment() is "Stadium2020" ? Collections.Stadium : Enum.Parse<Collections>(Gbx.GetEnvironment());
 
-        public int GroundRow => Collection switch
+        internal int GroundRow => Collection switch
         {
             Collections.RedIsland or Collections.WhiteShore => VistaGroundRowHigh,
             Collections.BlueBay or Collections.GreenCoast => VistaGroundRowLow,
             _ => Gbx.DecoBaseHeightOffset
         };
 
-        public Car Car
+        internal Car Car
         {
             set => Gbx.PlayerModel = new Ident(CarModels[value], CarCollectionId, "");
         }
@@ -77,23 +77,23 @@ namespace Tman.Core.Maps
             }
         }
 
-        public bool Supports(Block block) => block.Collections.HasFlag(Collection);
+        internal bool Supports(Block block) => block.Collections.HasFlag(Collection);
 
-        public bool Supports(Item item) => item.Collections.HasFlag(Collection);
+        internal bool Supports(Item item) => item.Collections.HasFlag(Collection);
 
-        public IEnumerable<Placement> Placements =>
+        internal IEnumerable<Placement> Placements =>
             (Gbx.Blocks ?? []).Select(block => new Placement(block))
                 .Concat((Gbx.AnchoredObjects ?? []).Select(item => new Placement(item)));
 
-        public IEnumerable<Placement> Terrain =>
+        internal IEnumerable<Placement> Terrain =>
             (Gbx.Blocks ?? []).Concat(Gbx.BakedBlocks ?? []).Where(block => !block.IsFree).Select(block => new Placement(block));
 
-        public List<Placement> Of(Selector selector) => Placements.Where(selector.Matches).ToList();
+        internal List<Placement> Of(Selector selector) => Placements.Where(selector.Matches).ToList();
 
-        public List<Placement> Waypoints(Waypoint waypoint) =>
+        internal List<Placement> Waypoints(Waypoint waypoint) =>
             Placements.Where(placement => placement.IsWaypoint && placement.Waypoint == waypoint).ToList();
 
-        public void Remove(Placement placement)
+        internal void Remove(Placement placement)
         {
             if (placement.Block is not null)
             {

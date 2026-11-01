@@ -20,7 +20,7 @@ namespace Tman.Core.Maps
             [Waypoint.StartFinish] = "StartFinish",
         };
 
-        public void Link(IReadOnlyCollection<Placement> checkpoints)
+        internal void Link(IReadOnlyCollection<Placement> checkpoints)
         {
             if (checkpoints.Count < 2)
             {

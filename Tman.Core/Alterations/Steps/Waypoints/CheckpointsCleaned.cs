@@ -7,7 +7,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Steps.Waypoints
 {
-    public class CheckpointsCleaned : Alteration
+    internal sealed class CheckpointsCleaned : Alteration
     {
         protected override IEnumerable<Alteration> PreappliedAlterations =>
         [

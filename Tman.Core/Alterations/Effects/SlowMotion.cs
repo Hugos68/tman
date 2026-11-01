@@ -4,7 +4,7 @@ using Tman.Core.Catalog;
 
 namespace Tman.Core.Alterations.Effects
 {
-    public class SlowMotion : StandardAlteration
+    public sealed class SlowMotion : StandardAlteration
     {
         protected override string DisplayName => "SlowMotion";
 

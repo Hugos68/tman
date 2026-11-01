@@ -2,8 +2,8 @@ using Tman.Core.Surfaces;
 
 namespace Tman.Core.Alterations.Surfaces
 {
-    public class Plastic : SurfaceAlteration
+    public sealed class Plastic : SurfaceAlteration
     {
-        protected override Surface Surface => Surface.Plastic;
+        private protected override Surface Surface => Surface.Plastic;
     }
 }

@@ -4,7 +4,7 @@ using Tman.Core.Catalog;
 
 namespace Tman.Core.Surfaces
 {
-    public static class SurfaceRules
+    internal static class SurfaceRules
     {
         private const string Penalty = "Penalty";
 

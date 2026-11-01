@@ -3,7 +3,7 @@ using Tman.Core.Maps;
 
 namespace Tman.Core.Alterations.Steps
 {
-    public class ConditionalAlteration(Predicate<Map> predicate, Alteration alteration) : Alteration
+    internal sealed class ConditionalAlteration(Predicate<Map> predicate, Alteration alteration) : Alteration
     {
         protected override void Run(Map map)
         {

@@ -7,7 +7,7 @@ using Tman.Core.Maps.Geometry;
 
 namespace Tman.Core.Maps.Placements
 {
-    public sealed class Placement
+    internal sealed class Placement
     {
         private const int ItemVariantShift = 8;
 

@@ -1,6 +1,6 @@
 namespace Tman.Core.Catalog
 {
-    public sealed record Block(string Id, int SizeX, int SizeZ, int[][]? Cells, Collections Collections, Waypoint Waypoint, bool Ground, bool Air, int Variants)
+    internal sealed record Block(string Id, int SizeX, int SizeZ, int[][]? Cells, Collections Collections, Waypoint Waypoint, bool Ground, bool Air, int Variants)
     {
         public Block? Plain => Blocks.PlainOf.TryGetValue(Id, out var plain) ? plain : null;
 

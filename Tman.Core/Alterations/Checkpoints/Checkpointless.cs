@@ -3,7 +3,7 @@ using Tman.Core.Alterations.Steps;
 
 namespace Tman.Core.Alterations.Checkpoints
 {
-    public class Checkpointless : StandardAlteration
+    public sealed class Checkpointless : StandardAlteration
     {
 
         protected override string DisplayName => "Checkpointless";

@@ -4,7 +4,7 @@ namespace Tman.Core.Maps
 {
     public sealed partial class Map
     {
-        public void RemoveValidation()
+        internal void RemoveValidation()
         {
             var gbx = Gbx;
             gbx.AuthorTime = new(-1);
@@ -24,7 +24,7 @@ namespace Tman.Core.Maps
             }
         }
 
-        public void RemoveLightmap()
+        internal void RemoveLightmap()
         {
             var gbx = Gbx;
             gbx.HasLightmaps = false;

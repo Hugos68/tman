@@ -8,7 +8,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Other
 {
-    public class Jitter : StandardAlteration
+    public sealed class Jitter : StandardAlteration
     {
         private const float Shift = 0.25f;
 

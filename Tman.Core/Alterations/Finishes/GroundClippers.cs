@@ -9,7 +9,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public class GroundClippers : StandardAlteration
+    public sealed class GroundClippers : StandardAlteration
     {
         protected override string DisplayName => "Ground Clippers";
 

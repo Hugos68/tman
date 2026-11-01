@@ -4,7 +4,7 @@ using Tman.Core.Catalog;
 
 namespace Tman.Core.Maps.Placements
 {
-    public static class PlacementExtensions
+    internal static class PlacementExtensions
     {
         public static List<Placement> Of(this IEnumerable<Placement> placements, Selector selector) =>
             [.. placements.Where(selector.Matches)];

@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Tman.Core.Surfaces.Building
 {
-    public static class LodLevels
+    internal static class LodLevels
     {
         public static float[] Merge(IEnumerable<float[]> distanceLists) => [.. distanceLists.SelectMany(distances => distances).Distinct().Order()];
 

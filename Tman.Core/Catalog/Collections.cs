@@ -3,7 +3,7 @@ using System;
 namespace Tman.Core.Catalog
 {
     [Flags]
-    public enum Collections
+    internal enum Collections
     {
         Stadium = 1,
         RedIsland = 2,

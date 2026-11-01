@@ -5,7 +5,7 @@ using GBX.NET;
 
 namespace Tman.Core.Catalog;
 
-public static class Items
+internal static class Items
 {
     public static readonly Item Bush = new("Bush", "Nadeo", null, Collections.RedIsland | Collections.WhiteShore, Waypoint.None, 9, new Vec3(3.450f, 2.361f, 3.450f));
     public static readonly Item BushBig = new("BushBig", "Nadeo", null, Collections.RedIsland, Waypoint.None, 4, new Vec3(0.000f, 0.000f, 0.000f));

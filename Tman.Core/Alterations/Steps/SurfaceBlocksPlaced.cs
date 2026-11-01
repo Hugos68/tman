@@ -7,7 +7,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Steps
 {
-    public class SurfaceBlocksPlaced(Func<Block, SurfaceBlock?> replacement) : Alteration
+    internal sealed class SurfaceBlocksPlaced(Func<Block, SurfaceBlock?> replacement) : Alteration
     {
         protected override void Run(Map map)
         {

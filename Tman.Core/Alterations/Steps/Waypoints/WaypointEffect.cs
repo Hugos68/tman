@@ -7,7 +7,7 @@ using Tman.Core.Maps.Geometry;
 
 namespace Tman.Core.Alterations.Steps.Waypoints
 {
-    public abstract class WaypointEffect(Block gate, Vec3 offset) : Alteration
+    internal abstract class WaypointEffect(Block gate, Vec3 offset) : Alteration
     {
         protected abstract Waypoint Waypoint { get; }
 

@@ -1,6 +1,6 @@
 namespace Tman.Core.Maps.Geometry
 {
-    public static class MapConstants
+    internal static class MapConstants
     {
         public const float CellSize = 32f;
         public const float SubcellSize = 4f;

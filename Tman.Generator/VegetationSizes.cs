@@ -4,7 +4,7 @@ using GBX.NET;
 
 namespace Tman.Generator
 {
-    public static class VegetationSizes
+    internal static class VegetationSizes
     {
         // sizes (2r, h, 2r) of the vegetation models measured by mapgeom csgen from the pak VegetTreeModel files, which GBX.NET.PAK 2.4.4 cannot decode
         public static readonly IReadOnlyDictionary<string, Vec3> Sizes = new Dictionary<string, Vec3>

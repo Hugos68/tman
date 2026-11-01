@@ -5,7 +5,7 @@ using GBX.NET;
 
 namespace Tman.Core.Catalog;
 
-public static class Blocks
+internal static class Blocks
 {
     public static readonly Block Beach = new("Beach", 1, 1, null, Collections.BlueBay, Waypoint.None, true, false, 1);
     public static readonly Block CanopyBorderBeamCurveInFCLeft = new("CanopyBorderBeamCurveInFCLeft", 1, 1, null, Collections.Stadium, Waypoint.None, false, true, 1);

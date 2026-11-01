@@ -8,7 +8,7 @@ namespace Tman.Core.Maps
 {
     public sealed partial class Map
     {
-        public void Free(Placement placement)
+        internal void Free(Placement placement)
         {
             var block = placement.Block!;
             if (block.IsFree)
@@ -25,7 +25,7 @@ namespace Tman.Core.Maps
             block.YawPitchRoll = pose.YawPitchRoll;
         }
 
-        public static void Nudge(Placement placement, Vec3 offset, Vec3 yawPitchRoll)
+        internal static void Nudge(Placement placement, Vec3 offset, Vec3 yawPitchRoll)
         {
             if (placement.Block is { } block)
             {
@@ -37,7 +37,7 @@ namespace Tman.Core.Maps
             placement.Item.YawPitchRoll += yawPitchRoll;
         }
 
-        public void Translate(Placement placement, Vec3 offset)
+        internal void Translate(Placement placement, Vec3 offset)
         {
             if (placement.Block is { IsFree: false } block && offset.X % MapConstants.CellSize == 0 && offset.Y % MapConstants.CellHeight == 0 && offset.Z % MapConstants.CellSize == 0)
             {

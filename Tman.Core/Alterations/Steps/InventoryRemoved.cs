@@ -5,7 +5,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Steps
 {
-    public class InventoryRemoved(Func<Placement, bool> predicate) : Alteration
+    internal sealed class InventoryRemoved(Func<Placement, bool> predicate) : Alteration
     {
         protected override void Run(Map map)
         {

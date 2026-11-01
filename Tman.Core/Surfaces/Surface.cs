@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Tman.Core.Surfaces
 {
-    public sealed record Surface(string Name, string PlatformFamily)
+    internal sealed record Surface(string Name, string PlatformFamily)
     {
         public static readonly Surface Road = new("Road", "Tech");
 

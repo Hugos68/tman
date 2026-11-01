@@ -2,7 +2,7 @@ using System.Linq;
 
 namespace Tman.Core.Catalog
 {
-    public static class BlockExtensions
+    internal static class BlockExtensions
     {
         public static (int, int)[] Footprint(this Block block) => block.Cells is null
             ? [.. Enumerable.Range(0, block.SizeX * block.SizeZ).Select(i => (i % block.SizeX, i / block.SizeX))]
