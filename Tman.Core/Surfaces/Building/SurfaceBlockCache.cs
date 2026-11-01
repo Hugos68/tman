@@ -14,11 +14,13 @@ namespace Tman.Core.Surfaces.Building
 
         private const string BlocksFolder = "Blocks";
 
+        private const string ApplicationFolder = "tman";
+
         private const int StampLength = 16;
 
         private const int BuilderStampLength = 8;
 
-        private static readonly Lazy<string> Root = new(() => Path.Combine(Directory.GetParent(GamePaks.Directory)!.FullName, FolderName, BlocksFolder, $"{PakStamp()}-{BuilderStamp()}"));
+        private static readonly Lazy<string> Root = new(() => Path.Combine(CacheFolder, BlocksFolder, $"{PakStamp()}-{BuilderStamp()}"));
 
         private static readonly object Building = new();
 
@@ -37,6 +39,8 @@ namespace Tman.Core.Surfaces.Building
                 return bytes;
             }
         }
+
+        private static string CacheFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), ApplicationFolder, FolderName);
 
         private static string BuilderStamp() => typeof(SurfaceBlockBuilder).Assembly.ManifestModule.ModuleVersionId.ToString("N")[..BuilderStampLength];
 
