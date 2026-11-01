@@ -23,6 +23,10 @@ namespace Tman.Core.Inventory.Builders
 
         private const string Placeholder = "Turbo";
 
+        private const string Decal = "Decal";
+
+        private const string Paint = "Paint";
+
         private const string Collision = "Collision";
 
         private readonly Dictionary<string, string> dressed = new(StringComparer.OrdinalIgnoreCase);
@@ -46,6 +50,14 @@ namespace Tman.Core.Inventory.Builders
             return result;
         }
 
+        public static string? OverlayTwin(string plain)
+        {
+            var stem = plain[(plain.LastIndexOf('\\') + 1)..];
+            var folder = plain[..(plain.LastIndexOf('\\') + 1)];
+            var painted = stem.StartsWith(Decal, StringComparison.Ordinal) ? Decal + Paint + stem[Decal.Length..] : Paint + stem;
+            return new[] { plain, folder + painted }.FirstOrDefault(Exists);
+        }
+
         public bool IsGameplayStrip(string link) => link.StartsWith(GameplayMaterials, StringComparison.OrdinalIgnoreCase);
 
         public CPlugSurface.GameplayId Gameplay(string link)
@@ -57,9 +69,14 @@ namespace Tman.Core.Inventory.Builders
                     return material.GameplayId;
                 }
             }
-            var name = link[GameplayMaterials.Length..];
-            return Enum.TryParse<CPlugSurface.GameplayId>(name, out var gameplay) ? gameplay : CPlugSurface.GameplayId.None;
+            return GameplayOf(link[GameplayMaterials.Length..]);
         }
+
+        public static CPlugSurface.GameplayId GameplayOf(string collisionName) =>
+            Enum.GetValues<CPlugSurface.GameplayId>()
+                .Where(gameplay => collisionName.StartsWith(gameplay.ToString(), StringComparison.Ordinal))
+                .OrderByDescending(gameplay => gameplay.ToString().Length)
+                .FirstOrDefault(CPlugSurface.GameplayId.None);
 
         private string Resolve(string link)
         {

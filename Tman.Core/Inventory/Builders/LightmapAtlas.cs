@@ -8,7 +8,7 @@ namespace Tman.Core.Inventory.Builders
 {
     public static class LightmapAtlas
     {
-        private const int LightmapUvSet = 1;
+        private static int LightmapSet(CPlugVisual3D visual) => visual.VertexStreams![0].UVs!.Keys.Max();
 
         private const float Margin = 0.002f;
 
@@ -21,34 +21,58 @@ namespace Tman.Core.Inventory.Builders
             public float Scale { get; set; }
         }
 
-        public static float Repack(IReadOnlyList<IReadOnlyList<CPlugVisual3D>> parts)
+        public sealed record Layout(Vec2 Min, Vec2 Max, float MetersPerUv);
+
+        public static Layout? Repack(IReadOnlyList<IReadOnlyList<CPlugVisual3D>> parts)
         {
             var islands = parts.Select(Measure).Where(island => island is not null).Select(island => island!).OrderByDescending(island => island.Height).ToList();
             if (islands.Count == 0)
             {
-                return 0;
+                return null;
             }
-            var height = Pack(islands);
+            Pack(islands);
             foreach (var island in islands)
             {
                 Remap(island);
             }
-            return height;
+            var visuals = islands.SelectMany(island => island.Visuals).ToList();
+            var uvs = visuals.SelectMany(visual => visual.VertexStreams![0].UVs![LightmapSet(visual)]).ToList();
+            var min = new Vec2(uvs.Min(uv => uv.X), uvs.Min(uv => uv.Y));
+            var max = new Vec2(uvs.Max(uv => uv.X), uvs.Max(uv => uv.Y));
+            return new Layout(min, max, MathF.Sqrt(visuals.Sum(Area) / MathF.Max(visuals.Sum(UvArea), 1e-6f)));
         }
 
         private static Island? Measure(IReadOnlyList<CPlugVisual3D> visuals)
         {
-            var mapped = visuals.Where(visual => visual.VertexStreams is [{ UVs: { } uvs }, ..] && uvs.ContainsKey(LightmapUvSet)).ToList();
+            var mapped = visuals.Where(visual => visual.VertexStreams is [{ UVs.Count: > 1 }, ..]).ToList();
             if (mapped.Count == 0)
             {
                 return null;
             }
-            var uvs = mapped.SelectMany(visual => visual.VertexStreams![0].UVs![LightmapUvSet]).ToList();
+            var uvs = mapped.SelectMany(visual => visual.VertexStreams![0].UVs![LightmapSet(visual)]).ToList();
             var min = new Vec2(uvs.Min(uv => uv.X), uvs.Min(uv => uv.Y));
             var max = new Vec2(uvs.Max(uv => uv.X), uvs.Max(uv => uv.Y));
             var side = MathF.Sqrt(Math.Max(mapped.Sum(Area), 1e-3f));
             var aspect = MathF.Sqrt(Math.Clamp((max.X - min.X) / MathF.Max(max.Y - min.Y, 1e-6f), 0.1f, 10f));
             return new Island(mapped, min, max, side * aspect, side / aspect);
+        }
+
+        private static float UvArea(CPlugVisual3D visual)
+        {
+            if (visual is not CPlugVisualIndexed { IndexBuffer.Indices: { } indices })
+            {
+                return 0;
+            }
+            var uvs = visual.VertexStreams![0].UVs![LightmapSet(visual)];
+            var area = 0f;
+            for (var i = 0; i + 2 < indices.Length; i += 3)
+            {
+                var a = uvs[indices[i]];
+                var b = uvs[indices[i + 1]];
+                var c = uvs[indices[i + 2]];
+                area += MathF.Abs((b.X - a.X) * (c.Y - a.Y) - (c.X - a.X) * (b.Y - a.Y)) * 0.5f;
+            }
+            return area;
         }
 
         private static float Area(CPlugVisual3D visual)
@@ -119,7 +143,8 @@ namespace Tman.Core.Inventory.Builders
             foreach (var visual in island.Visuals)
             {
                 var stream = visual.VertexStreams![0];
-                stream.UVs![LightmapUvSet] = [.. stream.UVs[LightmapUvSet].Select(uv => island.Origin + (uv - island.Min) * scale)];
+                var set = LightmapSet(visual);
+                stream.UVs![set] = [.. stream.UVs[set].Select(uv => island.Origin + (uv - island.Min) * scale)];
             }
         }
     }

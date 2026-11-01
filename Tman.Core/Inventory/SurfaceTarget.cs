@@ -13,8 +13,8 @@ namespace Tman.Core.Inventory
         {
             [Surface.Road] = new(Materials + "PlatformTech", CPlugSurface.MaterialId.Asphalt),
             [Surface.Dirt] = new(Modifiers + @"PlatformDirt\PlatformTech", CPlugSurface.MaterialId.Dirt),
-            [Surface.Ice] = new(Modifiers + @"PlatformIce\PlatformTech", CPlugSurface.MaterialId.Ice),
-            [Surface.Grass] = new(Modifiers + @"PlatformGrass\PlatformTech", CPlugSurface.MaterialId.Grass),
+            [Surface.Ice] = new(Modifiers + @"PlatformIce\PlatformTech", CPlugSurface.MaterialId.RoadIce),
+            [Surface.Grass] = new(Modifiers + @"PlatformGrass\PlatformTech", CPlugSurface.MaterialId.Green),
             [Surface.Plastic] = new(Modifiers + @"PlatformPlastic\PlatformTech", CPlugSurface.MaterialId.Plastic),
             [Surface.Wood] = new(Materials + "ThemeSnowRoad", CPlugSurface.MaterialId.Wood),
         };
