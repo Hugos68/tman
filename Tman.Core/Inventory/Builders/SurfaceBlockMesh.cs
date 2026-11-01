@@ -49,9 +49,9 @@ namespace Tman.Core.Inventory.Builders
                     var link = deck || overlay is not null ? target.Link : dressing.Dress(links[slot]);
                     var (physics, gameplay) = strip ? (target.Physics, dressing.Gameplay(links[slot])) : SurfaceOf(link);
                     materialMap[slot] = MaterialIndex(materials, materialIndices, link, deck || overlay is not null ? target.Physics : physics, gameplay);
-                    if (overlay is not null && MaterialDressing.Exists(overlay))
+                    if (overlay is not null && MaterialDressing.OverlayTwin(overlay) is { } twin)
                     {
-                        overlayMap[slot] = MaterialIndex(materials, materialIndices, overlay, CPlugSurface.MaterialId.NotCollidable, CPlugSurface.GameplayId.None);
+                        overlayMap[slot] = MaterialIndex(materials, materialIndices, twin, CPlugSurface.MaterialId.NotCollidable, CPlugSurface.GameplayId.None);
                     }
                 }
                 var visualBase = visuals.Count;
@@ -76,7 +76,7 @@ namespace Tman.Core.Inventory.Builders
                     });
                     if (overlayMap[geom.MaterialIndex] is { } overlayIndex)
                     {
-                        var decal = Detached((CPlugVisual3D)partVisuals[geom.VisualIndex].DeepClone());
+                        var decal = DecalCopy(partVisuals[geom.VisualIndex]);
                         visuals.Add(decal);
                         partVisuals.Add(decal);
                         geoms.Add(new CPlugSolid2Model.ShadedGeom
@@ -112,10 +112,11 @@ namespace Tman.Core.Inventory.Builders
 
             }
             solid.LodMaxDistAtFov90 = lodDistances;
-            var atlasHeight = LightmapAtlas.Repack(islands);
-            if (solid.PreLightGenerator is { } lightmap)
+            if (LightmapAtlas.Repack(islands) is { } layout && solid.PreLightGenerator is { } lightmap)
             {
-                lightmap.U07 = atlasHeight;
+                lightmap.U02 = parts.Max(part => Solid(part).PreLightGenerator?.U02 ?? 0);
+                lightmap.U06 = layout.Max.X;
+                lightmap.U07 = layout.Max.Y;
             }
             solid.Visuals = [.. visuals];
             solid.ShadedGeoms = [.. geoms];
@@ -244,6 +245,17 @@ namespace Tman.Core.Inventory.Builders
 
         private static bool IsDeck(string link, DeckFamily family) => family.IsDeck(link);
 
+        private static CPlugVisual3D DecalCopy(CPlugVisual3D visual)
+        {
+            var copy = Detached((CPlugVisual3D)visual.DeepClone());
+            var sets = copy.VertexStreams![0].UVs!;
+            if (sets.Count > 2)
+            {
+                sets[0] = [.. sets[sets.Keys.Max() - 1]];
+            }
+            return copy;
+        }
+
         private static int MaterialIndex(List<CPlugSolid2Model.Material> materials, Dictionary<(string Link, CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay), int> indices, string link, CPlugSurface.MaterialId physics, CPlugSurface.GameplayId gameplay)
         {
             var key = (link, physics, gameplay);
@@ -279,10 +291,12 @@ namespace Tman.Core.Inventory.Builders
 
         private static readonly (CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay) OutsideTheEnvironmentPaks = (CPlugSurface.MaterialId.Asphalt, CPlugSurface.GameplayId.None);
 
-        private static (CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay) CollisionMaterial(string name) =>
-            Enum.TryParse<CPlugSurface.GameplayId>(name, out var gameplay) ? (CPlugSurface.MaterialId.Asphalt, gameplay)
-            : Enum.TryParse<CPlugSurface.MaterialId>(name, out var physics) ? (physics, CPlugSurface.GameplayId.None)
-            : throw new InvalidOperationException($"Unknown collision material {name}");
+        private static (CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay) CollisionMaterial(string name)
+        {
+            var gameplay = MaterialDressing.GameplayOf(name);
+            var surface = gameplay == CPlugSurface.GameplayId.None ? name : name[gameplay.ToString().Length..];
+            return (Enum.TryParse<CPlugSurface.MaterialId>(surface, out var physics) ? physics : CPlugSurface.MaterialId.Asphalt, gameplay);
+        }
 
         private static CPlugSurface.MaterialId PhysicsOf(string link) => SurfaceOf(link).Physics;
 
