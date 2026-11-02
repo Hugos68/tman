@@ -1,4 +1,5 @@
 using GBX.NET.Engines.Plug;
+using Tman.Core.Catalog;
 using Tman.Core.Surfaces;
 using Tman.Core.Surfaces.Building;
 using Xunit;
@@ -40,18 +41,36 @@ namespace Tman.Tests
         }
 
         [Fact]
-        public void EverySurfaceHasADeckLinkAndPhysics()
+        public void EverySurfaceHasADeckLinkAndPhysicsForRoadsAndPlatforms()
         {
+            var road = DeckFamily.Of(Blocks.RoadTechStraight)!;
+            var platform = DeckFamily.Of(Blocks.PlatformTechBase)!;
+            var openRoad = DeckFamily.Of(Blocks.OpenTechRoadStraight)!;
+            Assert.False(road.IsPlatform);
+            Assert.True(platform.IsPlatform);
+            Assert.True(openRoad.IsPlatform);
             foreach (var surface in Surface.All)
             {
-                var target = SurfaceTarget.Of(surface);
-                Assert.False(string.IsNullOrEmpty(target.Link));
-                Assert.NotEqual(CPlugSurface.MaterialId.Concrete, target.Physics);
+                foreach (var family in new[] { road, platform })
+                {
+                    var target = SurfaceTarget.Of(surface, family);
+                    Assert.False(string.IsNullOrEmpty(target.Link));
+                    Assert.NotEqual(CPlugSurface.MaterialId.Concrete, target.Physics);
+                }
             }
-            Assert.Equal(CPlugSurface.MaterialId.Plastic, SurfaceTarget.Of(Surface.Plastic).Physics);
-            Assert.Equal(CPlugSurface.MaterialId.Green, SurfaceTarget.Of(Surface.Grass).Physics);
-            Assert.Equal(CPlugSurface.MaterialId.RoadIce, SurfaceTarget.Of(Surface.Ice).Physics);
-            Assert.Equal(@"Stadium\Media\Material\PlatformTech", SurfaceTarget.Of(Surface.Road).Link);
+            Assert.Equal(CPlugSurface.MaterialId.Plastic, SurfaceTarget.Of(Surface.Plastic, road).Physics);
+            Assert.Equal(CPlugSurface.MaterialId.Green, SurfaceTarget.Of(Surface.Grass, platform).Physics);
+            Assert.Equal(@"Stadium\Media\Material\PlatformTech", SurfaceTarget.Of(Surface.Road, road).Link);
+        }
+
+        [Fact]
+        public void IceIsTheBobsleighDeckOnRoadsAndTheIcePlatformOnPlatformsAndOpenRoads()
+        {
+            Assert.Equal(@"Stadium\Media\Material\RoadIce", SurfaceTarget.Of(Surface.Ice, DeckFamily.Of(Blocks.RoadTechStraight)!).Link);
+            Assert.Equal(@"Stadium\Media\Material\RoadIce", SurfaceTarget.Of(Surface.Ice, DeckFamily.Of(Blocks.RoadDirtStraight)!).Link);
+            Assert.Equal(@"Stadium\Media\Modifier\PlatformIce\PlatformTech", SurfaceTarget.Of(Surface.Ice, DeckFamily.Of(Blocks.PlatformTechBase)!).Link);
+            Assert.Equal(@"Stadium\Media\Modifier\PlatformIce\PlatformTech", SurfaceTarget.Of(Surface.Ice, DeckFamily.Of(Blocks.OpenTechRoadStraight)!).Link);
+            Assert.Equal(CPlugSurface.MaterialId.RoadIce, SurfaceTarget.Of(Surface.Ice, DeckFamily.Of(Blocks.PlatformTechBase)!).Physics);
         }
     }
 }

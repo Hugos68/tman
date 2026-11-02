@@ -67,7 +67,7 @@ Every output map has its validation removed (no author time, no medals — valid
 | `Jitter` | Other | Every block/item position and yawpitchroll is slightly changed |
 | `Road` | Surfaces | Every road, open road and platform drives on asphalt: road kinds become surface blocks with the asphalt deck, platforms their Tech twin. |
 | `Dirt` | Surfaces | The same with dirt. |
-| `Ice` | Surfaces | The same with ice. |
+| `Ice` | Surfaces | The same with ice: the bobsleigh deck on roads, the ice platform on platforms and open roads. |
 | `Grass` | Surfaces | The same with grass. |
 | `Plastic` | Surfaces | The same with plastic. |
 | `Wood` | Surface | The same with wood. |

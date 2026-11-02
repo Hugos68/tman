@@ -64,7 +64,7 @@ namespace Tman.Core.Surfaces.Building
                 parts.AddRange(PrefabParts.Collect(paks, prefab, position, rotation));
             }
             var family = DeckFamily.Of(file.Block.Archetype) ?? throw new InvalidOperationException($"{file.Block.Archetype.Id} is not a road kind");
-            var model = mesh.Merge(parts, family, SurfaceTarget.Of(file.Block.Surface), MaterialDressing.For(paks, materials, file.Collection, infoPath, info, ancestor));
+            var model = mesh.Merge(parts, family, SurfaceTarget.Of(file.Block.Surface, family), MaterialDressing.For(paks, materials, file.Collection, infoPath, info, ancestor));
             return Shell(file, info, variant, model, infoPath, ancestor);
         }
 
