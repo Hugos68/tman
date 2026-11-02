@@ -2,8 +2,8 @@ namespace Tman.Core
 {
     internal static class Assets
     {
-        private const string DataFolder = "Assets/Data/";
+        private const string TemplatesFolder = "Assets/Templates/";
 
-        public static string Data(string file) => DataFolder + file;
+        public static string Template(string file) => TemplatesFolder + file;
     }
 }

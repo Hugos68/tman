@@ -42,7 +42,7 @@ namespace Tman.Tests
         {
             Assert.Equal(Custom.CheckpointExpandableBottomBlueBay, Custom.CheckpointExpandableBottom.For(Collections.BlueBay));
             Assert.Equal(Custom.CheckpointExpandableBottom, Custom.CheckpointExpandableBottom.For(Collections.Stadium));
-            Assert.Equal(Custom.FinishPlaneTemplate, Custom.FinishPlaneTemplate.For(Collections.RedIsland));
+            Assert.Equal(Custom.FinishFlag8m, Custom.FinishFlag8m.For(Collections.RedIsland));
         }
 
         [Fact]

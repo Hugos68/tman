@@ -66,7 +66,7 @@ namespace Tman.Core.Alterations.Finishes
             var collection = map.Collection;
             var boxes = collection == Collections.Stadium
                 ? GrassBoxes(map)
-                : WaterBoxes(map, context, collection);
+                : WaterBoxes(map, collection);
             if (boxes.Count == 0)
             {
                 context.Logger.LogWarning("No floor found: nothing to finish on");
@@ -81,16 +81,15 @@ namespace Tman.Core.Alterations.Finishes
             }
         }
 
-        private static List<Box> WaterBoxes(Map map, AlterationContext context, Collections collection)
+        private static List<Box> WaterBoxes(Map map, Collections collection)
         {
             if (!OpenWater.TryGetValue(collection, out var water))
             {
                 return [];
             }
-            var footprints = WaterFootprints.Load(context, collection.ToString());
             var terrain = map.Terrain.ToLookup(block => water.Tiles.Contains(block.BlockModel));
             var cells = terrain[true].Select(block => (block.Cell.X, block.Cell.Z));
-            var subcells = terrain[false].SelectMany(footprints.Subcells);
+            var subcells = terrain[false].SelectMany(block => WaterFootprints.Subcells(collection, block));
             var boxes = Boxes.OfCells(cells, MapConstants.CellSize, water.Bottom, water.Top);
             boxes.AddRange(Boxes.OfCells(subcells, MapConstants.SubcellSize, water.Bottom, water.Top));
             var width = map.Size.X * MapConstants.CellSize;
