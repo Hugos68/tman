@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using Tman.Core.Catalog;
 using Tman.Core.Maps.Geometry;
 using Tman.Core.Maps.Placements;
 
-namespace Tman.Core.Alterations.Finishes
+namespace Tman.Core.Catalog
 {
     internal static class WaterFootprints
     {
@@ -108,8 +107,8 @@ namespace Tman.Core.Alterations.Finishes
                 {
                     if ((deep & (1UL << (z * MapConstants.SubcellsPerCell + x))) != 0)
                     {
-                        var turned = block.Direction.Turn((x, z), (MapConstants.SubcellsPerCell, MapConstants.SubcellsPerCell));
-                        yield return (block.Cell.X * MapConstants.SubcellsPerCell + turned.X, block.Cell.Z * MapConstants.SubcellsPerCell + turned.Z);
+                        var (X, Z) = block.Direction.Turn((x, z), (MapConstants.SubcellsPerCell, MapConstants.SubcellsPerCell));
+                        yield return (block.Cell.X * MapConstants.SubcellsPerCell + X, block.Cell.Z * MapConstants.SubcellsPerCell + Z);
                     }
                 }
             }
