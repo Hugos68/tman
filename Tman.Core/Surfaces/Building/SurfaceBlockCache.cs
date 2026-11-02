@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using Tman.Core.Game;
 using Tman.Paks;
 
@@ -22,7 +23,7 @@ namespace Tman.Core.Surfaces.Building
 
         private static readonly Lazy<string> Root = new(() => Path.Combine(CacheFolder, BlocksFolder, $"{PakStamp()}-{BuilderStamp()}"));
 
-        private static readonly object Building = new();
+        private static readonly Lock Building = new();
 
         public static byte[] GetOrBuild(SurfaceBlockFile file)
         {
