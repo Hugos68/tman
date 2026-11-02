@@ -37,6 +37,7 @@ Tman.Core/
 │  ├─ AlterationContext.cs   the services a running alteration may use: assets and surface blocks
 │  ├─ AlterationPipeline.cs  the public entry point: resolves an alteration by name from the service provider and applies it
 │  ├─ StandardAlteration.cs  what every user-facing alteration derives from: validation and lightmap removed, Steps, Run, the map renamed
+│  ├─ Reverses/              PodiumReverse: start at the podium, finish at the old start
 │  ├─ Finishes/              the finish alterations; FinishPlane places a modeler item over boxes, WaterFootprints knows which subcells of a shore tile are deep water
 │  ├─ Steps/                 the reusable steps alterations are composed from (each one is itself an Alteration)
 │  │  └─ Waypoints/          the steps that act on starts, checkpoints and finishes

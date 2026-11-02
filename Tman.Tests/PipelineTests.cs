@@ -64,5 +64,16 @@ namespace Tman.Tests
             Assert.Equal(blocks.Requested.Count, renamed);
             Assert.Equal(files.Select(file => file.EmbeddedEntry).Order().ToList(), map.EmbeddedFiles.Where(entry => entry.StartsWith("Blocks/tman/", StringComparison.Ordinal)).Order().ToList());
         }
+
+        [Fact]
+        public void PodiumReverseLeavesAMapWithoutAPodiumAlone()
+        {
+            using var services = TestServices.Build();
+            var map = TestServices.LoadTestMap();
+            var starts = map.Placements.Where(placement => placement.IsStart).Select(placement => placement.Id).ToList();
+            services.GetRequiredService<AlterationPipeline>().Apply("PodiumReverse", map);
+            Assert.Equal(starts, map.Placements.Where(placement => placement.IsStart).Select(placement => placement.Id).ToList());
+            Assert.EndsWith("Podium Reverse", map.Name);
+        }
     }
 }
