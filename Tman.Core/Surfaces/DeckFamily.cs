@@ -54,6 +54,8 @@ namespace Tman.Core.Surfaces
             ? null
             : All.Where(family => block.Id.StartsWith(family.Prefix, StringComparison.Ordinal)).OrderByDescending(family => family.Prefix.Length).FirstOrDefault();
 
+        public bool IsPlatform => DeckMaterials.Contains(PlatformTech);
+
         public bool IsDeck(string link) => DeckMaterials.Contains(link) || AllDeckMaterials.Value.Contains(link);
 
         private static readonly Lazy<IReadOnlySet<string>> AllDeckMaterials = new(() => Decks([.. All.SelectMany(family => family.DeckMaterials)]));

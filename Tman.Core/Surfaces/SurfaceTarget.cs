@@ -9,17 +9,26 @@ namespace Tman.Core.Surfaces
 
         private const string Modifiers = @"Stadium\Media\Modifier\";
 
-        private static readonly Dictionary<Surface, SurfaceTarget> BySurface = new()
+        private sealed record Looks(string Road, string Platform, CPlugSurface.MaterialId Physics)
+        {
+            public Looks(string both, CPlugSurface.MaterialId physics) : this(both, both, physics) { }
+        }
+
+        private static readonly Dictionary<Surface, Looks> BySurface = new()
         {
             [Surface.Road] = new(Materials + "PlatformTech", CPlugSurface.MaterialId.Asphalt),
             [Surface.Dirt] = new(Modifiers + @"PlatformDirt\PlatformTech", CPlugSurface.MaterialId.Dirt),
-            [Surface.Ice] = new(Modifiers + @"PlatformIce\PlatformTech", CPlugSurface.MaterialId.RoadIce),
+            [Surface.Ice] = new(Materials + "RoadIce", Modifiers + @"PlatformIce\PlatformTech", CPlugSurface.MaterialId.RoadIce),
             [Surface.Grass] = new(Modifiers + @"PlatformGrass\PlatformTech", CPlugSurface.MaterialId.Green),
             [Surface.Plastic] = new(Modifiers + @"PlatformPlastic\PlatformTech", CPlugSurface.MaterialId.Plastic),
             [Surface.Wood] = new(Materials + "ThemeSnowRoad", CPlugSurface.MaterialId.Wood),
             [Surface.Metal] = new(Materials + "Structure", CPlugSurface.MaterialId.Metal)
         };
 
-        public static SurfaceTarget Of(Surface surface) => BySurface[surface];
+        public static SurfaceTarget Of(Surface surface, DeckFamily family)
+        {
+            var looks = BySurface[surface];
+            return new SurfaceTarget(family.IsPlatform ? looks.Platform : looks.Road, looks.Physics);
+        }
     }
 }
