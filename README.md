@@ -1,3 +1,5 @@
+<img src="assets/banner.png" alt="TMAN - Trackmania Altered Nadeo" width="100%">
+
 # tman (Trackmania Altered Nadeo)
 
 tman applies predefined alterations to Trackmania 2020 maps: give it a `.Map.Gbx` file (or a folder of them) and the name of an alteration, and it writes an altered copy. Map creators use it to produce whole altered campaigns without touching each map in the editor.
@@ -69,7 +71,7 @@ Every output map has its validation removed (no author time, no medals — valid
 | `Wood` | Surface | The same with wood. |
 | `Metal` | Surface | The same with metal. |
  
-The surface alterations build their blocks from the game's own files: copy `Stadium.pak`, `RedIsland.pak`, `WhiteShore.pak`, `GreenCoast.pak` and `BlueBay.pak` (from `Trackmania\Packs`) into a `Paks/` folder at the repository root. The first run on a map builds every road block it needs (about a second each) into a cache; later runs reuse them. With a `Paks/` folder the cache is `Cache/` next to it; with a game installation it is the user's local application data (`%LocalAppData%\tman\Cache` on Windows). The cache is keyed by the pak files and the build, so a game update or a code change never serves stale blocks.
+The surface alterations build their blocks from the game's own files: copy `Stadium.pak`, `RedIsland.pak`, `WhiteShore.pak`, `GreenCoast.pak` and `BlueBay.pak` (from `Trackmania\Packs`). The first run on a map builds every road block it needs (about a second each) into a cache; later runs reuse them. The cache is in the user's local application data (`%LocalAppData%\tman\Cache` on Windows). The cache is keyed by the pak files and the build, so a game update or a code change never serves stale blocks.
 
 ## Where it comes from
 

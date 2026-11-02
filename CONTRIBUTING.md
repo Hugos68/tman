@@ -7,7 +7,6 @@
 | `Tman.Core` | The library. Everything an alteration needs; no user-interface code. |
 | `Tman.Interface` | The command line (`tman`). A graphical interface would be another project referencing `Tman.Core`. |
 | `Tman.Paks` | Reads the game's pak files: the per-pak keys, the hashed-name resolver, the `Paks/` folder lookup. Used by `Tman.Core` (surface blocks) and `Tman.Generator`. |
-| `Tman.Tests` | Unit tests of the rules in `Tman.Core` (`dotnet test`). |
 | `Tman.Generator` | A development tool: regenerates the game catalog in `Tman.Core/Catalog/Generated` from the game's pak files and the custom items in `Tman.Core/Assets/Items`. Not needed to run tman. |
 
 `Tman.sln` builds all five.
