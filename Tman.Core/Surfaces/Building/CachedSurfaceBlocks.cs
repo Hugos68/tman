@@ -1,8 +1,9 @@
 using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace Tman.Core.Surfaces.Building
 {
-    internal sealed class CachedSurfaceBlocks(IBlockCache cache, SurfaceBlockBuilder builder) : ISurfaceBlocks
+    internal sealed class CachedSurfaceBlocks(IBlockCache cache, SurfaceBlockBuilder builder, ILogger<CachedSurfaceBlocks> logger) : ISurfaceBlocks
     {
         private readonly Lock building = new();
 
@@ -12,6 +13,7 @@ namespace Tman.Core.Surfaces.Building
             {
                 if (cache.Read(file.CachePath) is { } cached)
                 {
+                    logger.LogDebug("{Block} from the cache", file.Name);
                     return cached;
                 }
                 var bytes = builder.Build(file);

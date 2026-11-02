@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using GBX.NET;
@@ -9,11 +10,12 @@ using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Plug;
 using Tman.Core.Catalog;
 using Tman.Core.Game;
+using Microsoft.Extensions.Logging;
 using Tman.Paks;
 
 namespace Tman.Core.Surfaces.Building
 {
-    internal sealed class SurfaceBlockBuilder(IPakStore paks, IAssets assets, GameMaterials materials, SurfaceBlockMesh mesh)
+    internal sealed class SurfaceBlockBuilder(IPakStore paks, IAssets assets, GameMaterials materials, SurfaceBlockMesh mesh, ILogger<SurfaceBlockBuilder> logger)
     {
         private const string Template = "SurfaceBlock.Block.Gbx";
 
@@ -37,7 +39,10 @@ namespace Tman.Core.Surfaces.Building
         {
             try
             {
-                return BuildUnchecked(file);
+                var stopwatch = Stopwatch.StartNew();
+                var bytes = BuildUnchecked(file);
+                logger.LogDebug("Built {Block} ({Size} bytes) in {Elapsed} ms", file.Name, bytes.Length, stopwatch.ElapsedMilliseconds);
+                return bytes;
             }
             catch (Exception exception) when (exception is not InvalidOperationException)
             {

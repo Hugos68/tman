@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using Tman.Core.Alterations.Steps;
 using Tman.Core.Alterations.Steps.Waypoints;
 using Tman.Core.Catalog;
@@ -43,6 +44,7 @@ namespace Tman.Core.Alterations.Finishes
                 .ToList();
             if (rows.Count == 0)
             {
+                context.Logger.LogWarning("No ground found: nothing to clip");
                 return;
             }
             var top = (rows.Min() - map.GroundRow) * MapConstants.CellHeight + floor.Bed - TopUnderFloor;

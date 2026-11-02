@@ -1,4 +1,5 @@
 using System;
+using Microsoft.Extensions.Logging;
 using Tman.Core.Maps;
 
 namespace Tman.Core.Alterations.Steps
@@ -8,6 +9,7 @@ namespace Tman.Core.Alterations.Steps
         protected override void Run(Map map, AlterationContext context)
         {
             map.Name = edit(map.Name);
+            context.Logger.LogInformation("Renamed to {Name}", map.Name);
         }
     }
 }

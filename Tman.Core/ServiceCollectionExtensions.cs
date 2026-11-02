@@ -1,5 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Tman.Core.Alterations;
+using Tman.Core.Game;
 using Tman.Core.Surfaces.Building;
 
 namespace Tman.Core
@@ -13,8 +15,7 @@ namespace Tman.Core
             services.AddSingleton<SurfaceBlockMesh>();
             services.AddSingleton<SurfaceBlockBuilder>();
             services.AddSingleton<ISurfaceBlocks, CachedSurfaceBlocks>();
-            services.AddSingleton<AlterationContext>();
-            services.AddSingleton<AlterationPipeline>();
+            services.AddSingleton(provider => new AlterationPipeline(provider, provider.GetRequiredService<IAssets>(), provider.GetRequiredService<ISurfaceBlocks>(), provider.GetRequiredService<ILoggerFactory>()));
             foreach (var alteration in AlterationPipeline.AlterationTypes)
             {
                 services.AddTransient(alteration);

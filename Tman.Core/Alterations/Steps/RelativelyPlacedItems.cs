@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using Tman.Core.Catalog;
 using Tman.Core.Maps;
 using Tman.Core.Maps.Placements;
@@ -23,6 +24,7 @@ namespace Tman.Core.Alterations.Steps
                 {
                     map.PlaceRelative(source, item);
                 }
+                context.Logger.LogInformation("{Item} placed on {Count} placements", item.Id, sources.Count);
             }
         }
     }

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Microsoft.Extensions.Logging;
 using Tman.Core.Catalog;
 using Tman.Core.Game;
 using Tman.Core.Maps;
@@ -9,8 +10,10 @@ using Tman.Core.Surfaces.Building;
 
 namespace Tman.Core.Alterations
 {
-    internal sealed class AlterationContext(IAssets assets, ISurfaceBlocks surfaceBlocks)
+    internal sealed class AlterationContext(IAssets assets, ISurfaceBlocks surfaceBlocks, ILogger logger)
     {
+        public ILogger Logger { get; } = logger;
+
         public Stream Open(string assetPath) => assets.Open(assetPath);
 
         public void Embed(Map map, Item custom)

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using GBX.NET;
+using Microsoft.Extensions.Logging;
 using Tman.Core.Alterations.Steps;
 using Tman.Core.Alterations.Steps.Waypoints;
 using Tman.Core.Catalog;
@@ -77,9 +78,11 @@ namespace Tman.Core.Alterations.Finishes
                 : WaterBoxes(map, context, collection);
             if (boxes.Count == 0)
             {
+                context.Logger.LogWarning("No floor found: nothing to finish on");
                 return;
             }
             FinishPlane.Place(map, context, $"FinishFloor_{map.Uid}.Item.Gbx", boxes, collection == Collections.Stadium);
+            context.Logger.LogInformation("Finish plane over {Count} floor boxes", boxes.Count);
             if (collection == Collections.Stadium && map.Decoration.StartsWith("48x48"))
             {
                 context.Embed(map, Custom.FinishStadiumPenaltyGrass);

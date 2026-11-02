@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Tman.Core.Maps;
 
 namespace Tman.Core.Alterations
@@ -13,6 +14,7 @@ namespace Tman.Core.Alterations
             {
                 alteration.Apply(map, context);
             }
+            context.Logger.LogDebug("{Step}", GetType().Name);
             Run(map, context);
             map.GenerateUid();
         }
