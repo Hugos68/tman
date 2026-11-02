@@ -5,6 +5,7 @@ using System.Linq;
 using GBX.NET;
 using GBX.NET.Engines.GameData;
 using GBX.NET.Engines.Plug;
+using Tman.Core.Catalog;
 using Tman.Core.Maps;
 using Tman.Core.Maps.Geometry;
 
@@ -28,23 +29,20 @@ namespace Tman.Core.Alterations.Finishes
 
         public readonly record struct Ramp(float X0, float X1, float Z0, float Z1, float YInner, float YOuter, float Below, float Above, Side Side);
 
-        public static void Place(Map map, string templatePath, string ident, IReadOnlyList<Box> boxes) => Place(map, templatePath, ident, boxes, [], true);
+        public static void Place(Map map, AlterationContext context, string ident, IReadOnlyList<Box> boxes) => Place(map, context, ident, boxes, [], true);
 
-        public static void Place(Map map, string templatePath, string ident, IReadOnlyList<Box> boxes, bool visible) => Place(map, templatePath, ident, boxes, [], visible);
+        public static void Place(Map map, AlterationContext context, string ident, IReadOnlyList<Box> boxes, bool visible) => Place(map, context, ident, boxes, [], visible);
 
-        public static void Place(Map map, string templatePath, string ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps) => Place(map, templatePath, ident, boxes, ramps, true);
+        public static void Place(Map map, AlterationContext context, string ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps) => Place(map, context, ident, boxes, ramps, true);
 
-        public static void Place(Map map, string templatePath, string ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps, bool visible)
+        public static void Place(Map map, AlterationContext context, string ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps, bool visible)
         {
-            var path = Path.Combine(Path.GetTempPath(), ident);
-            File.WriteAllBytes(path, Build(templatePath, ident, map.Challenge.MapInfo.Collection, boxes, ramps, visible));
-            map.Embed(path);
+            using var template = context.Open(Custom.FinishPlaneTemplate.Path!);
+            map.Embed(ident, Build(template, ident, map.Challenge.MapInfo.Collection, boxes, ramps, visible));
             map.Challenge.PlaceAnchoredObject(new Ident(ident, map.Challenge.MapInfo.Collection, ident), Vec3.Zero, Vec3.Zero, Vec3.Zero);
         }
 
-        public static byte[] Build(string templatePath, string ident, Id collection, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps) => Build(templatePath, ident, collection, boxes, ramps, true);
-
-        public static byte[] Build(string templatePath, string ident, Id collection, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps, bool visible)
+        public static byte[] Build(Stream template, string ident, Id collection, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps, bool visible)
         {
             var bodies = new List<Vec3[]>();
             foreach (var b in Merge(boxes))
@@ -68,17 +66,17 @@ namespace Tman.Core.Alterations.Finishes
                 throw new InvalidOperationException("no boxes");
             }
 
-            var gbx = Gbx.Parse<CGameItemModel>(templatePath);
+            var gbx = Gbx.Parse<CGameItemModel>(template);
             var item = gbx.Node;
             if (item.EntityModelEdition is not CGameCommonItemEntityModelEdition edition || edition.MeshCrystal is not CPlugCrystal crystal)
             {
-                throw new InvalidOperationException($"{templatePath} is not a mesh-modeler item");
+                throw new InvalidOperationException($"{ident}: the finish plane template is not a mesh-modeler item");
             }
             var geometry = crystal.Layers.OfType<CPlugCrystal.GeometryLayer>().First();
             var trigger = crystal.Layers.OfType<CPlugCrystal.TriggerLayer>().First();
             if (geometry.Crystal is null || trigger.Crystal is null || crystal.Materials.Count < 2)
             {
-                throw new InvalidOperationException($"{templatePath} has no geometry + trigger layers with two materials");
+                throw new InvalidOperationException($"{ident}: the finish plane template has no geometry + trigger layers with two materials");
             }
             var glass = visible
                 ? bodies.SelectMany(b => new[] { Face(b, 3, 7, 6, 2), Face(b, 0, 1, 5, 4) }).ToList()

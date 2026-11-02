@@ -13,7 +13,7 @@ using Tman.Paks;
 
 namespace Tman.Core.Surfaces.Building
 {
-    internal static class SurfaceBlockBuilder
+    internal sealed class SurfaceBlockBuilder(IPakStore paks, IAssets assets, GameMaterials materials, SurfaceBlockMesh mesh)
     {
         private const string Template = "SurfaceBlock.Block.Gbx";
 
@@ -31,11 +31,9 @@ namespace Tman.Core.Surfaces.Building
 
         private const byte SpawnFlag = 4;
 
-        private static readonly Lazy<Dictionary<string, string>> BlockInfoIndex = new(IndexBlockInfos);
+        private readonly Lazy<BlockInfoIndex> blockInfos = new(() => BlockInfoIndex.Of(paks));
 
-        private static readonly Lazy<Dictionary<string, string>> RenamedBlockInfoIndex = new(IndexRenamedBlockInfos);
-
-        public static byte[] Build(SurfaceBlockFile file)
+        public byte[] Build(SurfaceBlockFile file)
         {
             try
             {
@@ -47,28 +45,28 @@ namespace Tman.Core.Surfaces.Building
             }
         }
 
-        private static byte[] BuildUnchecked(SurfaceBlockFile file)
+        private byte[] BuildUnchecked(SurfaceBlockFile file)
         {
-            var store = GamePaks.Store;
-            var (infoPath, info) = BlockInfo(store, file.Block.Archetype, file.Collection);
+            var (infoPath, info) = BlockInfo(file.Block.Archetype, file.Collection);
             var variant = Variant(info, file.Ground, file.AdditionalVariant) ?? throw new InvalidOperationException($"{file.Block.Archetype.Id} has no {(file.Ground ? "ground" : "air")} variant {file.AdditionalVariant}");
-            var ancestor = store.Open(infoPath)!.RefTable!.AncestorLevel;
+            var ancestor = paks.Open(infoPath)!.RefTable!.AncestorLevel;
             var parts = new List<PrefabParts.Part>();
             foreach (var mobil in (variant.Mobils ?? []).Select(variations => variations[0]))
             {
                 var prefab = PakStore.Logical(infoPath, ancestor, mobil.PrefabFidFile!.FilePath);
                 var position = mobil.HasGeomTransformation ? mobil.GeomTranslation : Vec3.Zero;
                 var rotation = mobil.HasGeomTransformation ? Transforms.FromEulerDegrees(mobil.GeomRotation) : Quat.Identity;
-                parts.AddRange(PrefabParts.Collect(store, prefab, position, rotation));
+                parts.AddRange(PrefabParts.Collect(paks, prefab, position, rotation));
             }
             var family = DeckFamily.Of(file.Block.Archetype) ?? throw new InvalidOperationException($"{file.Block.Archetype.Id} is not a road kind");
-            var model = SurfaceBlockMesh.Merge(parts, family, SurfaceTarget.Of(file.Block.Surface), MaterialDressing.For(file.Collection, infoPath, info, ancestor));
-            return Shell(file, info, variant, model, infoPath, ancestor, store);
+            var model = mesh.Merge(parts, family, SurfaceTarget.Of(file.Block.Surface), MaterialDressing.For(paks, materials, file.Collection, infoPath, info, ancestor));
+            return Shell(file, info, variant, model, infoPath, ancestor);
         }
 
-        private static byte[] Shell(SurfaceBlockFile file, CGameCtnBlockInfo info, CGameCtnBlockInfoVariant variant, CPlugStaticObjectModel model, string infoPath, int ancestor, PakStore store)
+        private byte[] Shell(SurfaceBlockFile file, CGameCtnBlockInfo info, CGameCtnBlockInfoVariant variant, CPlugStaticObjectModel model, string infoPath, int ancestor)
         {
-            var item = Gbx.Parse<CGameItemModel>(Assets.Data(Template));
+            using var template = assets.Open(Assets.Data(Template));
+            var item = Gbx.Parse<CGameItemModel>(template);
             var collection = CollectionIds.Of(file.Collection);
             item.Node.Ident = new Ident(file.Ident, collection, file.RecordAuthor);
             item.Node.Name = file.Name;
@@ -81,9 +79,9 @@ namespace Tman.Core.Surfaces.Building
             var properties = new CGameBlockItem.MobilProperties { Flags = StaticObjectFlag, StaticObject = model };
             if (info.WayPointType != CGameCtnBlockInfo.EWayPointType.None)
             {
-                if (TriggerShapeFile(variant) is { } triggerFile && store.Open(PakStore.Logical(infoPath, ancestor, triggerFile.FilePath)) is { Node: CPlugSurface trigger } triggerGbx)
+                if (TriggerShapeFile(variant) is { } triggerFile && paks.Open(PakStore.Logical(infoPath, ancestor, triggerFile.FilePath)) is { Node: CPlugSurface trigger } triggerGbx)
                 {
-                    properties.Shape = SurfaceBlockMesh.TriggerShape(trigger, triggerGbx, PakStore.Logical(infoPath, ancestor, triggerFile.FilePath));
+                    properties.Shape = mesh.TriggerShape(trigger, triggerGbx, PakStore.Logical(infoPath, ancestor, triggerFile.FilePath));
                     properties.Flags |= TriggerFlag;
                 }
                 if (SpawnBox(variant) is { } spawn && spawn != default)
@@ -98,39 +96,39 @@ namespace Tman.Core.Surfaces.Building
             return stream.ToArray();
         }
 
-        private static Dictionary<string, string> IndexBlockInfos()
+        private sealed record BlockInfoIndex(Dictionary<string, string> ByFileName, Dictionary<string, string> ByRenamedId)
         {
-            var index = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var entry in GamePaks.Store.Entries)
+            public static BlockInfoIndex Of(IPakStore paks)
             {
-                var segments = entry.Split(PakPath.Separator);
-                if (segments.Length > BlockInfoDepth && PakPath.Join(segments[1], segments[2]) == BlockInfoFolder && entry.EndsWith(BlockInfoExtension, StringComparison.OrdinalIgnoreCase))
+                var byFileName = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var entry in paks.Entries)
                 {
-                    index.TryAdd(PakPath.Join(segments[0], segments[^1][..^BlockInfoExtension.Length]), entry);
+                    var segments = entry.Split(PakPath.Separator);
+                    if (segments.Length > BlockInfoDepth && PakPath.Join(segments[1], segments[2]) == BlockInfoFolder && entry.EndsWith(BlockInfoExtension, StringComparison.OrdinalIgnoreCase))
+                    {
+                        byFileName.TryAdd(PakPath.Join(segments[0], segments[^1][..^BlockInfoExtension.Length]), entry);
+                    }
                 }
+                var byRenamedId = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var (key, path) in byFileName)
+                {
+                    if (paks.Open(path)?.Node is CGameCtnBlockInfo info && !string.Equals(info.Ident.Id, PakPath.Name(key), StringComparison.OrdinalIgnoreCase))
+                    {
+                        byRenamedId.TryAdd(PakPath.Join(PakPath.Environment(key), info.Ident.Id), path);
+                    }
+                }
+                return new BlockInfoIndex(byFileName, byRenamedId);
             }
-            return index;
+
+            public string? Path(string key) => ByFileName.TryGetValue(key, out var path) || ByRenamedId.TryGetValue(key, out path) ? path : null;
         }
 
-        private static Dictionary<string, string> IndexRenamedBlockInfos()
-        {
-            var index = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var (key, path) in BlockInfoIndex.Value)
-            {
-                if (GamePaks.Store.Open(path)?.Node is CGameCtnBlockInfo info && !string.Equals(info.Ident.Id, PakPath.Name(key), StringComparison.OrdinalIgnoreCase))
-                {
-                    index.TryAdd(PakPath.Join(PakPath.Environment(key), info.Ident.Id), path);
-                }
-            }
-            return index;
-        }
-
-        private static (string Path, CGameCtnBlockInfo Info) BlockInfo(PakStore store, Block archetype, Collections collection)
+        private (string Path, CGameCtnBlockInfo Info) BlockInfo(Block archetype, Collections collection)
         {
             foreach (var environment in collection == Collections.Stadium ? [StadiumFolder] : new[] { collection.ToString(), StadiumFolder })
             {
                 var key = PakPath.Join(environment, archetype.Id);
-                if ((BlockInfoIndex.Value.TryGetValue(key, out var path) || RenamedBlockInfoIndex.Value.TryGetValue(key, out path)) && store.Open(path)?.Node is CGameCtnBlockInfo info)
+                if (blockInfos.Value.Path(key) is { } path && paks.Open(path)?.Node is CGameCtnBlockInfo info)
                 {
                     return (path, info);
                 }

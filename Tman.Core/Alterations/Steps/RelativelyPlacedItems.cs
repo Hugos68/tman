@@ -9,7 +9,7 @@ namespace Tman.Core.Alterations.Steps
 {
     internal sealed class RelativelyPlacedItems(IReadOnlyDictionary<Selector, Item> selectorItemDictionary, Func<Placement, bool>? filter = null) : Alteration
     {
-        protected override void Run(Map map)
+        protected override void Run(Map map, AlterationContext context)
         {
             foreach (var (selector, item) in selectorItemDictionary)
             {
@@ -18,7 +18,7 @@ namespace Tman.Core.Alterations.Steps
                 {
                     continue;
                 }
-                map.Embed(item);
+                context.Embed(map, item);
                 foreach (var source in sources)
                 {
                     map.PlaceRelative(source, item);

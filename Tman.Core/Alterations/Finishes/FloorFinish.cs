@@ -13,7 +13,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public sealed class FloorFinish : StandardAlteration
+    internal sealed class FloorFinish : StandardAlteration
     {
         protected override string DisplayName => "Floor Finish";
 
@@ -63,36 +63,38 @@ namespace Tman.Core.Alterations.Finishes
 
         private const int Ring = 16;
 
+        private const string WaterFootprintsFile = "WaterFootprints.json";
+
         private const int FootprintFlagsMask = 0x0FE01FFF;
 
         private const int LastSubcell = MapConstants.SubcellsPerCell - 1;
 
-        protected override void Run(Map map)
+        protected override void Run(Map map, AlterationContext context)
         {
             var collection = map.Collection;
             var boxes = collection == Collections.Stadium
                 ? GrassBoxes(map)
-                : WaterBoxes(map, collection, Assets.Data("WaterFootprints.json"));
+                : WaterBoxes(map, context, collection);
             if (boxes.Count == 0)
             {
                 return;
             }
-            FinishPlane.Place(map, Custom.FinishPlaneTemplate.FullPath(), $"FinishFloor_{map.Uid}.Item.Gbx", boxes, collection == Collections.Stadium);
+            FinishPlane.Place(map, context, $"FinishFloor_{map.Uid}.Item.Gbx", boxes, collection == Collections.Stadium);
             if (collection == Collections.Stadium && map.Decoration.StartsWith("48x48"))
             {
-                map.Embed(Custom.FinishStadiumPenaltyGrass);
+                context.Embed(map, Custom.FinishStadiumPenaltyGrass);
                 map.Place(Custom.FinishStadiumPenaltyGrass, new Vec3(0, GrassLevel(map), 0));
             }
         }
 
-        private static List<FinishPlane.Box> WaterBoxes(Map map, Collections collection, string footprintsPath)
+        private static List<FinishPlane.Box> WaterBoxes(Map map, AlterationContext context, Collections collection)
         {
             var boxes = new List<FinishPlane.Box>();
             if (!OpenWater.TryGetValue(collection, out var water))
             {
                 return boxes;
             }
-            var footprints = LoadWaterFootprints(footprintsPath, collection.ToString());
+            var footprints = LoadWaterFootprints(context, collection.ToString());
             var cells = new Dictionary<int, List<int>>();
             var squares = new Dictionary<int, List<int>>();
             var seen = new HashSet<Int3>();
@@ -211,10 +213,11 @@ namespace Tman.Core.Alterations.Finishes
             }
         }
 
-        private static Dictionary<(string Tile, uint Flags), ulong> LoadWaterFootprints(string path, string environment)
+        private static Dictionary<(string Tile, uint Flags), ulong> LoadWaterFootprints(AlterationContext context, string environment)
         {
             var table = new Dictionary<(string, uint), ulong>();
-            var footprints = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, Dictionary<string, string>>>>(File.ReadAllText(path)) ?? new();
+            using var json = context.Open(Assets.Data(WaterFootprintsFile));
+            var footprints = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, Dictionary<string, string>>>>(json) ?? new();
             foreach (var (tile, masks) in footprints.TryGetValue(environment, out var tiles) ? tiles : new())
             {
                 foreach (var (flags, mask) in masks)

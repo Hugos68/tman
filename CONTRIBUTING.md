@@ -32,7 +32,9 @@ Both run in CI on every push and pull request.
 ```
 Tman.Core/
 ├─ Alterations/              the alterations, one folder per family (Cars, Checkpoints, Effects, Finishes, Other, Surfaces)
-│  ├─ Alteration.cs          the base class: pre-applied steps, Run, a new map UID
+│  ├─ Alteration.cs          the base class: pre-applied steps, Run(map, context), a new map UID
+│  ├─ AlterationContext.cs   the services a running alteration may use: assets and surface blocks
+│  ├─ AlterationPipeline.cs  the public entry point: resolves an alteration by name from the service provider and applies it
 │  ├─ StandardAlteration.cs  what every user-facing alteration derives from: validation and lightmap removed, Steps, Run, the map renamed
 │  ├─ Finishes/              the finish alterations and FinishPlane, the finish item built per map
 │  ├─ Steps/                 the reusable steps alterations are composed from (each one is itself an Alteration)
@@ -41,8 +43,8 @@ Tman.Core/
 ├─ Catalog/                  what the game has: Block, Item, Collections, Waypoint, Car, BlockFlags, CollectionIds
 │  └─ Generated/             Blocks.g.cs, Items.g.cs, Custom.g.cs — written by Tman.Generator, never edited by hand
 ├─ Surfaces/                 the surface alterations' vocabulary and rules: Surface, SurfaceTarget, SurfaceRules, DeckFamily, SurfaceBlock, SurfaceBlockKey, SurfaceBlockFile
-│  └─ Building/              one custom block per road kind, variant, environment and surface, built from the game's paks: SurfaceBlockBuilder, SurfaceBlockMesh, GameMaterials, MaterialDressing, LightmapAtlas, LodLevels, SurfaceBlockCache
-├─ Game/                     the game's own files: GamePaks (the pak store), PrefabParts (a prefab flattened into placed static objects), Transforms
+│  └─ Building/              one custom block per road kind, variant, environment and surface, built from the game's paks: SurfaceBlockBuilder, SurfaceBlockMesh, GameMaterials, MaterialDressing, LightmapAtlas, LodLevels; ISurfaceBlocks = CachedSurfaceBlocks over an IBlockCache (FileBlockCache, MemoryBlockCache)
+├─ Game/                     the game's own files: IAssets + DirectoryAssets (the shipped Assets/ folder), PrefabParts (a prefab flattened into placed static objects), Transforms
 ├─ Maps/                     a map and what is in it
 │  ├─ Map.cs                 load, save, metadata, queries, removal
 │  ├─ Map.Placing.cs         Place, PlaceRelative, PlaceLike
@@ -58,7 +60,11 @@ Tman.Core/
 
 Namespaces follow the folders (`Tman.Core.Alterations.Finishes`, `Tman.Core.Catalog`, `Tman.Core.Surfaces.Building`, `Tman.Core.Maps.Placements`). `Map` is one partial class split by concern: call sites read `map.Replace(...)`, the file name tells which concern the method belongs to.
 
-Everything is `internal` unless Tman.Interface needs it (`Alteration`, the alterations, `Map.Load` and `Map.Save`), every class that is not a base class is `sealed`, and every number that is not zero or one has a name.
+Everything is `internal` unless Tman.Interface needs it (`AlterationPipeline`, `AddTman`, the service interfaces and their adapters, `Map.Load` and `Map.Save`), every class that is not a base class is `sealed`, and every number that is not zero or one has a name.
+
+### Services
+
+Core touches the outside world through three interfaces, chosen and constructed by the host (Tman.Interface's `Program`) and registered in a `ServiceCollection`: `IPakStore` (the game's pak files; `PakStore` over a directory), `IAssets` (the shipped `Assets/` folder; `DirectoryAssets`), `IBlockCache` (built surface blocks; `FileBlockCache` under the user's local application data, `MemoryBlockCache` for runs that keep nothing). `AddTman()` registers Core's own services on top — the block builder chain, `ISurfaceBlocks`, the `AlterationContext`, every alteration by type — and `AlterationPipeline.Apply(name, map)` resolves the alteration and runs it. Alterations and steps never reach for a static: what they need comes in through the `AlterationContext` parameter of `Run` (`context.Embed(map, item)`, `context.Replace(map, placement, surfaceBlock)`, `context.Open(assetPath)`). A test composes the same container with a `MemoryBlockCache`, a fake `IPakStore` and an in-memory `IAssets`.
 
 ### The catalog
 

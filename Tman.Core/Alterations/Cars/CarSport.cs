@@ -4,7 +4,7 @@ using Tman.Core.Catalog;
 
 namespace Tman.Core.Alterations.Cars
 {
-    public sealed class CarSport : StandardAlteration
+    internal sealed class CarSport : StandardAlteration
     {
         protected override string DisplayName => "Sport Car";
 

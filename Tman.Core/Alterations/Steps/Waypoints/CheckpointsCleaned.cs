@@ -148,7 +148,7 @@ namespace Tman.Core.Alterations.Steps.Waypoints
             [Blocks.RoadWaterCheckpoint] = (Blocks.RoadWaterStraight, DirectionOffset.None),
         };
 
-        protected override void Run(Map map)
+        protected override void Run(Map map, AlterationContext context)
         {
             foreach (var placement in map.Placements.OnlyBlocks().Where(placement => placement.BlockModel?.Waypoint == Waypoint.Checkpoint).ToList())
             {

@@ -11,7 +11,7 @@ namespace Tman.Core.Alterations.Steps.Waypoints
     {
         protected abstract Waypoint Waypoint { get; }
 
-        protected override void Run(Map map)
+        protected override void Run(Map map, AlterationContext context)
         {
             foreach (var placement in map.Waypoints(Waypoint))
             {

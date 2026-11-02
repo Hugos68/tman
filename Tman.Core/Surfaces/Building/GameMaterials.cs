@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using GBX.NET;
 using GBX.NET.Engines.Plug;
-using Tman.Core.Game;
 using Tman.Paks;
 
 namespace Tman.Core.Surfaces.Building
 {
-    internal static class GameMaterials
+    internal sealed class GameMaterials(IPakStore paks)
     {
         public const string Extension = ".Material.Gbx";
 
@@ -16,11 +15,11 @@ namespace Tman.Core.Surfaces.Building
 
         private const string EnvironmentMaterialsFolder = @"Media\Material";
 
-        private static readonly Dictionary<string, (CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay)> SurfaceByLink = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, (CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay)> surfaceByLink = new(StringComparer.OrdinalIgnoreCase);
 
         private static readonly (CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay) OutsideTheEnvironmentPaks = (CPlugSurface.MaterialId.Asphalt, CPlugSurface.GameplayId.None);
 
-        public static string Link(string ownerPath, Gbx owner, string filePath)
+        public string Link(string ownerPath, Gbx owner, string filePath)
         {
             var logical = PakStore.Logical(ownerPath, owner.RefTable!.AncestorLevel, filePath);
             var link = logical.EndsWith(Extension, StringComparison.OrdinalIgnoreCase) ? logical[..^Extension.Length] : logical;
@@ -32,7 +31,7 @@ namespace Tman.Core.Surfaces.Building
             return Exists(environmentMaterial) ? environmentMaterial : link;
         }
 
-        public static bool Exists(string link) => GamePaks.Store.Resolve(link + Extension) is not null;
+        public bool Exists(string link) => paks.Resolve(link + Extension) is not null;
 
         public static bool IsGameplayCollision(string link) => link.StartsWith(GameplayCollisionPrefix, StringComparison.OrdinalIgnoreCase);
 
@@ -44,18 +43,18 @@ namespace Tman.Core.Surfaces.Building
 
         public static CPlugSurface.GameplayId GameplayOfCollision(string link) => GameplayOf(link[GameplayCollisionPrefix.Length..]);
 
-        public static CPlugSurface.MaterialId PhysicsOf(string link) => SurfaceOf(link).Physics;
+        public CPlugSurface.MaterialId PhysicsOf(string link) => SurfaceOf(link).Physics;
 
-        public static (CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay) SurfaceOf(string link)
+        public (CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay) SurfaceOf(string link)
         {
-            if (!SurfaceByLink.TryGetValue(link, out var surface))
+            if (!surfaceByLink.TryGetValue(link, out var surface))
             {
                 surface = IsGameplayCollision(link)
                     ? GameplayCollision(link[GameplayCollisionPrefix.Length..])
-                    : GamePaks.Store.Open(link + Extension)?.Node is CPlugMaterial material
+                    : paks.Open(link + Extension)?.Node is CPlugMaterial material
                         ? (material.SurfaceId, material.GameplayId)
                         : OutsideTheEnvironmentPaks;
-                SurfaceByLink[link] = surface;
+                surfaceByLink[link] = surface;
             }
             return surface;
         }

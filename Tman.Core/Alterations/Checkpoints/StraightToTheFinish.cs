@@ -3,7 +3,7 @@ using Tman.Core.Alterations.Steps.Waypoints;
 
 namespace Tman.Core.Alterations.Checkpoints
 {
-    public sealed class StraightToTheFinish : StandardAlteration
+    internal sealed class StraightToTheFinish : StandardAlteration
     {
         protected override string DisplayName => "Straight to the Finish";
 

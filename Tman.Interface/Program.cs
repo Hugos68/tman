@@ -4,8 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Tman.Core;
 using Tman.Core.Alterations;
+using Tman.Core.Game;
 using Tman.Core.Maps;
+using Tman.Core.Surfaces.Building;
+using Tman.Paks;
 
 namespace Tman.Interface
 {
@@ -16,6 +21,10 @@ namespace Tman.Interface
         private const char Wildcard = '*';
 
         private static readonly char[] WildcardCharacters = ['*', '?'];
+
+        private const string ApplicationFolder = "tman";
+
+        private const string CacheFolder = "Cache";
 
         private static async Task<int> Main(string[] args)
         {
@@ -50,7 +59,8 @@ namespace Tman.Interface
 
                 try
                 {
-                    var alteration = CreateAlteration(alterationName);
+                    using var services = Services();
+                    var pipeline = services.GetRequiredService<AlterationPipeline>();
                     var inputFiles = InputFiles(input);
 
                     ValidatePaths(input, output);
@@ -58,7 +68,7 @@ namespace Tman.Interface
                     await Parallel.ForEachAsync(inputFiles, cancellationToken, (inputFile, token) =>
                     {
                         token.ThrowIfCancellationRequested();
-                        Apply(alteration, inputFile, output, inputFiles.Length > 1);
+                        Apply(pipeline, alterationName, inputFile, output, inputFiles.Length > 1);
                         return ValueTask.CompletedTask;
                     });
 
@@ -79,14 +89,12 @@ namespace Tman.Interface
             return await rootCommand.Parse(args).InvokeAsync();
         }
 
-        private static Alteration CreateAlteration(string name)
-        {
-            var type = typeof(Alteration).Assembly.GetTypes().FirstOrDefault(candidate => candidate.IsSubclassOf(typeof(Alteration)) && !candidate.IsAbstract && candidate.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                ?? throw new ArgumentException($"Unknown alteration: {name}");
-
-            return (Alteration)(Activator.CreateInstance(type)
-                ?? throw new ArgumentException($"Could not create alteration: {name}"));
-        }
+        private static ServiceProvider Services() => new ServiceCollection()
+            .AddSingleton<IPakStore>(_ => new PakStore(PakDirectory.Find()))
+            .AddSingleton<IAssets>(new DirectoryAssets(AppContext.BaseDirectory))
+            .AddSingleton<IBlockCache>(provider => new FileBlockCache(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), ApplicationFolder, CacheFolder), provider.GetRequiredService<IPakStore>()))
+            .AddTman()
+            .BuildServiceProvider();
 
         private static string[] InputFiles(string input)
         {
@@ -128,11 +136,11 @@ namespace Tman.Interface
 
         private static bool IsWildcard(string fileName) => fileName.IndexOfAny(WildcardCharacters) >= 0;
 
-        private static void Apply(Alteration alteration, string input, string output, bool multipleFiles)
+        private static void Apply(AlterationPipeline pipeline, string alterationName, string input, string output, bool multipleFiles)
         {
             var map = Map.Load(input);
 
-            alteration.Apply(map);
+            pipeline.Apply(alterationName, map);
 
             var fileName = Path.GetFileName(input);
 
@@ -146,7 +154,7 @@ namespace Tman.Interface
 
             map.Save(outputPath);
 
-            Console.WriteLine($"Applied {alteration.GetType().Name}: {outputPath}");
+            Console.WriteLine($"Applied {alterationName}: {outputPath}");
         }
     }
 }

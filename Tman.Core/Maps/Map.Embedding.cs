@@ -7,22 +7,24 @@ namespace Tman.Core.Maps
 {
     public sealed partial class Map
     {
-        internal void Embed(Item custom) => Embed(custom.FullPath());
-
-        internal void Embed(string path)
+        internal void Embed(string name, Stream content)
         {
             Challenge.UpdateEmbeddedZipData(zip =>
             {
-                var name = Path.GetFileName(path);
                 if (zip.GetEntry(name) is not null)
                 {
                     return;
                 }
                 var entry = zip.CreateEntry(name);
                 using var entryStream = entry.Open();
-                using var fileStream = File.OpenRead(path);
-                fileStream.CopyTo(entryStream);
+                content.CopyTo(entryStream);
             });
+        }
+
+        internal void Embed(string name, byte[] content)
+        {
+            using var stream = new MemoryStream(content);
+            Embed(name, stream);
         }
 
         internal void EmbedSurfaceBlock(SurfaceBlockFile file, byte[] bytes)

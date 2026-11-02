@@ -4,7 +4,7 @@ using Tman.Core.Catalog;
 
 namespace Tman.Core.Alterations.Effects
 {
-    public sealed class Freewheel : StandardAlteration
+    internal sealed class Freewheel : StandardAlteration
     {
         protected override string DisplayName => "Freewheel";
 

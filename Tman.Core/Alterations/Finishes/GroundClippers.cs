@@ -9,7 +9,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public sealed class GroundClippers : StandardAlteration
+    internal sealed class GroundClippers : StandardAlteration
     {
         protected override string DisplayName => "Ground Clippers";
 
@@ -32,7 +32,7 @@ namespace Tman.Core.Alterations.Finishes
         private const float Thickness = 1.0f;
         private const float Margin = 6 * MapConstants.CellSize;
 
-        protected override void Run(Map map)
+        protected override void Run(Map map, AlterationContext context)
         {
             if (!Floors.TryGetValue(map.Collection, out var floor))
             {
@@ -49,7 +49,7 @@ namespace Tman.Core.Alterations.Finishes
             var box = new FinishPlane.Box(-Margin, map.Size.X * MapConstants.CellSize + Margin, -Margin, map.Size.Z * MapConstants.CellSize + Margin, top - Thickness, top);
             FinishPlane.Place(
                 map,
-                Custom.FinishPlaneTemplate.FullPath(),
+                context,
                 $"GroundClippers_{map.Uid}.Item.Gbx",
                 [box], false);
         }

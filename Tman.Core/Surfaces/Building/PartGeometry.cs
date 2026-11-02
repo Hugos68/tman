@@ -6,18 +6,18 @@ using Tman.Paks;
 
 namespace Tman.Core.Surfaces.Building
 {
-    internal static class PartGeometry
+    internal sealed class PartGeometry(IPakStore paks, GameMaterials materials)
     {
-        public static CPlugSolid2Model Solid(PrefabParts.Part part) =>
+        public CPlugSolid2Model Solid(PrefabParts.Part part) =>
             part.Model.Mesh ?? (part.Model.MeshFile is { } file ? Referenced(part, file.FilePath) as CPlugSolid2Model : null)
             ?? throw new InvalidOperationException($"{part.OwnerPath} has a static object without a mesh");
 
-        public static CPlugSurface? Shape(PrefabParts.Part part) =>
+        public CPlugSurface? Shape(PrefabParts.Part part) =>
             part.Model.Shape ?? (part.Model.ShapeFile is { } file ? Referenced(part, file.FilePath) as CPlugSurface : null);
 
-        public static CPlugSurface.Mesh? CollisionMesh(PrefabParts.Part part) => Shape(part)?.Surf as CPlugSurface.Mesh;
+        public CPlugSurface.Mesh? CollisionMesh(PrefabParts.Part part) => Shape(part)?.Surf as CPlugSurface.Mesh;
 
-        public static string[] MaterialLinks(PrefabParts.Part part, CPlugSolid2Model solid, CPlugSurface? shape)
+        public string[] MaterialLinks(PrefabParts.Part part, CPlugSolid2Model solid, CPlugSurface? shape)
         {
             if (solid.Materials is { } externals)
             {
@@ -26,14 +26,14 @@ namespace Tman.Core.Surfaces.Building
             return [.. (solid.MaterialIds ?? []).Select(id => $"{solid.MaterialsFolderName}{id}")];
         }
 
-        public static string Link(PrefabParts.Part part, string filePath) => GameMaterials.Link(part.OwnerPath, part.Owner, filePath);
+        public string Link(PrefabParts.Part part, string filePath) => materials.Link(part.OwnerPath, part.Owner, filePath);
 
-        private static string ShapeLink(PrefabParts.Part part, CPlugSurface? shape, int index) =>
+        private string ShapeLink(PrefabParts.Part part, CPlugSurface? shape, int index) =>
             shape?.Materials?.ElementAtOrDefault(index)?.MaterialFile is { } file
                 ? Link(part, file.FilePath)
                 : throw new InvalidOperationException($"Material {index} of {part.OwnerPath} has no file");
 
-        private static object? Referenced(PrefabParts.Part part, string filePath) =>
-            GamePaks.Store.Open(PakStore.Logical(part.OwnerPath, part.Owner.RefTable!.AncestorLevel, filePath))?.Node;
+        private object? Referenced(PrefabParts.Part part, string filePath) =>
+            paks.Open(PakStore.Logical(part.OwnerPath, part.Owner.RefTable!.AncestorLevel, filePath))?.Node;
     }
 }

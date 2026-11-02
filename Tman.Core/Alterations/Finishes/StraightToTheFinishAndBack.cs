@@ -10,7 +10,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public sealed class StraightToTheFinishAndBack : StandardAlteration
+    internal sealed class StraightToTheFinishAndBack : StandardAlteration
     {
         protected override string DisplayName => "Straight to the Finish and Back";
 
@@ -19,7 +19,7 @@ namespace Tman.Core.Alterations.Finishes
             new CheckpointsCleaned()
         ];
 
-        protected override void Run(Map map)
+        protected override void Run(Map map, AlterationContext context)
         {
             var finishes = map.Waypoints(Waypoint.Finish);
             var segments = new HashSet<string>();
@@ -34,11 +34,11 @@ namespace Tman.Core.Alterations.Finishes
             {
                 if (finish.BlockModel == Blocks.GateExpandableFinish)
                 {
-                    ReplaceSegment(map, finish, segments);
+                    ReplaceSegment(map, context, finish, segments);
                 }
                 else if (finish.BlockModel == Blocks.GateFinish)
                 {
-                    ReplaceRing(map, finish);
+                    ReplaceRing(map, context, finish);
                 }
                 else
                 {
@@ -52,32 +52,32 @@ namespace Tman.Core.Alterations.Finishes
             map.Link(map.Waypoints(Waypoint.Checkpoint));
         }
 
-        private static void ReplaceRing(Map map, Placement ring)
+        private static void ReplaceRing(Map map, AlterationContext context, Placement ring)
         {
             var pillar = ring.IsGround ? 0 : ring.Variant / BlockFlags.VariantsPerAdditionalVariant;
-            Place(map, ring, pillar == 1 ? Custom.CheckpointRingPillar : pillar == 2 ? Custom.CheckpointRingInPillar : Custom.CheckpointRing);
+            Place(map, context, ring, pillar == 1 ? Custom.CheckpointRingPillar : pillar == 2 ? Custom.CheckpointRingInPillar : Custom.CheckpointRing);
             map.Remove(ring);
         }
 
-        private static void ReplaceSegment(Map map, Placement segment, HashSet<string> segments)
+        private static void ReplaceSegment(Map map, AlterationContext context, Placement segment, HashSet<string> segments)
         {
             var inPillar = segment.Variant / BlockFlags.VariantsPerAdditionalVariant;
-            Place(map, segment, Custom.CheckpointExpandable);
+            Place(map, context, segment, Custom.CheckpointExpandable);
             if (!segments.Contains(Key(map, segment, new Vec3(0, -MapConstants.CellHeight, 0))))
             {
-                Place(map, segment, segment.IsGround ? Custom.CheckpointExpandableFoot : inPillar == 1 ? Custom.CheckpointExpandableBottom : Custom.CheckpointExpandableBottomInPillar);
+                Place(map, context, segment, segment.IsGround ? Custom.CheckpointExpandableFoot : inPillar == 1 ? Custom.CheckpointExpandableBottom : Custom.CheckpointExpandableBottomInPillar);
             }
             if (!segments.Contains(Key(map, segment, new Vec3(0, MapConstants.CellHeight, 0))))
             {
-                Place(map, segment, inPillar == (segment.IsGround ? 1 : 2) ? Custom.CheckpointExpandableTopInPillar : Custom.CheckpointExpandableTop);
+                Place(map, context, segment, inPillar == (segment.IsGround ? 1 : 2) ? Custom.CheckpointExpandableTopInPillar : Custom.CheckpointExpandableTop);
             }
             if (!segments.Contains(Key(map, segment, new Vec3(-MapConstants.CellSize, 0, 0))))
             {
-                Place(map, segment, Custom.CheckpointExpandableRight);
+                Place(map, context, segment, Custom.CheckpointExpandableRight);
             }
             if (!segments.Contains(Key(map, segment, new Vec3(MapConstants.CellSize, 0, 0))))
             {
-                Place(map, segment, Custom.CheckpointExpandableLeft);
+                Place(map, context, segment, Custom.CheckpointExpandableLeft);
             }
             map.Remove(segment);
         }
@@ -94,10 +94,10 @@ namespace Tman.Core.Alterations.Finishes
             return string.Join(" ", new[] { origin.X, origin.Y, origin.Z }.Select(v => Math.Round(v, 1)).Concat(new[] { x.X, x.Y, x.Z, y.X, y.Y, y.Z }.Select(v => Math.Round(v, 2))));
         }
 
-        private static void Place(Map map, Placement segment, Item item)
+        private static void Place(Map map, AlterationContext context, Placement segment, Item item)
         {
             var skinned = item.For(map.Collection);
-            map.Embed(skinned);
+            context.Embed(map, skinned);
             map.PlaceRelative(segment, skinned);
         }
     }

@@ -2,8 +2,8 @@ using Tman.Core.Surfaces;
 
 namespace Tman.Core.Alterations.Surfaces
 {
-    public sealed class Road : SurfaceAlteration
+    internal sealed class Road : SurfaceAlteration
     {
-        private protected override Surface Surface => Surface.Road;
+        protected override Surface Surface => Surface.Road;
     }
 }

@@ -33,11 +33,16 @@ namespace Tman.Core.Maps
             return source;
         }
 
-        internal Placement Replace(Placement source, SurfaceBlock model)
+        internal SurfaceBlockFile SurfaceBlockFile(Placement source, SurfaceBlock model)
         {
             var block = source.Block!;
-            var file = new SurfaceBlockFile(model, block.IsGround, BlockFlags.AdditionalVariant(block.Flags), Collection);
-            EmbedSurfaceBlock(file, SurfaceBlockCache.GetOrBuild(file));
+            return new SurfaceBlockFile(model, block.IsGround, BlockFlags.AdditionalVariant(block.Flags), Collection);
+        }
+
+        internal Placement Replace(Placement source, SurfaceBlockFile file, byte[] bytes)
+        {
+            var block = source.Block!;
+            EmbedSurfaceBlock(file, bytes);
             block.Name = file.RecordName;
             block.Flags |= BlockFlags.CustomBlock;
             block.Author = file.RecordAuthor;

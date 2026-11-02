@@ -3,20 +3,20 @@ using Tman.Core.Maps;
 
 namespace Tman.Core.Alterations
 {
-    public abstract class Alteration
+    internal abstract class Alteration
     {
         protected virtual IEnumerable<Alteration> PreappliedAlterations => [];
 
-        public void Apply(Map map)
+        internal void Apply(Map map, AlterationContext context)
         {
             foreach (var alteration in PreappliedAlterations)
             {
-                alteration.Apply(map);
+                alteration.Apply(map, context);
             }
-            Run(map);
+            Run(map, context);
             map.GenerateUid();
         }
 
-        protected virtual void Run(Map map) { }
+        protected virtual void Run(Map map, AlterationContext context) { }
     }
 }

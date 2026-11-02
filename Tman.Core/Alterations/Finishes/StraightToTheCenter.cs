@@ -9,7 +9,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public sealed class StraightToTheCenter : StandardAlteration
+    internal sealed class StraightToTheCenter : StandardAlteration
     {
         protected override string DisplayName => "Straight to the Center";
 
@@ -18,7 +18,7 @@ namespace Tman.Core.Alterations.Finishes
             new CheckpointsCleaned()
         ];
 
-        protected override void Run(Map map)
+        protected override void Run(Map map, AlterationContext context)
         {
             var finishes = map.Waypoints(Waypoint.Finish);
             if (finishes.Count == 0)
