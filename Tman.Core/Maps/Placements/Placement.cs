@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using GBX.NET;
 using GBX.NET.Engines.Game;
 using GBX.NET.Engines.GameData;
@@ -62,6 +63,16 @@ namespace Tman.Core.Maps.Placements
         public Block? BlockModel => Block is not null ? Blocks.FromId(Block.BlockModel.Id) : null;
 
         public Item? ItemModel => Item is not null ? Items.FromId(Item.ItemModel.Id) ?? Custom.FromId(Item.ItemModel.Id) : null;
+
+        public IEnumerable<(int X, int Z)> Cells()
+        {
+            var (sizeX, sizeZ, footprint) = BlockModel is { } model ? (model.SizeX, model.SizeZ, model.Footprint()) : (1, 1, [(0, 0)]);
+            foreach (var cell in footprint)
+            {
+                var turned = Direction.Turn(cell, (sizeX, sizeZ));
+                yield return (Cell.X + turned.X, Cell.Z + turned.Z);
+            }
+        }
 
         public Position Pose(Map map)
         {
