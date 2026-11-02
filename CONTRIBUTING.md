@@ -37,7 +37,7 @@ Tman.Core/
 │  ├─ AlterationContext.cs   the services a running alteration may use: assets and surface blocks
 │  ├─ AlterationPipeline.cs  the public entry point: resolves an alteration by name from the service provider and applies it
 │  ├─ StandardAlteration.cs  what every user-facing alteration derives from: validation and lightmap removed, Steps, Run, the map renamed
-│  ├─ Finishes/              the finish alterations and FinishPlane, the finish item built per map
+│  ├─ Finishes/              the finish alterations; FinishPlane places a modeler item over boxes, WaterFootprints knows which subcells of a shore tile are deep water
 │  ├─ Steps/                 the reusable steps alterations are composed from (each one is itself an Alteration)
 │  │  └─ Waypoints/          the steps that act on starts, checkpoints and finishes
 │  └─ Surfaces/              SurfaceAlteration (the mechanism) and one three-line class per surface
@@ -45,7 +45,7 @@ Tman.Core/
 │  └─ Generated/             Blocks.g.cs, Items.g.cs, Custom.g.cs — written by Tman.Generator, never edited by hand
 ├─ Surfaces/                 the surface alterations' vocabulary and rules: Surface, SurfaceTarget, SurfaceRules, DeckFamily, SurfaceBlock, SurfaceBlockKey, SurfaceBlockFile
 │  └─ Building/              one custom block per road kind, variant, environment and surface, built from the game's paks: SurfaceBlockBuilder, SurfaceBlockMesh, GameMaterials, MaterialDressing, LightmapAtlas, LodLevels; ISurfaceBlocks = CachedSurfaceBlocks over an IBlockCache (FileBlockCache, MemoryBlockCache)
-├─ Game/                     the game's own files: IAssets + DirectoryAssets (the shipped Assets/ folder), PrefabParts (a prefab flattened into placed static objects), Transforms
+├─ Game/                     the game's own files: IAssets + DirectoryAssets (the shipped Assets/ folder), PrefabParts (a prefab flattened into placed static objects), Transforms, ModelerItem (a mesh-modeler item written from a template and a list of bodies)
 ├─ Maps/                     a map and what is in it
 │  ├─ Map.cs                 load, save, metadata, queries, removal
 │  ├─ Map.Placing.cs         Place, PlaceRelative, PlaceLike
@@ -55,7 +55,7 @@ Tman.Core/
 │  ├─ Map.Embedding.cs       custom items and surface blocks embedded into the map
 │  ├─ Map.Cleaning.cs        validation and lightmap removal
 │  ├─ Placements/            Placement (a block or item in the map), Selector, PlacementExtensions
-│  └─ Geometry/              Position, Direction, DirectionOffset, MapConstants
+│  └─ Geometry/              Position, Direction, DirectionOffset, MapConstants, Box + Boxes (cells → boxes, merging)
 └─ Assets/                   Data/ (lookup tables, the game-made custom block shell), Items/<Category>/<Family>/*.Item.Gbx (custom items)
 ```
 
@@ -135,4 +135,4 @@ Writes `Blocks.g.cs`, `Items.g.cs` and `Custom.g.cs` into `Tman.Core/Catalog/Gen
 
 ## Verifying a change
 
-`dotnet test` runs `Tman.Tests` (no game files needed): the pure rules — surface rules, deck families, block keys and file names, flags, transforms, LOD merging, material gameplay, the catalog's idents and twins, the caches, the installation parsers, the generator's identifiers — and the pipeline composed on fakes: every alteration resolves from the container, an effect alteration runs without the paks, a surface alteration embeds one block per kind and renames every road placement, on `Maps/Test.Map.Gbx` with a fixed `ISurfaceBlocks` in place of the builder. A test that needs a service of its own registers it after `AddTman()`; the last registration wins. The check that catches most regressions in alterations themselves: run the alteration you touched (and the ones sharing its steps) on a few maps of each environment before and after your change and compare the outputs — the block and item lists must be identical unless the change meant to move them. Open the result in the editor or drive it when the change is visible or affects gameplay.
+`dotnet test` runs `Tman.Tests` (no game files needed): the pure rules — surface rules, deck families, block keys and file names, flags, transforms, LOD merging, material gameplay, the catalog's idents and twins, the caches, the installation parsers, the generator's identifiers — and the pipeline composed on fakes: every alteration resolves from the container, an effect alteration runs without the paks, a surface alteration embeds one block per kind and renames every road placement, on `Maps/Test.Map.Gbx` with a fixed `ISurfaceBlocks` in place of the builder. A test that needs a service of its own registers it after `AddTman()`; the last registration wins. The check that catches most regressions in alterations themselves: run the alteration you touched (and the ones sharing its steps) on a few maps of each environment before and after your change and compare the outputs — for a finish, the geometry inside the generated item too (positions and faces of its crystal layers), since the item's name carries the map's new UID and its bytes differ on every run — the block and item lists must be identical unless the change meant to move them. Open the result in the editor or drive it when the change is visible or affects gameplay.

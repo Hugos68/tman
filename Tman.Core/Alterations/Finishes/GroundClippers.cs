@@ -48,12 +48,8 @@ namespace Tman.Core.Alterations.Finishes
                 return;
             }
             var top = (rows.Min() - map.GroundRow) * MapConstants.CellHeight + floor.Bed - TopUnderFloor;
-            var box = new FinishPlane.Box(-Margin, map.Size.X * MapConstants.CellSize + Margin, -Margin, map.Size.Z * MapConstants.CellSize + Margin, top - Thickness, top);
-            FinishPlane.Place(
-                map,
-                context,
-                $"GroundClippers_{map.Uid}.Item.Gbx",
-                [box], false);
+            var box = new Box(-Margin, map.Size.X * MapConstants.CellSize + Margin, -Margin, map.Size.Z * MapConstants.CellSize + Margin, top - Thickness, top);
+            FinishPlane.Place(map, context, $"GroundClippers_{map.Uid}.Item.Gbx", [box], false);
         }
     }
 }

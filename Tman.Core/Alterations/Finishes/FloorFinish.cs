@@ -1,8 +1,5 @@
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
 using GBX.NET;
 using Microsoft.Extensions.Logging;
 using Tman.Core.Alterations.Steps;
@@ -64,12 +61,6 @@ namespace Tman.Core.Alterations.Finishes
 
         private const int Ring = 16;
 
-        private const string WaterFootprintsFile = "WaterFootprints.json";
-
-        private const int FootprintFlagsMask = 0x0FE01FFF;
-
-        private const int LastSubcell = MapConstants.SubcellsPerCell - 1;
-
         protected override void Run(Map map, AlterationContext context)
         {
             var collection = map.Collection;
@@ -90,154 +81,44 @@ namespace Tman.Core.Alterations.Finishes
             }
         }
 
-        private static List<FinishPlane.Box> WaterBoxes(Map map, AlterationContext context, Collections collection)
+        private static List<Box> WaterBoxes(Map map, AlterationContext context, Collections collection)
         {
-            var boxes = new List<FinishPlane.Box>();
             if (!OpenWater.TryGetValue(collection, out var water))
             {
-                return boxes;
+                return [];
             }
-            var footprints = LoadWaterFootprints(context, collection.ToString());
-            var cells = new Dictionary<int, List<int>>();
-            var squares = new Dictionary<int, List<int>>();
-            var seen = new HashSet<Int3>();
-            foreach (var block in map.Terrain)
-            {
-                if (water.Tiles.Contains(block.BlockModel))
-                {
-                    if (seen.Add(block.Cell))
-                    {
-                        Add(cells, block.Cell.Z, block.Cell.X);
-                    }
-                }
-                else if (footprints.TryGetValue((block.Id, block.Flags & FootprintFlagsMask), out var deep))
-                {
-                    for (var zi = 0; zi < MapConstants.SubcellsPerCell; zi++)
-                    {
-                        for (var xi = 0; xi < MapConstants.SubcellsPerCell; xi++)
-                        {
-                            if ((deep & (1UL << (zi * MapConstants.SubcellsPerCell + xi))) == 0)
-                            {
-                                continue;
-                            }
-                            var (x, z) = block.Direction switch
-                            {
-                                Direction.East => (LastSubcell - zi, xi),
-                                Direction.South => (LastSubcell - xi, LastSubcell - zi),
-                                Direction.West => (zi, LastSubcell - xi),
-                                _ => (xi, zi),
-                            };
-                            Add(squares, block.Cell.Z * MapConstants.SubcellsPerCell + z, block.Cell.X * MapConstants.SubcellsPerCell + x);
-                        }
-                    }
-                }
-            }
-            foreach (var (z, xs) in cells)
-            {
-                foreach (var (x0, x1) in Runs(xs))
-                {
-                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.CellSize, x1 * MapConstants.CellSize, z * MapConstants.CellSize, (z + 1) * MapConstants.CellSize, water.Bottom, water.Top));
-                }
-            }
-            foreach (var (z, xs) in squares)
-            {
-                foreach (var (x0, x1) in Runs(xs))
-                {
-                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.SubcellSize, x1 * MapConstants.SubcellSize, z * MapConstants.SubcellSize, (z + 1) * MapConstants.SubcellSize, water.Bottom, water.Top));
-                }
-            }
+            var footprints = WaterFootprints.Load(context, collection.ToString());
+            var terrain = map.Terrain.ToLookup(block => water.Tiles.Contains(block.BlockModel));
+            var cells = terrain[true].Select(block => (block.Cell.X, block.Cell.Z));
+            var subcells = terrain[false].SelectMany(footprints.Subcells);
+            var boxes = Boxes.OfCells(cells, MapConstants.CellSize, water.Bottom, water.Top);
+            boxes.AddRange(Boxes.OfCells(subcells, MapConstants.SubcellSize, water.Bottom, water.Top));
             var width = map.Size.X * MapConstants.CellSize;
             var depth = map.Size.Z * MapConstants.CellSize;
             var margin = Ring * MapConstants.CellSize;
-            boxes.Add(new FinishPlane.Box(-margin, width + margin, -margin, 0, water.Bottom, water.Top));
-            boxes.Add(new FinishPlane.Box(-margin, width + margin, depth, depth + margin, water.Bottom, water.Top));
-            boxes.Add(new FinishPlane.Box(-margin, 0, 0, depth, water.Bottom, water.Top));
-            boxes.Add(new FinishPlane.Box(width, width + margin, 0, depth, water.Bottom, water.Top));
+            boxes.Add(new Box(-margin, width + margin, -margin, 0, water.Bottom, water.Top));
+            boxes.Add(new Box(-margin, width + margin, depth, depth + margin, water.Bottom, water.Top));
+            boxes.Add(new Box(-margin, 0, 0, depth, water.Bottom, water.Top));
+            boxes.Add(new Box(width, width + margin, 0, depth, water.Bottom, water.Top));
             return boxes;
         }
 
-        private static List<FinishPlane.Box> GrassBoxes(Map map)
+        private static List<Box> GrassBoxes(Map map)
         {
-            var boxes = new List<FinishPlane.Box>();
-            var grass = map.Terrain.Of(Blocks.Grass).Select(placement => placement.Cell).Distinct().ToList();
+            var grass = map.Terrain.Of(Blocks.Grass).Select(placement => (placement.Cell.X, placement.Cell.Z)).Distinct().ToList();
             if (grass.Count == 0)
             {
-                return boxes;
+                return [];
             }
-            var hidden = new HashSet<(int X, int Z)>();
-            foreach (var block in map.Placements.OnlyBlocks().Ground().Where(placement => !placement.IsFree && placement.BlockModel != Blocks.Grass))
-            {
-                var (sizeX, sizeZ, cells) = block.BlockModel is { } model ? (model.SizeX, model.SizeZ, model.Footprint()) : (1, 1, [(0, 0)]);
-                foreach (var (ux, uz) in cells)
-                {
-                    var (x, z) = block.Direction switch
-                    {
-                        Direction.East => (sizeZ - 1 - uz, ux),
-                        Direction.South => (sizeX - 1 - ux, sizeZ - 1 - uz),
-                        Direction.West => (uz, sizeX - 1 - ux),
-                        _ => (ux, uz),
-                    };
-                    hidden.Add((block.Cell.X + x, block.Cell.Z + z));
-                }
-            }
-            var y = GrassLevel(map);
-            var rows = new Dictionary<int, List<int>>();
-            foreach (var (x, z) in grass.Select(c => (c.X, c.Z)).Distinct().Where(c => !hidden.Contains(c)))
-            {
-                Add(rows, z, x);
-            }
-            foreach (var (z, xs) in rows)
-            {
-                foreach (var (x0, x1) in Runs(xs))
-                {
-                    boxes.Add(new FinishPlane.Box(x0 * MapConstants.CellSize, x1 * MapConstants.CellSize, z * MapConstants.CellSize, (z + 1) * MapConstants.CellSize, y, y + Thickness));
-                }
-            }
-            return boxes;
+            var hidden = map.Placements.OnlyBlocks().Ground()
+                .Where(placement => !placement.IsFree && placement.BlockModel != Blocks.Grass)
+                .SelectMany(block => block.Cells())
+                .ToHashSet();
+            var level = GrassLevel(map);
+            return Boxes.OfCells(grass.Where(cell => !hidden.Contains(cell)), MapConstants.CellSize, level, level + Thickness);
         }
 
         private static float GrassLevel(Map map) =>
             (map.Terrain.Of(Blocks.Grass).Min(placement => placement.Cell.Y) - map.GroundRow) * MapConstants.CellHeight;
-
-        private static IEnumerable<(int X0, int X1)> Runs(List<int> xs)
-        {
-            var sorted = xs.Distinct().OrderBy(x => x).ToList();
-            for (var i = 0; i < sorted.Count;)
-            {
-                var start = sorted[i];
-                var end = start;
-                while (i + 1 < sorted.Count && sorted[i + 1] == end + 1)
-                {
-                    i++;
-                    end = sorted[i];
-                }
-                i++;
-                yield return (start, end + 1);
-            }
-        }
-
-        private static Dictionary<(string Tile, uint Flags), ulong> LoadWaterFootprints(AlterationContext context, string environment)
-        {
-            var table = new Dictionary<(string, uint), ulong>();
-            using var json = context.Open(Assets.Data(WaterFootprintsFile));
-            var footprints = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, Dictionary<string, string>>>>(json) ?? new();
-            foreach (var (tile, masks) in footprints.TryGetValue(environment, out var tiles) ? tiles : new())
-            {
-                foreach (var (flags, mask) in masks)
-                {
-                    table[(tile, uint.Parse(flags, NumberStyles.HexNumber, CultureInfo.InvariantCulture) & FootprintFlagsMask)] = ulong.Parse(mask, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-                }
-            }
-            return table;
-        }
-
-        private static void Add<TKey>(Dictionary<TKey, List<int>> rows, TKey key, int x) where TKey : notnull
-        {
-            if (!rows.TryGetValue(key, out var xs))
-            {
-                rows[key] = xs = [];
-            }
-            xs.Add(x);
-        }
     }
 }

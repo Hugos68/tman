@@ -1,4 +1,5 @@
 using Tman.Core.Catalog;
+using Tman.Core.Maps.Geometry;
 using Xunit;
 
 namespace Tman.Tests
@@ -50,6 +51,9 @@ namespace Tman.Tests
             Assert.Equal(Blocks.RoadTechCheckpoint, Blocks.RoadTechFinish.As(Waypoint.Checkpoint));
             Assert.Equal(Blocks.RoadTechCheckpoint, Blocks.RoadTechCheckpoint.As(Waypoint.Checkpoint));
             Assert.Equal(Blocks.RoadTechStraight, Blocks.RoadTechCheckpoint.Plain);
+            Assert.Equal((Blocks.RoadTechSlopeStraight, DirectionOffset.Half), Blocks.PlainOf["RoadTechCheckpointSlopeDown"]);
+            Assert.Equal((Blocks.PlatformTechWallStraight4, DirectionOffset.Quarter), Blocks.PlainOf["PlatformTechWallCheckpointLeft"]);
+            Assert.Equal((Blocks.RoadIceWithWallDiagLeftSwitchLeft, DirectionOffset.None), Blocks.PlainOf["RoadIceWithWallDiagLeftCheckpointRight"]);
             Assert.Null(Blocks.RoadTechStraight.As(Waypoint.Checkpoint));
         }
 

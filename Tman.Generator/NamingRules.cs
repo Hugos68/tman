@@ -21,11 +21,27 @@ namespace Tman.Generator
 
         private static readonly string[] PenaltySurfaces = ["", "Dirt", "Ice"];
 
+        private const string WallCheckpoint = "WallCheckpoint";
+
+        private const string WithWall = "WithWall";
+
+        private static readonly (string Suffix, int QuarterTurns)[] PlainTurns =
+            [("Slope2Down", 2), ("Slope2Left", 1), ("Slope2Right", 3), ("CheckpointSlopeDown", 2), ("CheckpointTiltLeft", 2), ("WithWallCheckpointRight", 2)];
+
         private static readonly (string Waypoint, string Replacement)[] SpecialGateEdits =
             [("Start", "Special"), ("Checkpoint", "Special"), ("Finish", "Special"), ("Left", ""), ("Center", ""), ("Right", ""), ("v2", "")];
 
         [GeneratedRegex("^Platform([A-Z][a-z]+)Base$")]
         private static partial Regex PlatformFamilyBase();
+
+        public static int PlainQuarterTurns(string checkpointId)
+        {
+            if (checkpointId.Contains(WallCheckpoint, StringComparison.Ordinal) && !checkpointId.Contains(WithWall, StringComparison.Ordinal))
+            {
+                return 1;
+            }
+            return PlainTurns.FirstOrDefault(turn => checkpointId.EndsWith(turn.Suffix, StringComparison.Ordinal)).QuarterTurns;
+        }
 
         public static SortedDictionary<string, string> PlainOfPenalty(IReadOnlyCollection<string> blockIds)
         {

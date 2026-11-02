@@ -22,7 +22,9 @@ namespace Tman.Generator
 
         private const int SizeDecimals = 3;
 
-        private static readonly string[] Usings = ["System.Collections.Generic", "GBX.NET"];
+        private static readonly string[] Usings = ["System.Collections.Generic", "GBX.NET", "Tman.Core.Maps.Geometry"];
+
+        private static readonly string[] DirectionOffsets = ["None", "Quarter", "Half", "ThreeQuarters"];
 
         private static readonly (int Kind, string Name)[] Waypoints = [(0, "Start"), (1, "Finish"), (2, "Checkpoint"), (4, "StartFinish")];
 
@@ -31,7 +33,7 @@ namespace Tman.Generator
             var identifiers = new Identifiers();
             var fields = blocks.Select(pair => Field("Block", identifiers.For(pair.Key), BlockCreation(pair.Key, pair.Value))).ToList();
             var byId = IdDictionary("Block", blocks.Keys.Select(id => (id, identifiers.Of(id))));
-            var plainOf = ReadOnlyDictionary("PlainOf", "string", "Block", PlainTwins(blocks, identifiers).Select(pair => (Key: (ExpressionSyntax)Literal(pair.Checkpoint), Value: Name(pair.PlainIdentifier))));
+            var plainOf = ReadOnlyDictionary("PlainOf", "string", "(Block Block, DirectionOffset Rotation)", PlainTwins(blocks, identifiers).Select(pair => (Key: (ExpressionSyntax)Literal(pair.Checkpoint), Value: (ExpressionSyntax)TupleExpression(SeparatedList([Argument(Name(pair.PlainIdentifier)), Argument(Member("DirectionOffset", DirectionOffsets[NamingRules.PlainQuarterTurns(pair.Checkpoint)]))])))));
             var plainOfPenalty = ReadOnlyDictionary("PlainOfPenalty", "string", "Block", tables.PlainOfPenalty.Select(pair => (Key: (ExpressionSyntax)Literal(pair.Key), Value: Name(identifiers.Of(pair.Value)))));
             var platformFamilyOf = ReadOnlyDictionary("PlatformFamilyOf", "string", "string", tables.PlatformFamilyOf.Select(pair => (Key: (ExpressionSyntax)Literal(pair.Key), Value: (ExpressionSyntax)Literal(pair.Value))));
             var platformTwins = ReadOnlyDictionary("PlatformTwins", "(string, string)", "Block", tables.PlatformTwins.Select(pair => (Key: Tuple(pair.Key.Block, pair.Key.Family), Value: Name(identifiers.Of(pair.Value)))));
