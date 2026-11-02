@@ -7,6 +7,7 @@
 | `Tman.Core` | The library. Everything an alteration needs; no user-interface code. |
 | `Tman.Interface` | The command line (`tman`). A graphical interface would be another project referencing `Tman.Core`. |
 | `Tman.Paks` | Reads the game's pak files: the per-pak keys, the hashed-name resolver, the `Paks/` folder lookup. Used by `Tman.Core` (surface blocks) and `Tman.Generator`. |
+| `Tman.Tests` | xunit tests of the rules and of the pipeline on fakes (`dotnet test`). |
 | `Tman.Generator` | A development tool: regenerates the game catalog in `Tman.Core/Catalog/Generated` from the game's pak files and the custom items in `Tman.Core/Assets/Items`. Not needed to run tman. |
 
 `Tman.sln` builds all five.
@@ -132,4 +133,4 @@ Writes `Blocks.g.cs`, `Items.g.cs` and `Custom.g.cs` into `Tman.Core/Catalog/Gen
 
 ## Verifying a change
 
-`dotnet test` runs `Tman.Tests`: the pure rules (flag bits, surface block keys and file names, the surface rules, road families, prefab transforms, selectors). The check that catches most regressions in alterations themselves: run the alteration you touched (and the ones sharing its steps) on a few maps of each environment before and after your change and compare the outputs — the block and item lists must be identical unless the change meant to move them. Open the result in the editor or drive it when the change is visible or affects gameplay.
+`dotnet test` runs `Tman.Tests` (no game files needed): the pure rules — surface rules, deck families, block keys and file names, flags, transforms, LOD merging, material gameplay, the catalog's idents and twins, the caches, the installation parsers, the generator's identifiers — and the pipeline composed on fakes: every alteration resolves from the container, an effect alteration runs without the paks, a surface alteration embeds one block per kind and renames every road placement, on `Maps/Test.Map.Gbx` with a fixed `ISurfaceBlocks` in place of the builder. A test that needs a service of its own registers it after `AddTman()`; the last registration wins. The check that catches most regressions in alterations themselves: run the alteration you touched (and the ones sharing its steps) on a few maps of each environment before and after your change and compare the outputs — the block and item lists must be identical unless the change meant to move them. Open the result in the editor or drive it when the change is visible or affects gameplay.

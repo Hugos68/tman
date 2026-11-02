@@ -13,7 +13,7 @@ namespace Tman.Core.Alterations
     public sealed class AlterationPipeline
     {
         internal static readonly IReadOnlyList<Type> AlterationTypes =
-            [.. typeof(Alteration).Assembly.GetTypes().Where(type => type.IsSubclassOf(typeof(Alteration)) && !type.IsAbstract)];
+            [.. typeof(StandardAlteration).Assembly.GetTypes().Where(type => type.IsSubclassOf(typeof(StandardAlteration)) && !type.IsAbstract)];
 
         private readonly IServiceProvider services;
 
