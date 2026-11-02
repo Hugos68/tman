@@ -25,7 +25,7 @@ namespace Tman.Interface
 
         private const string ApplicationFolder = "tman";
 
-        private const string CacheFolder = "Cache";
+        private const string CacheFolder = "cache";
 
         private const string LoggerName = "tman";
 
