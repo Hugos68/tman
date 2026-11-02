@@ -4,12 +4,11 @@ using System.Linq;
 using GBX.NET.Engines.Game;
 using GBX.NET.Engines.Plug;
 using Tman.Core.Catalog;
-using Tman.Core.Game;
 using Tman.Paks;
 
 namespace Tman.Core.Surfaces.Building
 {
-    internal sealed class MaterialDressing(Collections collection, IReadOnlyList<string> modifierFolders)
+    internal sealed class MaterialDressing(IPakStore paks, GameMaterials materials, Collections collection, IReadOnlyList<string> modifierFolders)
     {
         private const string TerrainModifierExtension = ".TerrainModifier.Gbx";
 
@@ -29,13 +28,13 @@ namespace Tman.Core.Surfaces.Building
 
         private readonly Dictionary<string, string> dressed = new(StringComparer.OrdinalIgnoreCase);
 
-        public static MaterialDressing For(Collections collection, string infoPath, CGameCtnBlockInfo info, int ancestor)
+        public static MaterialDressing For(IPakStore paks, GameMaterials materials, Collections collection, string infoPath, CGameCtnBlockInfo info, int ancestor)
         {
             var folders = new[] { info.MaterialModifierFile?.FilePath, info.MaterialModifier2File?.FilePath }
                 .Where(modifier => modifier is not null && modifier.EndsWith(TerrainModifierExtension, StringComparison.OrdinalIgnoreCase))
                 .Select(modifier => PakStore.Logical(infoPath, ancestor, modifier!.Trim())[..^TerrainModifierExtension.Length])
                 .ToList();
-            return new MaterialDressing(collection, folders);
+            return new MaterialDressing(paks, materials, collection, folders);
         }
 
         public string Dress(string link)
@@ -48,18 +47,18 @@ namespace Tman.Core.Surfaces.Building
             return result;
         }
 
-        public static string? OverlayTwin(string plain)
+        public string? OverlayTwin(string plain)
         {
             var name = PakPath.Name(plain);
             var painted = name.StartsWith(Decal, StringComparison.Ordinal) ? Decal + Paint + name[Decal.Length..] : Paint + name;
-            return new[] { plain, PakPath.Join(PakPath.Folder(plain), painted) }.FirstOrDefault(GameMaterials.Exists);
+            return new[] { plain, PakPath.Join(PakPath.Folder(plain), painted) }.FirstOrDefault(materials.Exists);
         }
 
         public CPlugSurface.GameplayId StripGameplay(string collisionLink)
         {
             foreach (var folder in modifierFolders)
             {
-                if (GamePaks.Store.Open(PakPath.Join(folder, Collision) + GameMaterials.Extension)?.Node is CPlugMaterial material)
+                if (paks.Open(PakPath.Join(folder, Collision) + GameMaterials.Extension)?.Node is CPlugMaterial material)
                 {
                     return material.GameplayId;
                 }
@@ -75,7 +74,7 @@ namespace Tman.Core.Surfaces.Building
                 foreach (var candidate in new[] { name, name + InWorld })
                 {
                     var skinned = PakPath.Join(PakPath.Join(collection.ToString(), EnvironmentSkinFolder), candidate);
-                    if (GameMaterials.Exists(skinned))
+                    if (materials.Exists(skinned))
                     {
                         return skinned;
                     }
@@ -88,7 +87,7 @@ namespace Tman.Core.Surfaces.Building
                 foreach (var candidate in new[] { name, unbranded, plain })
                 {
                     var modified = PakPath.Join(folder, candidate);
-                    if (candidate.Length > 0 && GameMaterials.Exists(modified))
+                    if (candidate.Length > 0 && materials.Exists(modified))
                     {
                         return modified;
                     }

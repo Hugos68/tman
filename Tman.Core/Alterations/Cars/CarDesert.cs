@@ -4,7 +4,7 @@ using Tman.Core.Alterations.Steps;
 
 namespace Tman.Core.Alterations.Cars
 {
-    public sealed class CarDesert : StandardAlteration
+    internal sealed class CarDesert : StandardAlteration
     {
         protected override string DisplayName => "Desert Car";
 

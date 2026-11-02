@@ -22,8 +22,6 @@ namespace Tman.Generator
 
         private const int SizeDecimals = 3;
 
-        private const string LineEnding = "\r\n";
-
         private static readonly string[] Usings = ["System.Collections.Generic", "GBX.NET"];
 
         private static readonly (int Kind, string Name)[] Waypoints = [(0, "Start"), (1, "Finish"), (2, "Checkpoint"), (4, "StartFinish")];
@@ -59,8 +57,8 @@ namespace Tman.Generator
             var unit = CompilationUnit()
                 .WithUsings(List(Usings.Select(name => UsingDirective(ParseName(name)))))
                 .WithMembers(SingletonList<MemberDeclarationSyntax>(NamespaceDeclaration(ParseName(Namespace)).WithMembers(SingletonList<MemberDeclarationSyntax>(type))))
-                .NormalizeWhitespace(eol: LineEnding)
-                .WithLeadingTrivia(Comment(Header), EndOfLine(LineEnding));
+                .NormalizeWhitespace(eol: Environment.NewLine)
+                .WithLeadingTrivia(Comment(Header), EndOfLine(Environment.NewLine));
             return unit.ToFullString();
         }
 
@@ -88,7 +86,8 @@ namespace Tman.Generator
                 Collections(item.Collections),
                 Waypoint(item.Waypoint),
                 Literal(item.Variants),
-                ObjectCreationExpression(IdentifierName("Vec3")).WithArgumentList(Arguments(Literal(item.Size.X), Literal(item.Size.Y), Literal(item.Size.Z)))));
+                ObjectCreationExpression(IdentifierName("Vec3")).WithArgumentList(Arguments(Literal(item.Size.X), Literal(item.Size.Y), Literal(item.Size.Z))),
+                item.Ident is null ? Null() : ObjectCreationExpression(IdentifierName("Ident")).WithArgumentList(Arguments(Literal(item.Ident.Id), Literal(item.Ident.Collection.ToString()), Literal(item.Ident.Author)))));
 
         private static ExpressionSyntax Cells(List<(int X, int Z)>? cells) => cells is null
             ? Null()

@@ -27,6 +27,8 @@ tman <alteration> -i <input> -o <output>
 | `<alteration>` | The alteration's name (case-insensitive), see the table below. |
 | `-i`, `--input` | A map file, or a wildcard pattern such as `maps/*.Map.Gbx`. |
 | `-o`, `--output` | The output file, or a pattern containing `*` when the input is a pattern (`*` is replaced by each input's name). |
+| `-v`, `--verbose` | Log every step, every replaced block, the kinds a step kept and every surface block built. |
+| `-q`, `--quiet` | Log warnings and errors only. |
 
 Example — one map:
 

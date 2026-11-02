@@ -5,9 +5,9 @@ using Tman.Core.Surfaces;
 
 namespace Tman.Core.Alterations.Surfaces
 {
-    public abstract class SurfaceAlteration : StandardAlteration
+    internal abstract class SurfaceAlteration : StandardAlteration
     {
-        private protected abstract Surface Surface { get; }
+        protected abstract Surface Surface { get; }
 
         protected override string DisplayName => Surface.Name;
 

@@ -10,7 +10,7 @@ using GBX.NET.PAK;
 
 namespace Tman.Paks
 {
-    public sealed class PakStore : IDisposable
+    public sealed class PakStore : IPakStore, IDisposable
     {
         public const string Extension = ".pak";
 
@@ -32,6 +32,7 @@ namespace Tman.Paks
 
         public PakStore(string directory)
         {
+            Directory = directory;
             Gbx.LZO = new Lzo();
             foreach (var (name, key) in Paks)
             {
@@ -48,6 +49,8 @@ namespace Tman.Paks
                 }
             }
         }
+
+        public string Directory { get; }
 
         public IEnumerable<string> Entries => entries.Select(e => e.Logical);
 

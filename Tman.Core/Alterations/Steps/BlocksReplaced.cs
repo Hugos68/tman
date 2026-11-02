@@ -7,6 +7,6 @@ namespace Tman.Core.Alterations.Steps
 {
     internal sealed class BlocksReplaced(Func<Block, Block?> replacement) : BlockReplacement<Block>(replacement)
     {
-        protected override void Replace(Map map, Placement placement, Block target) => map.Replace(placement, target);
+        protected override void Replace(Map map, AlterationContext context, Placement placement, Block target) => map.Replace(placement, target);
     }
 }

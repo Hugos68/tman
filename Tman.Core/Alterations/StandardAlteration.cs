@@ -3,7 +3,7 @@ using Tman.Core.Alterations.Steps;
 
 namespace Tman.Core.Alterations
 {
-    public abstract class StandardAlteration : Alteration
+    internal abstract class StandardAlteration : Alteration
     {
         protected abstract string DisplayName { get; }
 

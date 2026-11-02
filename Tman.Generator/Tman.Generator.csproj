@@ -19,4 +19,8 @@
     <ProjectReference Include="../Tman.Paks/Tman.Paks.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Tman.Tests" />
+  </ItemGroup>
+
 </Project>

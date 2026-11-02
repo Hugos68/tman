@@ -6,7 +6,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public sealed class Manslaughter : StandardAlteration
+    internal sealed class Manslaughter : StandardAlteration
     {
         protected override string DisplayName => "Manslaughter";
 

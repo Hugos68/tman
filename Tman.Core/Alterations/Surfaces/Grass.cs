@@ -2,8 +2,8 @@ using Tman.Core.Surfaces;
 
 namespace Tman.Core.Alterations.Surfaces
 {
-    public sealed class Grass : SurfaceAlteration
+    internal sealed class Grass : SurfaceAlteration
     {
-        private protected override Surface Surface => Surface.Grass;
+        protected override Surface Surface => Surface.Grass;
     }
 }

@@ -7,6 +7,7 @@
 | `Tman.Core` | The library. Everything an alteration needs; no user-interface code. |
 | `Tman.Interface` | The command line (`tman`). A graphical interface would be another project referencing `Tman.Core`. |
 | `Tman.Paks` | Reads the game's pak files: the per-pak keys, the hashed-name resolver, the `Paks/` folder lookup. Used by `Tman.Core` (surface blocks) and `Tman.Generator`. |
+| `Tman.Tests` | xunit tests of the rules and of the pipeline on fakes (`dotnet test`). |
 | `Tman.Generator` | A development tool: regenerates the game catalog in `Tman.Core/Catalog/Generated` from the game's pak files and the custom items in `Tman.Core/Assets/Items`. Not needed to run tman. |
 
 `Tman.sln` builds all five.
@@ -32,7 +33,9 @@ Both run in CI on every push and pull request.
 ```
 Tman.Core/
 ├─ Alterations/              the alterations, one folder per family (Cars, Checkpoints, Effects, Finishes, Other, Surfaces)
-│  ├─ Alteration.cs          the base class: pre-applied steps, Run, a new map UID
+│  ├─ Alteration.cs          the base class: pre-applied steps, Run(map, context), a new map UID
+│  ├─ AlterationContext.cs   the services a running alteration may use: assets and surface blocks
+│  ├─ AlterationPipeline.cs  the public entry point: resolves an alteration by name from the service provider and applies it
 │  ├─ StandardAlteration.cs  what every user-facing alteration derives from: validation and lightmap removed, Steps, Run, the map renamed
 │  ├─ Finishes/              the finish alterations and FinishPlane, the finish item built per map
 │  ├─ Steps/                 the reusable steps alterations are composed from (each one is itself an Alteration)
@@ -41,8 +44,8 @@ Tman.Core/
 ├─ Catalog/                  what the game has: Block, Item, Collections, Waypoint, Car, BlockFlags, CollectionIds
 │  └─ Generated/             Blocks.g.cs, Items.g.cs, Custom.g.cs — written by Tman.Generator, never edited by hand
 ├─ Surfaces/                 the surface alterations' vocabulary and rules: Surface, SurfaceTarget, SurfaceRules, DeckFamily, SurfaceBlock, SurfaceBlockKey, SurfaceBlockFile
-│  └─ Building/              one custom block per road kind, variant, environment and surface, built from the game's paks: SurfaceBlockBuilder, SurfaceBlockMesh, GameMaterials, MaterialDressing, LightmapAtlas, LodLevels, SurfaceBlockCache
-├─ Game/                     the game's own files: GamePaks (the pak store), PrefabParts (a prefab flattened into placed static objects), Transforms
+│  └─ Building/              one custom block per road kind, variant, environment and surface, built from the game's paks: SurfaceBlockBuilder, SurfaceBlockMesh, GameMaterials, MaterialDressing, LightmapAtlas, LodLevels; ISurfaceBlocks = CachedSurfaceBlocks over an IBlockCache (FileBlockCache, MemoryBlockCache)
+├─ Game/                     the game's own files: IAssets + DirectoryAssets (the shipped Assets/ folder), PrefabParts (a prefab flattened into placed static objects), Transforms
 ├─ Maps/                     a map and what is in it
 │  ├─ Map.cs                 load, save, metadata, queries, removal
 │  ├─ Map.Placing.cs         Place, PlaceRelative, PlaceLike
@@ -58,7 +61,15 @@ Tman.Core/
 
 Namespaces follow the folders (`Tman.Core.Alterations.Finishes`, `Tman.Core.Catalog`, `Tman.Core.Surfaces.Building`, `Tman.Core.Maps.Placements`). `Map` is one partial class split by concern: call sites read `map.Replace(...)`, the file name tells which concern the method belongs to.
 
-Everything is `internal` unless Tman.Interface needs it (`Alteration`, the alterations, `Map.Load` and `Map.Save`), every class that is not a base class is `sealed`, and every number that is not zero or one has a name.
+Everything is `internal` unless Tman.Interface needs it (`AlterationPipeline`, `AddTman`, the service interfaces and their adapters, `Map.Load` and `Map.Save`), every class that is not a base class is `sealed`, and every number that is not zero or one has a name.
+
+### Services
+
+Core touches the outside world through three interfaces, chosen and constructed by the host (Tman.Interface's `Program`) and registered in a `ServiceCollection`: `IPakStore` (the game's pak files; `PakStore` over a directory), `IAssets` (the shipped `Assets/` folder; `DirectoryAssets`), `IBlockCache` (built surface blocks; `FileBlockCache` under the user's local application data, `MemoryBlockCache` for runs that keep nothing). `AddTman()` registers Core's own services on top — the block builder chain, `ISurfaceBlocks`, the `AlterationContext`, every alteration by type — and `AlterationPipeline.Apply(name, map)` resolves the alteration and runs it. Alterations and steps never reach for a static: what they need comes in through the `AlterationContext` parameter of `Run` (`context.Embed(map, item)`, `context.Replace(map, placement, surfaceBlock)`, `context.Open(assetPath)`). A test composes the same container with a `MemoryBlockCache`, a fake `IPakStore` and an in-memory `IAssets`.
+
+### Logging
+
+Core logs through `Microsoft.Extensions.Logging`: the block builder and the cache take an `ILogger<T>` in their constructors; an alteration and its steps log through `context.Logger`, a logger named after the alteration that runs (`Tman.Core.Alterations.Surfaces.Wood`) inside a scope carrying the map's name, so a parallel campaign run stays readable. Information is one line per step with a count (`SurfaceBlocksPlaced: 43 of 833 blocks replaced`, `FinishPlane over 74 floor boxes`, `Renamed to …`) and one per map with the time; Debug names every step, every replaced placement, the kinds a step kept and how many, and every surface block built or served from the cache; Warning is for what the map has and tman does not know (a block outside the catalog, no floor to finish on). Nothing in Core writes to the console: Tman.Interface adds the simple console logger, `--verbose` lowers the level to Debug and `--quiet` raises it to Warning.
 
 ### The catalog
 
@@ -106,7 +117,7 @@ Rules of the house: no comments, no optional knobs, no strings where the catalog
 
 `Road`, `Dirt`, `Ice`, `Grass` and `Plastic` derive from `SurfaceAlteration` and only name their `Surface`. The mechanism, in `SurfaceRules`: penalty kinds become their plain straight; `Platform<Family>…` blocks become the same shape of the target family when the catalog has it; every road and open-road kind (`RoadFamily`: RoadTech, RoadDirt, RoadIce, RoadBump, OpenTech, OpenDirt, OpenGrass, OpenIce) becomes a surface block unless it already is that surface.
 
-A surface block is a custom block built on the fly from the game's paks by `SurfaceBlockBuilder`: the environment's block definition (vista maps have their own geometry for Stadium kinds), the record's variant (ground or air, additional index), its prefab's entities merged into one static object — inline static objects, geometry sub-prefabs and the kerbs; the `TreeGen` lamps and supports and the vegetation placements are left out because the game draws those itself around a custom block — with the deck slot's material and physics swapped to the surface (`RoadFamily.DeckMaterial` → `SurfaceTarget`), every other material keeping the surface and gameplay ids the pak gives it. The mesh goes into the item shell the game itself writes for a custom block (`Assets/Data/SurfaceBlock.Block.Gbx`): archetype = the original kind, the map's collection, the variant key `SurfaceBlockKey.Of(ground, additionalVariant)` (the game's own rule: ground 0, air 1 000 000, plus 1 000 per additional variant). Built blocks are cached in `Cache/Blocks/<pak stamp>/` next to `Paks/` (gitignored); a game update changes the stamp and the cache rebuilds itself. `SurfaceBlockFile` names the file and the record (`<Surface><Kind>_<key>[<Environment>].Block.Gbx`, record `tman\<Surface>\<Ground|Air>\<file>_CustomBlock`, `BlockFlags.CustomBlock`), `MapReplacing.Replace(placement, surfaceBlock)` rewrites the record and `MapEmbedding` embeds the bytes deflated (a stored entry crashes the game at load).
+A block definition places each prefab with an optional transform (translation + Euler rotation in degrees, X then Y then Z — the 2x1 slope bases are a dead-end prefab turned half a turn, the wall checkpoints a checkpoint prefab tipped onto the wall); `PrefabParts` applies it. A surface block is a custom block built on the fly from the game's paks by `SurfaceBlockBuilder`: the environment's block definition (vista maps have their own geometry for Stadium kinds), the record's variant (ground or air, additional index), its prefab's entities merged into one static object — inline static objects, geometry sub-prefabs and the kerbs; the `TreeGen` lamps and supports and the vegetation placements are left out because the game draws those itself around a custom block — with the deck slot's material and physics swapped to the surface (`RoadFamily.DeckMaterial` → `SurfaceTarget`), every other material keeping the surface and gameplay ids the pak gives it. The mesh goes into the item shell the game itself writes for a custom block (`Assets/Data/SurfaceBlock.Block.Gbx`): archetype = the original kind, the map's collection, the variant key `SurfaceBlockKey.Of(ground, additionalVariant)` (the game's own rule: ground 0, air 1 000 000, plus 1 000 per additional variant). Built blocks are cached in `Cache/Blocks/<pak stamp>/` next to `Paks/` (gitignored); a game update changes the stamp and the cache rebuilds itself. `SurfaceBlockFile` names the file and the record (`<Surface><Kind>_<key>[<Environment>].Block.Gbx`, record `tman\<Surface>\<Ground|Air>\<file>_CustomBlock`, `BlockFlags.CustomBlock`), `MapReplacing.Replace(placement, surfaceBlock)` rewrites the record and `MapEmbedding` embeds the bytes deflated (a stored entry crashes the game at load).
 
 ## Custom items
 
@@ -122,4 +133,4 @@ Writes `Blocks.g.cs`, `Items.g.cs` and `Custom.g.cs` into `Tman.Core/Catalog/Gen
 
 ## Verifying a change
 
-`dotnet test` runs `Tman.Tests`: the pure rules (flag bits, surface block keys and file names, the surface rules, road families, prefab transforms, selectors). The check that catches most regressions in alterations themselves: run the alteration you touched (and the ones sharing its steps) on a few maps of each environment before and after your change and compare the outputs — the block and item lists must be identical unless the change meant to move them. Open the result in the editor or drive it when the change is visible or affects gameplay.
+`dotnet test` runs `Tman.Tests` (no game files needed): the pure rules — surface rules, deck families, block keys and file names, flags, transforms, LOD merging, material gameplay, the catalog's idents and twins, the caches, the installation parsers, the generator's identifiers — and the pipeline composed on fakes: every alteration resolves from the container, an effect alteration runs without the paks, a surface alteration embeds one block per kind and renames every road placement, on `Maps/Test.Map.Gbx` with a fixed `ISurfaceBlocks` in place of the builder. A test that needs a service of its own registers it after `AddTman()`; the last registration wins. The check that catches most regressions in alterations themselves: run the alteration you touched (and the ones sharing its steps) on a few maps of each environment before and after your change and compare the outputs — the block and item lists must be identical unless the change meant to move them. Open the result in the editor or drive it when the change is visible or affects gameplay.

@@ -12,4 +12,8 @@
     <PackageReference Include="GBX.NET.PAK" Version="2.4.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Tman.Tests" />
+  </ItemGroup>
+
 </Project>

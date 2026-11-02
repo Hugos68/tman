@@ -8,7 +8,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Other
 {
-    public sealed class Jitter : StandardAlteration
+    internal sealed class Jitter : StandardAlteration
     {
         private const float Shift = 0.25f;
 
@@ -16,7 +16,7 @@ namespace Tman.Core.Alterations.Other
 
         protected override string DisplayName => "Jitter";
 
-        protected override void Run(Map map)
+        protected override void Run(Map map, AlterationContext context)
         {
             foreach (var placement in map.Placements.Where(p => !p.IsWaypoint))
             {

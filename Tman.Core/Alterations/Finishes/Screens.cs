@@ -6,7 +6,7 @@ using Tman.Core.Maps.Placements;
 
 namespace Tman.Core.Alterations.Finishes
 {
-    public sealed class Screens : StandardAlteration
+    internal sealed class Screens : StandardAlteration
     {
         protected override string DisplayName => "Screens";
 

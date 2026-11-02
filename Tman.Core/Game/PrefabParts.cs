@@ -10,14 +10,14 @@ namespace Tman.Core.Game
     {
         public sealed record Part(CPlugStaticObjectModel Model, Gbx Owner, string OwnerPath, Vec3 Position, Quat Rotation);
 
-        public static List<Part> Collect(PakStore store, string prefabPath, Vec3 position, Quat rotation)
+        public static List<Part> Collect(IPakStore store, string prefabPath, Vec3 position, Quat rotation)
         {
             var parts = new List<Part>();
             Collect(store, prefabPath, position, rotation, parts);
             return parts;
         }
 
-        private static void Collect(PakStore store, string path, Vec3 position, Quat rotation, List<Part> parts)
+        private static void Collect(IPakStore store, string path, Vec3 position, Quat rotation, List<Part> parts)
         {
             var gbx = store.Open(path) ?? throw new InvalidOperationException($"Missing prefab {path}");
             switch (gbx.Node)

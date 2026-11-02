@@ -20,7 +20,7 @@ namespace Tman.Generator
         public int Variants { get; set; } = Variants;
     }
 
-    internal sealed record ItemRow(string Id, string Author, string? Path, int Collections, int? Waypoint, int Variants, Vec3 Size)
+    internal sealed record ItemRow(string Id, string Author, string? Path, int Collections, int? Waypoint, int Variants, Vec3 Size, Ident? Ident)
     {
         public int Collections { get; set; } = Collections;
         public int Variants { get; set; } = Variants;
@@ -195,7 +195,7 @@ namespace Tman.Generator
                         size = SizeWalk.Measure(store, PakStore.Logical(logical, gbx!.RefTable!.AncestorLevel, picked)) ?? size;
                     }
                 }
-                var row = new ItemRow(name, "Nadeo", null, bit, waypoint, externals.Count, size);
+                var row = new ItemRow(name, "Nadeo", null, bit, waypoint, externals.Count, size, null);
                 if (items.TryGetValue(name, out var existing))
                 {
                     existing.Collections |= bit;
@@ -253,6 +253,7 @@ namespace Tman.Generator
                 var relative = Path.GetRelativePath(root, path).Replace('\\', '/');
                 int? waypoint = null;
                 var size = new Vec3(0, 0, 0);
+                var header = Gbx.ParseHeaderNode<CGameItemModel>(path).Ident;
                 CGameItemModel? item = null;
                 try
                 {
@@ -270,7 +271,7 @@ namespace Tman.Generator
                 {
                     waypoint = FindWaypoint(File.ReadAllBytes(path));
                 }
-                rows.Add(new ItemRow(file, file, relative, 31, waypoint, 1, size));
+                rows.Add(new ItemRow(file, header.Author, relative, 31, waypoint, 1, size, header));
             }
             return rows;
         }
