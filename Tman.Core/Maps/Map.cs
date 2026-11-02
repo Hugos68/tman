@@ -30,9 +30,9 @@ namespace Tman.Core.Maps
             Gbx.LZO = new Lzo();
         }
 
-        internal CGameCtnChallenge Challenge { get; }
+        private CGameCtnChallenge Challenge { get; }
 
-        internal Map(CGameCtnChallenge challenge)
+        private Map(CGameCtnChallenge challenge)
         {
             Challenge = challenge;
         }
@@ -48,6 +48,12 @@ namespace Tman.Core.Maps
         }
 
         public string Uid => Challenge.MapUid;
+
+        internal Ident Ident(Item item) => item.Ident ?? Ident(item.Id, item.Author);
+
+        internal Ident Ident(string name) => Ident(name, name);
+
+        private Ident Ident(string id, string author) => new(id, Challenge.MapInfo.Collection, author);
 
         public Int3 Size => Challenge.Size;
 

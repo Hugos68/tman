@@ -52,5 +52,16 @@ namespace Tman.Tests
             Assert.Equal(Blocks.RoadTechStraight, Blocks.RoadTechCheckpoint.Plain);
             Assert.Null(Blocks.RoadTechStraight.As(Waypoint.Checkpoint));
         }
+
+        [Fact]
+        public void NamingTablesComeFromTheGenerator()
+        {
+            Assert.Equal(Blocks.RoadTechStraight, Blocks.PlainOfPenalty["RoadTechPenalty"]);
+            Assert.False(Blocks.PlainOfPenalty.ContainsKey("RoadTechSlopeDownPenaltyHFC"));
+            Assert.Equal("Water", Blocks.PlatformFamilyOf["PlatformWaterBase"]);
+            Assert.Equal(Blocks.PlatformPlasticSlope2Straight, Blocks.PlatformTwins[("PlatformTechSlope2Straight", "Plastic")]);
+            Assert.Equal(Items.GateSpecial16mBoost, Items.SpecialGates[("GateCheckpointCenter16m", "GateSpecialBoost")]);
+            Assert.Equal(Custom.CheckpointExpandableBottomBlueBay, Custom.Skinned[("CheckpointExpandableBottom.Item.Gbx", Collections.BlueBay)]);
+        }
     }
 }

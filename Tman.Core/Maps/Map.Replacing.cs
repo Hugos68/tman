@@ -28,7 +28,7 @@ namespace Tman.Core.Maps
         internal Placement Replace(Placement source, Item model)
         {
             var item = source.Item!;
-            item.ItemModel = model.Ident(this);
+            item.ItemModel = Ident(model);
             item.WaypointSpecialProperty = Property(item.WaypointSpecialProperty, model.Waypoint);
             return source;
         }
