@@ -70,7 +70,7 @@ namespace Tman.Core.Surfaces.Building
 
         private byte[] Shell(SurfaceBlockFile file, CGameCtnBlockInfo info, CGameCtnBlockInfoVariant variant, CPlugStaticObjectModel model, string infoPath, int ancestor)
         {
-            using var template = assets.Open(Assets.Data(Template));
+            using var template = assets.Open(Assets.Template(Template));
             var item = Gbx.Parse<CGameItemModel>(template);
             var collection = CollectionIds.Of(file.Collection);
             item.Node.Ident = new Ident(file.Ident, collection, file.RecordAuthor);
