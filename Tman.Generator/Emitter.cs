@@ -26,17 +26,20 @@ namespace Tman.Generator
 
         private static readonly (int Kind, string Name)[] Waypoints = [(0, "Start"), (1, "Finish"), (2, "Checkpoint"), (4, "StartFinish")];
 
-        public static string Blocks(SortedDictionary<string, BlockRow> blocks, List<(string Name, int Kind, string Twin, bool HalfTurned)> families)
+        public static string Blocks(SortedDictionary<string, BlockRow> blocks, BlockTables tables)
         {
             var identifiers = new Identifiers();
             var fields = blocks.Select(pair => Field("Block", identifiers.For(pair.Key), BlockCreation(pair.Key, pair.Value))).ToList();
             var byId = IdDictionary("Block", blocks.Keys.Select(id => (id, identifiers.Of(id))));
             var plainOf = ReadOnlyDictionary("PlainOf", "string", "Block", PlainTwins(blocks, identifiers).Select(pair => (Key: (ExpressionSyntax)Literal(pair.Checkpoint), Value: Name(pair.PlainIdentifier))));
-            var members = fields.Concat([byId, FromId("Block", "block"), plainOf, FamiliesDictionary("Block", families, identifiers)]);
+            var plainOfPenalty = ReadOnlyDictionary("PlainOfPenalty", "string", "Block", tables.PlainOfPenalty.Select(pair => (Key: (ExpressionSyntax)Literal(pair.Key), Value: Name(identifiers.Of(pair.Value)))));
+            var platformFamilyOf = ReadOnlyDictionary("PlatformFamilyOf", "string", "string", tables.PlatformFamilyOf.Select(pair => (Key: (ExpressionSyntax)Literal(pair.Key), Value: (ExpressionSyntax)Literal(pair.Value))));
+            var platformTwins = ReadOnlyDictionary("PlatformTwins", "(string, string)", "Block", tables.PlatformTwins.Select(pair => (Key: Tuple(pair.Key.Block, pair.Key.Family), Value: Name(identifiers.Of(pair.Value)))));
+            var members = fields.Concat([byId, FromId("Block", "block"), plainOf, FamiliesDictionary("Block", tables.Families, identifiers), plainOfPenalty, platformFamilyOf, platformTwins]);
             return Unit("Blocks", members);
         }
 
-        public static string Items(string className, IEnumerable<ItemRow> items, List<(string Name, int Kind, string Twin, bool HalfTurned)> families)
+        public static string Items(string className, IEnumerable<ItemRow> items, ItemTables tables)
         {
             var identifiers = new Identifiers();
             var rows = items.ToList();
@@ -44,7 +47,13 @@ namespace Tman.Generator
             var members = fields.Concat([IdDictionary("Item", rows.Select(item => (item.Id, identifiers.Of(item.Id)))), FromId("Item", "item")]);
             if (className == "Items")
             {
-                members = members.Concat([FamiliesDictionary("Item", families, identifiers), HalfTurnedSet(families)]);
+                var specialGates = ReadOnlyDictionary("SpecialGates", "(string, string)", "Item", tables.SpecialGates.Select(pair => (Key: Tuple(pair.Key.Item, pair.Key.Gate), Value: Name(identifiers.Of(pair.Value)))));
+                members = members.Concat([FamiliesDictionary("Item", tables.Families, identifiers), HalfTurnedSet(tables.Families), specialGates]);
+            }
+            else
+            {
+                var skinned = ReadOnlyDictionary("Skinned", "(string, Collections)", "Item", tables.Skinned.Select(pair => (Key: (ExpressionSyntax)TupleExpression(SeparatedList([Argument(Literal(pair.Key.Item)), Argument(Member("Collections", pair.Key.Collection))])), Value: Name(identifiers.Of(pair.Value)))));
+                members = members.Concat([skinned]);
             }
             return Unit(className, members);
         }
@@ -146,6 +155,9 @@ namespace Tman.Generator
 
         private static ExpressionSyntax Tuple(string name, int kind) =>
             TupleExpression(SeparatedList([Argument(Literal(name)), Argument(Waypoint(kind))]));
+
+        private static ExpressionSyntax Tuple(string first, string second) =>
+            TupleExpression(SeparatedList([Argument(Literal(first)), Argument(Literal(second))]));
 
         private static ArgumentListSyntax Arguments(params ExpressionSyntax[] expressions) => ArgumentList(SeparatedList(expressions.Select(Argument)));
 

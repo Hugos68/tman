@@ -26,6 +26,10 @@ namespace Tman.Generator
         public int Variants { get; set; } = Variants;
     }
 
+    internal sealed record BlockTables(List<(string Name, int Kind, string Twin, bool HalfTurned)> Families, SortedDictionary<string, string> PlainOfPenalty, SortedDictionary<string, string> PlatformFamilyOf, SortedDictionary<(string Block, string Family), string> PlatformTwins);
+
+    internal sealed record ItemTables(List<(string Name, int Kind, string Twin, bool HalfTurned)> Families, SortedDictionary<(string Item, string Gate), string> SpecialGates, SortedDictionary<(string Item, string Collection), string> Skinned);
+
     internal static class CatalogGenerator
     {
         private static readonly string[] VariantExtensions = [".prefab.gbx", ".staticobject.gbx", ".vegettreemodel.gbx"];
@@ -36,17 +40,26 @@ namespace Tman.Generator
             Directory.CreateDirectory(outDirectory);
             var blocks = Blocks(store);
             var blocksPath = Path.Combine(outDirectory, "Blocks.cs");
-            File.WriteAllText(blocksPath, Emitter.Blocks(blocks, Families(blocks.ToDictionary(kv => kv.Key, kv => kv.Value.Waypoint, StringComparer.Ordinal), false)), new UTF8Encoding(false));
+            var blockIds = blocks.Keys.ToList();
+            var blockTables = new BlockTables(
+                Families(blocks.ToDictionary(kv => kv.Key, kv => kv.Value.Waypoint, StringComparer.Ordinal), false),
+                NamingRules.PlainOfPenalty(blockIds),
+                NamingRules.PlatformFamilyOf(blockIds),
+                NamingRules.PlatformTwins(blockIds));
+            File.WriteAllText(blocksPath, Emitter.Blocks(blocks, blockTables), new UTF8Encoding(false));
             Console.WriteLine($"wrote {blocksPath}: {blocks.Count} blocks");
             var items = Items(store);
             var itemsPath = Path.Combine(outDirectory, "Items.cs");
-            File.WriteAllText(itemsPath, Emitter.Items("Items", items.Values, Families(items.ToDictionary(kv => kv.Key, kv => kv.Value.Waypoint, StringComparer.Ordinal), true)), new UTF8Encoding(false));
+            var itemWaypoints = items.ToDictionary(kv => kv.Key, kv => kv.Value.Waypoint, StringComparer.Ordinal);
+            var itemTables = new ItemTables(Families(itemWaypoints, true), NamingRules.SpecialGates(blockIds, itemWaypoints), new SortedDictionary<(string, string), string>());
+            File.WriteAllText(itemsPath, Emitter.Items("Items", items.Values, itemTables), new UTF8Encoding(false));
             Console.WriteLine($"wrote {itemsPath}: {items.Count} items");
             if (projectRoot is not null && customSubdirectory is not null)
             {
                 var custom = Custom(projectRoot, customSubdirectory);
                 var customPath = Path.Combine(outDirectory, "Custom.cs");
-                File.WriteAllText(customPath, Emitter.Items("Custom", custom, []), new UTF8Encoding(false));
+                var customTables = new ItemTables([], new SortedDictionary<(string, string), string>(), NamingRules.Skinned(custom.Select(item => item.Id).ToList(), PakStore.Paks.Select(pak => pak.Name)));
+                File.WriteAllText(customPath, Emitter.Items("Custom", custom, customTables), new UTF8Encoding(false));
                 Console.WriteLine($"wrote {customPath}: {custom.Count} items");
             }
         }

@@ -362,5 +362,44 @@ namespace Tman.Core.Catalog
             ["FinishStandStraight.Item.Gbx"] = FinishStandStraight
         };
         public static Item? FromId(string id) => ById.TryGetValue(id, out var item) ? item : null;
+        public static readonly IReadOnlyDictionary<(string, Collections), Item> Skinned = new Dictionary<(string, Collections), Item>
+        {
+            [("CheckpointExpandableBottom.Item.Gbx", Collections.BlueBay)] = CheckpointExpandableBottomBlueBay,
+            [("CheckpointExpandableBottom.Item.Gbx", Collections.GreenCoast)] = CheckpointExpandableBottomGreenCoast,
+            [("CheckpointExpandableBottom.Item.Gbx", Collections.RedIsland)] = CheckpointExpandableBottomRedIsland,
+            [("CheckpointExpandableBottom.Item.Gbx", Collections.WhiteShore)] = CheckpointExpandableBottomWhiteShore,
+            [("CheckpointExpandableBottomInPillar.Item.Gbx", Collections.BlueBay)] = CheckpointExpandableBottomInPillarBlueBay,
+            [("CheckpointExpandableBottomInPillar.Item.Gbx", Collections.GreenCoast)] = CheckpointExpandableBottomInPillarGreenCoast,
+            [("CheckpointExpandableBottomInPillar.Item.Gbx", Collections.RedIsland)] = CheckpointExpandableBottomInPillarRedIsland,
+            [("CheckpointExpandableBottomInPillar.Item.Gbx", Collections.WhiteShore)] = CheckpointExpandableBottomInPillarWhiteShore,
+            [("CheckpointExpandableLeft.Item.Gbx", Collections.BlueBay)] = CheckpointExpandableLeftBlueBay,
+            [("CheckpointExpandableLeft.Item.Gbx", Collections.GreenCoast)] = CheckpointExpandableLeftGreenCoast,
+            [("CheckpointExpandableLeft.Item.Gbx", Collections.RedIsland)] = CheckpointExpandableLeftRedIsland,
+            [("CheckpointExpandableLeft.Item.Gbx", Collections.WhiteShore)] = CheckpointExpandableLeftWhiteShore,
+            [("CheckpointExpandableRight.Item.Gbx", Collections.BlueBay)] = CheckpointExpandableRightBlueBay,
+            [("CheckpointExpandableRight.Item.Gbx", Collections.GreenCoast)] = CheckpointExpandableRightGreenCoast,
+            [("CheckpointExpandableRight.Item.Gbx", Collections.RedIsland)] = CheckpointExpandableRightRedIsland,
+            [("CheckpointExpandableRight.Item.Gbx", Collections.WhiteShore)] = CheckpointExpandableRightWhiteShore,
+            [("CheckpointExpandableTop.Item.Gbx", Collections.BlueBay)] = CheckpointExpandableTopBlueBay,
+            [("CheckpointExpandableTop.Item.Gbx", Collections.GreenCoast)] = CheckpointExpandableTopGreenCoast,
+            [("CheckpointExpandableTop.Item.Gbx", Collections.RedIsland)] = CheckpointExpandableTopRedIsland,
+            [("CheckpointExpandableTop.Item.Gbx", Collections.WhiteShore)] = CheckpointExpandableTopWhiteShore,
+            [("CheckpointExpandableTopInPillar.Item.Gbx", Collections.BlueBay)] = CheckpointExpandableTopInPillarBlueBay,
+            [("CheckpointExpandableTopInPillar.Item.Gbx", Collections.GreenCoast)] = CheckpointExpandableTopInPillarGreenCoast,
+            [("CheckpointExpandableTopInPillar.Item.Gbx", Collections.RedIsland)] = CheckpointExpandableTopInPillarRedIsland,
+            [("CheckpointExpandableTopInPillar.Item.Gbx", Collections.WhiteShore)] = CheckpointExpandableTopInPillarWhiteShore,
+            [("CheckpointRing.Item.Gbx", Collections.BlueBay)] = CheckpointRingBlueBay,
+            [("CheckpointRing.Item.Gbx", Collections.GreenCoast)] = CheckpointRingGreenCoast,
+            [("CheckpointRing.Item.Gbx", Collections.RedIsland)] = CheckpointRingRedIsland,
+            [("CheckpointRing.Item.Gbx", Collections.WhiteShore)] = CheckpointRingWhiteShore,
+            [("CheckpointRingInPillar.Item.Gbx", Collections.BlueBay)] = CheckpointRingInPillarBlueBay,
+            [("CheckpointRingInPillar.Item.Gbx", Collections.GreenCoast)] = CheckpointRingInPillarGreenCoast,
+            [("CheckpointRingInPillar.Item.Gbx", Collections.RedIsland)] = CheckpointRingInPillarRedIsland,
+            [("CheckpointRingInPillar.Item.Gbx", Collections.WhiteShore)] = CheckpointRingInPillarWhiteShore,
+            [("CheckpointRingPillar.Item.Gbx", Collections.BlueBay)] = CheckpointRingPillarBlueBay,
+            [("CheckpointRingPillar.Item.Gbx", Collections.GreenCoast)] = CheckpointRingPillarGreenCoast,
+            [("CheckpointRingPillar.Item.Gbx", Collections.RedIsland)] = CheckpointRingPillarRedIsland,
+            [("CheckpointRingPillar.Item.Gbx", Collections.WhiteShore)] = CheckpointRingPillarWhiteShore
+        };
     }
 }

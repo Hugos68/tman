@@ -59,7 +59,7 @@ Tman.Core/
 └─ Assets/                   Data/ (lookup tables, the game-made custom block shell), Items/<Category>/<Family>/*.Item.Gbx (custom items)
 ```
 
-Namespaces follow the folders (`Tman.Core.Alterations.Finishes`, `Tman.Core.Catalog`, `Tman.Core.Surfaces.Building`, `Tman.Core.Maps.Placements`). `Map` is one partial class split by concern: call sites read `map.Replace(...)`, the file name tells which concern the method belongs to.
+Namespaces follow the folders (`Tman.Core.Alterations.Finishes`, `Tman.Core.Catalog`, `Tman.Core.Surfaces.Building`, `Tman.Core.Maps.Placements`). `Map` is one partial class split by concern: call sites read `map.Replace(...)`, the file name tells which concern the method belongs to. `Map` owns the game's map object: the `CGameCtnChallenge` is private, and only `Maps/` and `Surfaces/Building/` work with GBX.NET's node classes — an alteration sees placements, idents and bytes, never the game's object graph.
 
 Everything is `internal` unless Tman.Interface needs it (`AlterationPipeline`, `AddTman`, the service interfaces and their adapters, `Map.Load` and `Map.Save`), every class that is not a base class is `sealed`, and every number that is not zero or one has a name.
 
@@ -74,6 +74,8 @@ Core logs through `Microsoft.Extensions.Logging`: the block builder and the cach
 ### The catalog
 
 `Blocks`, `Items` and `Custom` are generated classes with one static field per game block, game item and custom item: `Blocks.RoadTechStraight`, `Items.GateCheckpointCenter32m`, `Custom.FinishFlag16m`. Every field is a record carrying what the game knows about it — size in cells, footprint cells, which collections have it, its waypoint kind, its variants — so alterations never pass around strings. Useful members:
+
+The game's naming conventions are tables in the same generated classes, computed once by the generator and looked up at run time — never string surgery on an id in Core: `Blocks.PlainOfPenalty` (a penalty kind → its plain straight), `Blocks.PlatformFamilyOf` and `Blocks.PlatformTwins` (a platform's family, and the same shape in another family), `Blocks.Families` / `Items.Families` and `Blocks.PlainOf` (waypoint twins), `Items.SpecialGates` (a waypoint item + an effect gate block → the special item), `Custom.Skinned` (a custom item → its environment twin). The rules live in `Tman.Generator/NamingRules.cs`; a game update that renames things fails there, at generation time, not in a map.
 
 - `block.As(Waypoint.Checkpoint)` — the same family's block of another waypoint kind (the checkpoint twin of a finish), `null` when the game has none.
 - `block.Plain` — the plain block a checkpoint was built from.

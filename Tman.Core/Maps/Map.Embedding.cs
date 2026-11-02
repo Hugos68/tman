@@ -1,5 +1,8 @@
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
+using GBX.NET;
 using Tman.Core.Catalog;
 using Tman.Core.Surfaces;
 
@@ -25,6 +28,21 @@ namespace Tman.Core.Maps
         {
             using var stream = new MemoryStream(content);
             Embed(name, stream);
+        }
+
+        internal void PlaceEmbedded(Ident ident, byte[] item)
+        {
+            Embed(ident.Id, item);
+            Challenge.PlaceAnchoredObject(ident, Vec3.Zero, Vec3.Zero, Vec3.Zero);
+        }
+
+        internal IReadOnlyList<string> EmbeddedFiles
+        {
+            get
+            {
+                using var zip = Challenge.OpenReadEmbeddedZipData();
+                return [.. zip.Entries.Select(entry => entry.FullName)];
+            }
         }
 
         internal void EmbedSurfaceBlock(SurfaceBlockFile file, byte[] bytes)

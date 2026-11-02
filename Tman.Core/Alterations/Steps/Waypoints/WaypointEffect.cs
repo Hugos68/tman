@@ -28,19 +28,7 @@ namespace Tman.Core.Alterations.Steps.Waypoints
             }
         }
 
-        private static Item EffectItem(Item waypoint, Block gate)
-        {
-            var effect = gate.Id["GateSpecial".Length..];
-            var id = waypoint.Id
-                .Replace("Start", "Special", StringComparison.Ordinal)
-                .Replace("Checkpoint", "Special", StringComparison.Ordinal)
-                .Replace("Finish", "Special", StringComparison.Ordinal)
-                .Replace("Left", "", StringComparison.Ordinal)
-                .Replace("Center", "", StringComparison.Ordinal)
-                .Replace("Right", "", StringComparison.Ordinal)
-                .Replace("v2", "", StringComparison.Ordinal)
-                + effect;
-            return Items.FromId(id) ?? throw new KeyNotFoundException($"No {effect} gate for {waypoint.Id}: {id}");
-        }
+        private static Item EffectItem(Item waypoint, Block gate) =>
+            Items.SpecialGates.GetValueOrDefault((waypoint.Id, gate.Id)) ?? throw new KeyNotFoundException($"No {gate.Id} item for {waypoint.Id}");
     }
 }

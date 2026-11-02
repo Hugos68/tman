@@ -38,11 +38,11 @@ namespace Tman.Core.Alterations.Finishes
         public static void Place(Map map, AlterationContext context, string ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps, bool visible)
         {
             using var template = context.Open(Custom.FinishPlaneTemplate.Path!);
-            map.Embed(ident, Build(template, ident, map.Challenge.MapInfo.Collection, boxes, ramps, visible));
-            map.Challenge.PlaceAnchoredObject(new Ident(ident, map.Challenge.MapInfo.Collection, ident), Vec3.Zero, Vec3.Zero, Vec3.Zero);
+            var embedded = map.Ident(ident);
+            map.PlaceEmbedded(embedded, Build(template, embedded, boxes, ramps, visible));
         }
 
-        public static byte[] Build(Stream template, string ident, Id collection, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps, bool visible)
+        public static byte[] Build(Stream template, Ident ident, IReadOnlyList<Box> boxes, IReadOnlyList<Ramp> ramps, bool visible)
         {
             var bodies = new List<Vec3[]>();
             foreach (var b in Merge(boxes))
@@ -70,13 +70,13 @@ namespace Tman.Core.Alterations.Finishes
             var item = gbx.Node;
             if (item.EntityModelEdition is not CGameCommonItemEntityModelEdition edition || edition.MeshCrystal is not CPlugCrystal crystal)
             {
-                throw new InvalidOperationException($"{ident}: the finish plane template is not a mesh-modeler item");
+                throw new InvalidOperationException($"{ident.Id}: the finish plane template is not a mesh-modeler item");
             }
             var geometry = crystal.Layers.OfType<CPlugCrystal.GeometryLayer>().First();
             var trigger = crystal.Layers.OfType<CPlugCrystal.TriggerLayer>().First();
             if (geometry.Crystal is null || trigger.Crystal is null || crystal.Materials.Count < 2)
             {
-                throw new InvalidOperationException($"{ident}: the finish plane template has no geometry + trigger layers with two materials");
+                throw new InvalidOperationException($"{ident.Id}: the finish plane template has no geometry + trigger layers with two materials");
             }
             var glass = visible
                 ? bodies.SelectMany(b => new[] { Face(b, 3, 7, 6, 2), Face(b, 0, 1, 5, 4) }).ToList()
@@ -92,7 +92,7 @@ namespace Tman.Core.Alterations.Finishes
                 smoothing.U01 = [.. Enumerable.Repeat(2, geometry.Crystal.Faces.Length)];
             }
 
-            item.Ident = new Ident(ident, collection, ident);
+            item.Ident = ident;
             using var ms = new MemoryStream();
             gbx.Save(ms);
             return ms.ToArray();

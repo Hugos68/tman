@@ -50,8 +50,8 @@ namespace Tman.Core.Maps.Placements
         public bool IsWaypoint => Property is not null;
 
         public Waypoint Waypoint => IsBlock
-            ? BlockModel?.Waypoint ?? WaypointByName
-            : ItemModel?.Waypoint ?? WaypointByName;
+            ? BlockModel?.Waypoint ?? WaypointByTag
+            : ItemModel?.Waypoint ?? WaypointByTag;
 
         public bool IsCheckpoint => IsWaypoint && Waypoint == Waypoint.Checkpoint;
 
@@ -82,12 +82,7 @@ namespace Tman.Core.Maps.Placements
             return position;
         }
 
-        private Waypoint WaypointByName =>
-            !IsWaypoint ? Waypoint.None
-            : Id.Contains("Checkpoint", StringComparison.Ordinal) ? Waypoint.Checkpoint
-            : Id.Contains("Finish", StringComparison.Ordinal) ? Waypoint.Finish
-            : Id.Contains("Start", StringComparison.Ordinal) ? Waypoint.Start
-            : Waypoint.None;
+        private Waypoint WaypointByTag => Property is null ? Waypoint.None : Map.WaypointOf(Property.Tag);
 
         private static Vec3 DirectionOffsetOf(Direction direction, (int X, int Z) size) =>
             direction switch

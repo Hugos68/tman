@@ -20,6 +20,10 @@ namespace Tman.Core.Maps
             [Waypoint.StartFinish] = "StartFinish",
         };
 
+        internal static Waypoint WaypointOf(string? tag) => tag == LinkedCheckpointTag
+            ? Waypoint.Checkpoint
+            : Tags.FirstOrDefault(pair => pair.Value == tag).Key;
+
         internal void Link(IReadOnlyCollection<Placement> checkpoints)
         {
             if (checkpoints.Count < 2)

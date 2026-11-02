@@ -1,5 +1,4 @@
 using System;
-using System.IO.Compression;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Tman.Core.Alterations;
@@ -61,10 +60,9 @@ namespace Tman.Tests
             var files = blocks.Requested.Distinct().ToList();
             Assert.NotEmpty(files);
             Assert.All(files, file => Assert.Equal("Wood", file.Block.Surface.Name));
-            var renamed = map.Placements.OnlyBlocks().Count(placement => placement.Block!.Name.EndsWith("_CustomBlock", StringComparison.Ordinal));
+            var renamed = map.Placements.OnlyBlocks().Count(placement => placement.Id.EndsWith("_CustomBlock", StringComparison.Ordinal));
             Assert.Equal(blocks.Requested.Count, renamed);
-            using var zip = map.Challenge.OpenReadEmbeddedZipData();
-            Assert.Equal(files.Select(file => file.EmbeddedEntry).Order().ToList(), zip.Entries.Select(entry => entry.FullName).Where(entry => entry.StartsWith("Blocks/tman/", StringComparison.Ordinal)).Order().ToList());
+            Assert.Equal(files.Select(file => file.EmbeddedEntry).Order().ToList(), map.EmbeddedFiles.Where(entry => entry.StartsWith("Blocks/tman/", StringComparison.Ordinal)).Order().ToList());
         }
     }
 }
