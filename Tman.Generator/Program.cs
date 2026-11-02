@@ -1,6 +1,7 @@
 using System;
 using System.CommandLine;
 using System.IO;
+using Tman.Paks;
 
 namespace Tman.Generator
 {
@@ -10,8 +11,8 @@ namespace Tman.Generator
         {
             var paksOption = new Option<DirectoryInfo>("--paks")
             {
-                Description = "The directory with Stadium.pak, RedIsland.pak, WhiteShore.pak, GreenCoast.pak and BlueBay.pak.",
-                Required = true
+                Description = "The directory with Stadium.pak, RedIsland.pak, WhiteShore.pak, GreenCoast.pak and BlueBay.pak; by default the game installation's Packs folder, or the Paks folder above the executable.",
+                DefaultValueFactory = _ => new DirectoryInfo(PakDirectory.Find())
             };
 
             var coreOption = new Option<DirectoryInfo>("--core")
