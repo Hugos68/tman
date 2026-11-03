@@ -3,17 +3,15 @@ using GBX.NET.Engines.Plug;
 
 namespace Tman.Core.Surfaces
 {
-    internal sealed record SurfaceTarget(string Link, CPlugSurface.MaterialId Physics, Tint Tint)
+    internal sealed record SurfaceTarget(string Link, CPlugSurface.MaterialId Physics)
     {
         private const string Materials = @"Stadium\Media\Material\";
 
         private const string Modifiers = @"Stadium\Media\Modifier\";
 
-        private sealed record Looks(string Road, string Platform, CPlugSurface.MaterialId Physics, Tint Tint)
+        private sealed record Looks(string Road, string Platform, CPlugSurface.MaterialId Physics)
         {
-            public Looks(string both, CPlugSurface.MaterialId physics) : this(both, both, physics, Tint.None) { }
-
-            public Looks(string road, string platform, CPlugSurface.MaterialId physics) : this(road, platform, physics, Tint.None) { }
+            public Looks(string both, CPlugSurface.MaterialId physics) : this(both, both, physics) { }
 
         }
 
@@ -32,7 +30,7 @@ namespace Tman.Core.Surfaces
         public static SurfaceTarget Of(Surface surface, DeckFamily family)
         {
             var looks = BySurface[surface];
-            return new SurfaceTarget(family.IsPlatform ? looks.Platform : looks.Road, looks.Physics, looks.Tint);
+            return new SurfaceTarget(family.IsPlatform ? looks.Platform : looks.Road, looks.Physics);
         }
     }
 }
