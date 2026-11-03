@@ -9,17 +9,12 @@ namespace Tman.Core.Surfaces
 
         private const string Modifiers = @"Stadium\Media\Modifier\";
 
-        private const string CustomMaterials = @"Stadium\Media\Material_BlockCustom\";
-
-        private static readonly Tint Black = new(0, 0, 0);
-
         private sealed record Looks(string Road, string Platform, CPlugSurface.MaterialId Physics, Tint Tint)
         {
             public Looks(string both, CPlugSurface.MaterialId physics) : this(both, both, physics, Tint.None) { }
 
             public Looks(string road, string platform, CPlugSurface.MaterialId physics) : this(road, platform, physics, Tint.None) { }
 
-            public Looks(string both, CPlugSurface.MaterialId physics, Tint tint) : this(both, both, physics, tint) { }
         }
 
         private static readonly Dictionary<Surface, Looks> BySurface = new()
@@ -31,7 +26,7 @@ namespace Tman.Core.Surfaces
             [Surface.Plastic] = new(Modifiers + @"PlatformPlastic\PlatformTech", CPlugSurface.MaterialId.Plastic),
             [Surface.Wood] = new(Materials + "ThemeSnowRoad", CPlugSurface.MaterialId.Wood),
             [Surface.Metal] = new(Materials + "Structure", CPlugSurface.MaterialId.Metal),
-            [Surface.Magnet] = new(CustomMaterials + "CustomConcrete", CPlugSurface.MaterialId.TechSuperMagnetic, Black)
+            [Surface.Magnet] = new(Materials + "TrackWallClips", CPlugSurface.MaterialId.TechSuperMagnetic)
         };
 
         public static SurfaceTarget Of(Surface surface, DeckFamily family)
