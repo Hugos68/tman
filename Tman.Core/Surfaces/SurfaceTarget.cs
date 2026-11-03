@@ -23,7 +23,7 @@ namespace Tman.Core.Surfaces
             [Surface.Plastic] = new(Modifiers + @"PlatformPlastic\PlatformTech", CPlugSurface.MaterialId.Plastic),
             [Surface.Wood] = new(Materials + "ThemeSnowRoad", CPlugSurface.MaterialId.Wood),
             [Surface.Metal] = new(Materials + "Structure", CPlugSurface.MaterialId.Metal),
-            [Surface.Magnet] = new(Modifiers + "Structure", CPlugSurface.MaterialId.TechSuperMagnetic)
+            [Surface.Magnet] = new(Materials + "Structure", CPlugSurface.MaterialId.TechSuperMagnetic)
         };
 
         public static SurfaceTarget Of(Surface surface, DeckFamily family)
