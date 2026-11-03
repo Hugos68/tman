@@ -11,23 +11,17 @@ namespace Tman.Core.Surfaces.Building
 
         private const float TextureSizeInMeters = 1;
 
-        private const string TintConstant = "TargetColor";
-
-        private const string RealConstant = "Real";
-
         private readonly List<CPlugSolid2Model.Material> materials = [];
 
-        private readonly Dictionary<(string Link, CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay, Tint Tint), int> indices = [];
+        private readonly Dictionary<(string Link, CPlugSurface.MaterialId Physics, CPlugSurface.GameplayId Gameplay), int> indices = [];
 
-        public int IndexOf(string link, CPlugSurface.MaterialId physics, CPlugSurface.GameplayId gameplay) => IndexOf(link, physics, gameplay, Tint.None);
-
-        public int IndexOf(string link, CPlugSurface.MaterialId physics, CPlugSurface.GameplayId gameplay, Tint tint)
+        public int IndexOf(string link, CPlugSurface.MaterialId physics, CPlugSurface.GameplayId gameplay)
         {
-            var key = (link, physics, gameplay, tint);
+            var key = (link, physics, gameplay);
             if (!indices.TryGetValue(key, out var index))
             {
                 index = materials.Count;
-                materials.Add(UserMaterial(link, physics, gameplay, tint));
+                materials.Add(UserMaterial(link, physics, gameplay));
                 indices[key] = index;
             }
             return index;
@@ -35,7 +29,7 @@ namespace Tman.Core.Surfaces.Building
 
         public CPlugSolid2Model.Material[] ToArray() => [.. materials];
 
-        private static CPlugSolid2Model.Material UserMaterial(string link, CPlugSurface.MaterialId physics, CPlugSurface.GameplayId gameplay, Tint tint)
+        private static CPlugSolid2Model.Material UserMaterial(string link, CPlugSurface.MaterialId physics, CPlugSurface.GameplayId gameplay)
         {
             var instance = new CPlugMaterialUserInst();
             instance.CreateChunk<CPlugMaterialUserInst.Chunk090FD000>().Version = UserInstanceVersion;
@@ -49,8 +43,8 @@ namespace Tman.Core.Surfaces.Building
             instance.SurfacePhysicId = physics;
             instance.SurfaceGameplayId = gameplay;
             instance.TextureSizeInMeters = TextureSizeInMeters;
-            instance.Csts = tint == Tint.None ? [] : [new CPlugMaterialUserInst.Cst { U01 = TintConstant, U02 = RealConstant, U03 = tint.Constants.Length }];
-            instance.Color = tint.Constants;
+            instance.Csts = [];
+            instance.Color = [];
             instance.UvAnims = [];
             instance.UserTextures = [];
             instance.HidingGroup = "";
