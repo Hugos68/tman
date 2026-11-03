@@ -15,8 +15,11 @@ namespace Tman.Core.Surfaces
         public static readonly Surface Plastic = new("Plastic", "Plastic");
 
         public static readonly Surface Wood = new("Wood", "Wood");
+
         public static readonly Surface Metal = new("Metal", "Metal");
 
-        public static readonly IReadOnlyList<Surface> All = [Road, Dirt, Ice, Grass, Plastic, Wood, Metal];
+        public static readonly Surface Magnet = new("Magnet", "Magnet");
+
+        public static readonly IReadOnlyList<Surface> All = [Road, Dirt, Ice, Grass, Plastic, Wood, Metal, Magnet];
     }
 }
