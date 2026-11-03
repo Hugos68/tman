@@ -42,7 +42,7 @@ namespace Tman.Core.Surfaces.Building
                     var strip = GameMaterials.IsGameplayCollision(links[slot]);
                     var link = deck || overlay is not null ? target.Link : dressing.Dress(links[slot]);
                     var (physics, gameplay) = strip ? (target.Physics, dressing.StripGameplay(links[slot])) : gameMaterials.SurfaceOf(link);
-                    materialMap[slot] = merged.IndexOf(link, deck || overlay is not null ? target.Physics : physics, gameplay);
+                    materialMap[slot] = deck || overlay is not null ? merged.IndexOf(link, target.Physics, gameplay, target.Tint) : merged.IndexOf(link, physics, gameplay);
                     if (overlay is not null && dressing.OverlayTwin(overlay) is { } twin)
                     {
                         overlayMap[slot] = merged.IndexOf(twin, CPlugSurface.MaterialId.NotCollidable, CPlugSurface.GameplayId.None);

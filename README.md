@@ -74,10 +74,12 @@ Every output map has its validation removed (no author time, no medals — valid
 | `Plastic` | Surfaces | The same with plastic. |
 | `Wood` | Surface | The same with wood. |
 | `Metal` | Surface | The same with metal. |
-| `Magnet` | Surface | The same with magnet. |
+| `Magnet` | Surface | The same with a dark metal deck the car sticks to (the Doomsday super-magnetic physics). |
 | `PodiumReverse` | Reverse | The race runs backwards: the car starts in front of the podium (the one nearest the old start when there are several), facing away from it, and the old start is the finish; checkpoints and the old finish become plain blocks. A map without a podium is left as it is. |
  
 The surface alterations build their blocks from the game's own files: copy `Stadium.pak`, `RedIsland.pak`, `WhiteShore.pak`, `GreenCoast.pak` and `BlueBay.pak` (from `Trackmania\Packs`). The first run on a map builds every road block it needs (about a second each) into a cache; later runs reuse them. The cache is in the user's local application data (`%LocalAppData%\tman\Cache` on Windows). The cache is keyed by the pak files and the build, so a game update or a code change never serves stale blocks.
+
+A map of a vista environment (RedIsland, WhiteShore, GreenCoast, BlueBay) with embedded custom blocks crashes the game when the editor switches its mood — any embedded block, including blocks the game made itself; the editor was never meant to re-decorate one. Altered vista maps are for playing; set the mood on the source map before altering it. tman logs a warning when it alters such a map.
 
 ## Where it comes from
 
