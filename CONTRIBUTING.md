@@ -7,11 +7,12 @@
 | `Tman.Core` | The library. Everything an alteration needs; no user-interface code. |
 | `Tman.Interface` | How a host talks to Core: `TmanHost` composes the services (paks, assets, cache, logging) and hands out the pipeline, `MapPaths` resolves input patterns to output paths, `Batch` runs an alteration over maps in parallel with progress. No console, no window. |
 | `Tman.Cli` | The command line (`tman`): arguments and console logging over `Tman.Interface`. |
+| `Tman.Gui` | The window (`tman-gui`, Avalonia): the alteration list from `AlterationPipeline.Catalog`, drag and drop, pickers, a progress bar fed by `Batch`'s callback and a log pane that is an `ILoggerProvider`. Nothing in it knows Core beyond `Tman.Interface`. |
 | `Tman.Paks` | Reads the game's pak files: the per-pak keys, the hashed-name resolver, the `Paks/` folder lookup. Used by `Tman.Core` (surface blocks) and `Tman.Generator`. |
 | `Tman.Tests` | xunit tests of the rules and of the pipeline on fakes (`dotnet test`). |
 | `Tman.Generator` | A development tool: regenerates the game catalog in `Tman.Core/Catalog/Generated` from the game's pak files and the custom items in `Tman.Core/Assets/Items`. Not needed to run tman. |
 
-`Tman.sln` builds all six.
+`Tman.sln` builds all seven.
 
 ## Setup
 

@@ -33,6 +33,11 @@ namespace Tman.Core.Alterations
 
         public static IEnumerable<string> Names => AlterationTypes.Select(type => type.Name).Order(StringComparer.Ordinal);
 
+        public static IEnumerable<AlterationInfo> Catalog => AlterationTypes
+            .Select(type => new AlterationInfo(type.Name, type.Namespace![(type.Namespace!.LastIndexOf('.') + 1)..]))
+            .OrderBy(info => info.Family, StringComparer.Ordinal)
+            .ThenBy(info => info.Name, StringComparer.Ordinal);
+
         public void Apply(string alterationName, Map map)
         {
             var type = AlterationTypes.FirstOrDefault(candidate => candidate.Name.Equals(alterationName, StringComparison.OrdinalIgnoreCase))

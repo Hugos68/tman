@@ -16,6 +16,8 @@ dotnet build Tman.sln --configuration Release
 
 The executable is `Tman.Cli/bin/Release/net10.0/tman` (`tman.exe` on Windows).
 
+There is also a window: `Tman.Gui/bin/Release/net10.0/tman-gui` (`tman-gui.exe`). Pick an alteration on the left, drop map files or a folder of maps onto it (or use the buttons), choose an output folder (by default a folder named after the alteration next to the maps), Run. Progress and the log — the same lines the command line prints, including the warnings — show at the bottom. `dotnet publish Tman.Gui -c Release -r win-x64 --self-contained -p:PublishSingleFile=true` makes a single tman-gui.exe that needs no .NET installed.
+
 ## Usage
 
 ```bash
