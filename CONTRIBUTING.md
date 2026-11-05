@@ -5,12 +5,14 @@
 | Project | Role |
 | --- | --- |
 | `Tman.Core` | The library. Everything an alteration needs; no user-interface code. |
-| `Tman.Interface` | The command line (`tman`). A graphical interface would be another project referencing `Tman.Core`. |
+| `Tman.Interface` | How a host talks to Core: `TmanHost` composes the services (paks, assets, cache, logging) and hands out the pipeline, `MapPaths` resolves input patterns to output paths, `Batch` runs an alteration over maps in parallel with progress. No console, no window. |
+| `Tman.Cli` | The command line (`tman`): arguments and console logging over `Tman.Interface`. |
+| `Tman.Gui` | The window (`tman-gui`, Avalonia): the alteration list from `AlterationPipeline.Catalog`, drag and drop, pickers, a progress bar fed by `Batch`'s callback and a log pane that is an `ILoggerProvider`. Nothing in it knows Core beyond `Tman.Interface`. |
 | `Tman.Paks` | Reads the game's pak files: the per-pak keys, the hashed-name resolver, the `Paks/` folder lookup. Used by `Tman.Core` (surface blocks) and `Tman.Generator`. |
 | `Tman.Tests` | xunit tests of the rules and of the pipeline on fakes (`dotnet test`). |
 | `Tman.Generator` | A development tool: regenerates the game catalog in `Tman.Core/Catalog/Generated` from the game's pak files and the custom items in `Tman.Core/Assets/Items`. Not needed to run tman. |
 
-`Tman.sln` builds all five.
+`Tman.sln` builds all seven.
 
 ## Setup
 
@@ -62,15 +64,15 @@ Tman.Core/
 
 Namespaces follow the folders (`Tman.Core.Alterations.Finishes`, `Tman.Core.Catalog`, `Tman.Core.Surfaces.Building`, `Tman.Core.Maps.Placements`). `Map` is one partial class split by concern: call sites read `map.Replace(...)`, the file name tells which concern the method belongs to. `Map` owns the game's map object: the `CGameCtnChallenge` is private, and only `Maps/` and `Surfaces/Building/` work with GBX.NET's node classes — an alteration sees placements, idents and bytes, never the game's object graph.
 
-Everything is `internal` unless Tman.Interface needs it (`AlterationPipeline`, `AddTman`, the service interfaces and their adapters, `Map.Load` and `Map.Save`), every class that is not a base class is `sealed`, and every number that is not zero or one has a name.
+Everything is `internal` unless a host needs it (`AlterationPipeline`, `AddTman`, the service interfaces and their adapters, `Map.Load` and `Map.Save`), every class that is not a base class is `sealed`, and every number that is not zero or one has a name.
 
 ### Services
 
-Core touches the outside world through three interfaces, chosen and constructed by the host (Tman.Interface's `Program`) and registered in a `ServiceCollection`: `IPakStore` (the game's pak files; `PakStore` over a directory), `IAssets` (the shipped `Assets/` folder; `DirectoryAssets`), `IBlockCache` (built surface blocks; `FileBlockCache` under the user's local application data, `MemoryBlockCache` for runs that keep nothing). `AddTman()` registers Core's own services on top — the block builder chain, `ISurfaceBlocks`, the `AlterationContext`, every alteration by type — and `AlterationPipeline.Apply(name, map)` resolves the alteration and runs it. Alterations and steps never reach for a static: what they need comes in through the `AlterationContext` parameter of `Run` (`context.Embed(map, item)`, `context.Replace(map, placement, surfaceBlock)`, `context.Open(assetPath)`). A test composes the same container with a `MemoryBlockCache`, a fake `IPakStore` and an in-memory `IAssets`.
+Core touches the outside world through three interfaces, chosen and constructed by the host (`TmanHost` in Tman.Interface) and registered in a `ServiceCollection`: `IPakStore` (the game's pak files; `PakStore` over a directory), `IAssets` (the shipped `Assets/` folder; `DirectoryAssets`), `IBlockCache` (built surface blocks; `FileBlockCache` under the user's local application data, `MemoryBlockCache` for runs that keep nothing). `AddTman()` registers Core's own services on top — the block builder chain, `ISurfaceBlocks`, the `AlterationContext`, every alteration by type — and `AlterationPipeline.Apply(name, map)` resolves the alteration and runs it. Alterations and steps never reach for a static: what they need comes in through the `AlterationContext` parameter of `Run` (`context.Embed(map, item)`, `context.Replace(map, placement, surfaceBlock)`, `context.Open(assetPath)`). A test composes the same container with a `MemoryBlockCache`, a fake `IPakStore` and an in-memory `IAssets`.
 
 ### Logging
 
-Core logs through `Microsoft.Extensions.Logging`: the block builder and the cache take an `ILogger<T>` in their constructors; an alteration and its steps log through `context.Logger`, a logger named after the alteration that runs (`Tman.Core.Alterations.Surfaces.Wood`) inside a scope carrying the map's name, so a parallel campaign run stays readable. Information is one line per step with a count (`SurfaceBlocksPlaced: 43 of 833 blocks replaced`, `FinishPlane over 74 floor boxes`, `Renamed to …`) and one per map with the time; Debug names every step, every replaced placement, the kinds a step kept and how many, and every surface block built or served from the cache; Warning is for what the map has and tman does not know (a block outside the catalog, no floor to finish on). Nothing in Core writes to the console: Tman.Interface adds the simple console logger, `--verbose` lowers the level to Debug and `--quiet` raises it to Warning.
+Core logs through `Microsoft.Extensions.Logging`: the block builder and the cache take an `ILogger<T>` in their constructors; an alteration and its steps log through `context.Logger`, a logger named after the alteration that runs (`Tman.Core.Alterations.Surfaces.Wood`) inside a scope carrying the map's name, so a parallel campaign run stays readable. Information is one line per step with a count (`SurfaceBlocksPlaced: 43 of 833 blocks replaced`, `FinishPlane over 74 floor boxes`, `Renamed to …`) and one per map with the time; Debug names every step, every replaced placement, the kinds a step kept and how many, and every surface block built or served from the cache; Warning is for what the map has and tman does not know (a block outside the catalog, no floor to finish on). Nothing in Core or Tman.Interface writes to the console: Tman.Cli adds the simple console logger, `--verbose` lowers the level to Debug and `--quiet` raises it to Warning.
 
 ### The catalog
 

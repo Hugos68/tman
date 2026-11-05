@@ -1,0 +1,51 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:alterations="using:Tman.Core.Alterations"
+        x:Class="Tman.Gui.MainWindow"
+        Title="tman"
+        Width="960" Height="640" MinWidth="720" MinHeight="480"
+        DragDrop.AllowDrop="True">
+  <Grid ColumnDefinitions="260,*" RowDefinitions="*,Auto" Margin="12">
+    <DockPanel Grid.Column="0" Grid.Row="0" Margin="0,0,12,0">
+      <TextBlock DockPanel.Dock="Top" Text="Alteration" FontWeight="SemiBold" Margin="0,0,0,6"/>
+      <ListBox x:Name="Alterations" SelectionChanged="OnSelectionChanged">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="alterations:AlterationInfo">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Text="{Binding Name}"/>
+              <TextBlock Text="{Binding Family}" Opacity="0.5"/>
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </DockPanel>
+    <Grid Grid.Column="1" Grid.Row="0" RowDefinitions="Auto,*,Auto,Auto">
+      <Border Grid.Row="0" x:Name="DropZone" BorderBrush="Gray" BorderThickness="2" CornerRadius="6" Padding="12" MinHeight="88" Background="#10FFFFFF">
+        <StackPanel Spacing="6">
+          <TextBlock x:Name="DropText" Text="Drop .Map.Gbx files or a folder here" HorizontalAlignment="Center"/>
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
+            <Button Content="Choose maps…" Click="OnChooseMaps"/>
+            <Button Content="Choose folder…" Click="OnChooseFolder"/>
+            <Button Content="Clear" Click="OnClear"/>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+      <ListBox Grid.Row="1" x:Name="Maps" Margin="0,8,0,8"/>
+      <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,8">
+        <TextBlock Grid.Column="0" Text="Output folder" VerticalAlignment="Center" Margin="0,0,8,0"/>
+        <TextBox Grid.Column="1" x:Name="Output" Watermark="Next to the maps, in a folder named after the alteration"/>
+        <Button Grid.Column="2" Content="…" Click="OnChooseOutput" Margin="8,0,0,0"/>
+      </Grid>
+      <Grid Grid.Row="3" ColumnDefinitions="Auto,*,Auto">
+        <Button Grid.Column="0" x:Name="Run" Content="Run" Click="OnRun" IsEnabled="False" MinWidth="96"/>
+        <ProgressBar Grid.Column="1" x:Name="Progress" Minimum="0" Maximum="1" Value="0" Margin="12,0" Height="20" ShowProgressText="True"/>
+        <Button Grid.Column="2" x:Name="Cancel" Content="Cancel" Click="OnCancel" IsEnabled="False"/>
+      </Grid>
+    </Grid>
+    <Border Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,12,0,0" BorderBrush="Gray" BorderThickness="1" CornerRadius="4" Height="160">
+      <ScrollViewer x:Name="LogScroll">
+        <SelectableTextBlock x:Name="Log" FontFamily="Consolas,Menlo,monospace" FontSize="12" Padding="8" TextWrapping="Wrap"/>
+      </ScrollViewer>
+    </Border>
+  </Grid>
+</Window>
