@@ -15,16 +15,17 @@ namespace Tman.Interface
             await Parallel.ForEachAsync(paths.Inputs, cancellationToken, (input, token) =>
             {
                 token.ThrowIfCancellationRequested();
-                var output = Apply(pipeline, alterationName, input, paths.OutputFor(input));
+                var output = Apply(pipeline, alterationName, input, paths);
                 progress(Interlocked.Increment(ref done), paths.Inputs.Count, output);
                 return ValueTask.CompletedTask;
             });
         }
 
-        public static string Apply(AlterationPipeline pipeline, string alterationName, string input, string output)
+        public static string Apply(AlterationPipeline pipeline, string alterationName, string input, MapPaths paths)
         {
             var map = Map.Load(input);
             pipeline.Apply(alterationName, map);
+            var output = paths.OutputFor(map.Name);
             Directory.CreateDirectory(Path.GetDirectoryName(output)!);
             map.Save(output);
             return output;

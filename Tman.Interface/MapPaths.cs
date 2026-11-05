@@ -31,12 +31,8 @@ namespace Tman.Interface
         public static MapPaths ForFolder(IReadOnlyList<string> inputs, string outputFolder) =>
             new(inputs, Path.Combine(outputFolder, Wildcard + MapExtension));
 
-        public string OutputFor(string input)
-        {
-            var fileName = Path.GetFileName(input);
-            var stem = fileName.EndsWith(MapExtension, StringComparison.OrdinalIgnoreCase) ? fileName[..^MapExtension.Length] : Path.GetFileNameWithoutExtension(fileName);
-            return Path.GetFullPath(Inputs.Count > 1 || Output.Contains(Wildcard) ? Output.Replace(Wildcard.ToString(), stem) : Output);
-        }
+        public string OutputFor(string mapName) =>
+            Path.GetFullPath(Output.Contains(Wildcard) ? Output.Replace(Wildcard.ToString(), MapNames.FileName(mapName)) : Output);
 
         private static string[] Expand(string input)
         {
