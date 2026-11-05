@@ -14,7 +14,7 @@ cd tman
 dotnet build Tman.sln --configuration Release
 ```
 
-The executable is `Tman.Interface/bin/Release/net10.0/tman` (`tman.exe` on Windows).
+The executable is `Tman.Cli/bin/Release/net10.0/tman` (`tman.exe` on Windows).
 
 ## Usage
 
