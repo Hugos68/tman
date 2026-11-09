@@ -78,6 +78,7 @@ namespace Tman.Core.Surfaces.Building
             item.Node.PageName = file.Block.Archetype.Id;
             item.Node.Description = file.Block.Name;
             item.Node.IconWebP = info.IconWebP;
+            item.Node.WaypointType = (CGameItemModel.EWaypointType)info.WayPointType;
             var edition = (CGameBlockItem)item.Node.EntityModelEdition!;
             edition.ArchetypeBlockInfoId = file.Block.Archetype.Id;
             edition.ArchetypeBlockInfoCollectionId = collection;
