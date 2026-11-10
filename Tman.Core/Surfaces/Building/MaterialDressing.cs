@@ -31,8 +31,10 @@ namespace Tman.Core.Surfaces.Building
         public static MaterialDressing For(IPakStore paks, GameMaterials materials, Collections collection, string infoPath, CGameCtnBlockInfo info, int ancestor)
         {
             var folders = new[] { info.MaterialModifierFile?.FilePath, info.MaterialModifier2File?.FilePath }
-                .Where(modifier => modifier is not null && modifier.EndsWith(TerrainModifierExtension, StringComparison.OrdinalIgnoreCase))
-                .Select(modifier => PakStore.Logical(infoPath, ancestor, modifier!.Trim())[..^TerrainModifierExtension.Length])
+                .Where(modifier => modifier is not null)
+                .Select(modifier => modifier!.Replace(" ", ""))
+                .Where(modifier => modifier.EndsWith(TerrainModifierExtension, StringComparison.OrdinalIgnoreCase))
+                .Select(modifier => PakStore.Logical(infoPath, ancestor, modifier)[..^TerrainModifierExtension.Length])
                 .ToList();
             return new MaterialDressing(paks, materials, collection, folders);
         }
