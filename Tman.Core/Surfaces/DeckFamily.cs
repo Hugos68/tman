@@ -26,6 +26,8 @@ namespace Tman.Core.Surfaces
 
         private const string SnowRoadBorder = Materials + "ThemeSnowRoadBorder";
 
+        private const string OpenBorders = Materials + "OpenTechBorders";
+
         private const string Pillar = "Pillar";
 
         private const string On = "On";
@@ -59,6 +61,10 @@ namespace Tman.Core.Surfaces
         public bool IsPlatform => DeckMaterials.Contains(PlatformTech);
 
         public bool IsDeck(string link) => DeckMaterials.Contains(link) || AllDeckMaterials.Value.Contains(link);
+
+        public static bool IsOpenBorder(string link) => string.Equals(link, OpenBorders, StringComparison.OrdinalIgnoreCase);
+
+        public static string OpenBorderOf(string deck) => PakPath.Join(PakPath.Folder(deck), PakPath.Name(OpenBorders));
 
         private static readonly Lazy<IReadOnlySet<string>> AllDeckMaterials = new(() => Decks([.. All.SelectMany(family => family.DeckMaterials)]));
 

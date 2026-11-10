@@ -69,7 +69,7 @@ Every output map has its validation removed (no author time, no medals — valid
 | `Manslaughter` | Finishes | Every spectator stand is a finish. |
 | `Moth` | Finishes | Every light is a finish. |
 | `Jitter` | Other | Every block/item position and yawpitchroll is slightly changed |
-| `Road` | Surfaces | Every road, open road and platform drives on asphalt: road kinds become surface blocks with the asphalt deck, platforms their Tech twin. The snow road's edge boards are part of its deck and go with it; the kerbs of the other roads are not driven on and keep their look and grip. |
+| `Road` | Surfaces | Every road, open road and platform drives on asphalt: road kinds become surface blocks with the asphalt deck, platforms their Tech twin. The snow road's edge boards and the open roads' painted borders are driven on, so they take the surface's grip (and its own border paint where the game has one); the kerbs of the other roads keep their look and grip. |
 | `Dirt` | Surfaces | The same with dirt. |
 | `Ice` | Surfaces | The same with ice: the bobsleigh deck on roads, the ice platform on platforms and open roads. |
 | `Grass` | Surfaces | The same with grass. |
