@@ -40,9 +40,10 @@ namespace Tman.Core.Surfaces.Building
                     var deck = family.IsDeck(links[slot]);
                     var overlay = family.DeckOverlay(links[slot]);
                     var strip = GameMaterials.IsGameplayCollision(links[slot]);
-                    var link = deck || overlay is not null ? target.Link : dressing.Dress(links[slot]);
+                    var border = DeckFamily.IsOpenBorder(links[slot]);
+                    var link = deck || overlay is not null ? target.Link : border ? OpenBorder(target) : dressing.Dress(links[slot]);
                     var (physics, gameplay) = strip ? (target.Physics, dressing.StripGameplay(links[slot])) : gameMaterials.SurfaceOf(link);
-                    materialMap[slot] = deck || overlay is not null ? merged.IndexOf(link, target.Physics, gameplay) : merged.IndexOf(link, physics, gameplay);
+                    materialMap[slot] = deck || overlay is not null || border ? merged.IndexOf(link, target.Physics, gameplay) : merged.IndexOf(link, physics, gameplay);
                     if (overlay is not null && dressing.OverlayTwin(overlay) is { } twin)
                     {
                         overlayMap[slot] = merged.IndexOf(twin, CPlugSurface.MaterialId.NotCollidable, CPlugSurface.GameplayId.None);
@@ -138,6 +139,12 @@ namespace Tman.Core.Surfaces.Building
             return copy;
         }
 
+        private string OpenBorder(SurfaceTarget target)
+        {
+            var twin = DeckFamily.OpenBorderOf(target.Link);
+            return gameMaterials.Exists(twin) ? twin : target.Link;
+        }
+
         private SlotTreatment[] ShapeSlots(PrefabParts.Part part, CPlugSurface shape, DeckFamily family, SurfaceTarget target, MaterialDressing dressing) =>
             [.. shape.Materials!.Select(material =>
             {
@@ -145,7 +152,7 @@ namespace Tman.Core.Surfaces.Building
                 {
                     var link = geometry.Link(part, file.FilePath);
                     return GameMaterials.IsGameplayCollision(link) ? new SlotTreatment(true, target.Physics, dressing.StripGameplay(link))
-                        : family.IsDeck(link) || family.DeckOverlay(link) is not null ? new SlotTreatment(true, target.Physics, null)
+                        : family.IsDeck(link) || family.DeckOverlay(link) is not null || DeckFamily.IsOpenBorder(link) ? new SlotTreatment(true, target.Physics, null)
                         : new SlotTreatment(false, gameMaterials.PhysicsOf(dressing.Dress(link)), null);
                 }
                 return new SlotTreatment(false, material.Material?.SurfaceId ?? material.SurfaceId ?? CPlugSurface.MaterialId.Asphalt, null);
