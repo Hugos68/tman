@@ -24,19 +24,19 @@ namespace Tman.Core.Surfaces
 
         private const string SnowRoad = Materials + "ThemeSnowRoad";
 
+        private const string SnowRoadBorder = Materials + "ThemeSnowRoadBorder";
+
         private const string Pillar = "Pillar";
 
         private const string On = "On";
 
-        private const string Border = "Border";
-
         public static readonly IReadOnlyList<DeckFamily> All =
         [
-            new("RoadTech", Decks(RoadTech, SnowRoad), Surface.Road),
+            new("RoadTech", Decks(RoadTech, SnowRoad, SnowRoadBorder), Surface.Road),
             new("RoadDirt", Decks(RoadDirt), Surface.Dirt),
             new("RoadIce", Decks(RoadIce), Surface.Ice),
             new("RoadBump", Decks(RoadBump), null),
-            new("SnowRoad", Decks(SnowRoad), Surface.Wood),
+            new("SnowRoad", Decks(SnowRoad, SnowRoadBorder), Surface.Wood),
             new("RallyRoadDirt", Decks(RoadDirt), Surface.Dirt),
             new("RallyCastleRoad", Decks(RoadDirt, RoadDirtFullColorize), Surface.Dirt),
             new("ToRoadDirt", Decks(RoadDirt), Surface.Dirt),
@@ -58,7 +58,7 @@ namespace Tman.Core.Surfaces
 
         public bool IsPlatform => DeckMaterials.Contains(PlatformTech);
 
-        public bool IsDeck(string link) => DeckMaterials.Contains(link) || AllDeckMaterials.Value.Contains(link) || PakPath.Name(link).Contains(Border, StringComparison.Ordinal);
+        public bool IsDeck(string link) => DeckMaterials.Contains(link) || AllDeckMaterials.Value.Contains(link);
 
         private static readonly Lazy<IReadOnlySet<string>> AllDeckMaterials = new(() => Decks([.. All.SelectMany(family => family.DeckMaterials)]));
 
