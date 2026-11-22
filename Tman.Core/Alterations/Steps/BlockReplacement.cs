@@ -21,9 +21,8 @@ namespace Tman.Core.Alterations.Steps
                 {
                     context.Logger.LogWarning("{Block} at {Cell} is not in the catalog", placement.Id, placement.Cell);
                 }
-                else if (replacement(model) is { } target)
+                else if (replacement(model) is { } target && Replace(map, context, placement, target))
                 {
-                    Replace(map, context, placement, target);
                     context.Logger.LogDebug("{Block} at {Cell} replaced", model.Id, placement.Cell);
                     replaced++;
                 }
@@ -39,6 +38,6 @@ namespace Tman.Core.Alterations.Steps
             }
         }
 
-        protected abstract void Replace(Map map, AlterationContext context, Placement placement, TModel target);
+        protected abstract bool Replace(Map map, AlterationContext context, Placement placement, TModel target);
     }
 }

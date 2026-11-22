@@ -10,6 +10,8 @@ namespace Tman.Core.Maps
 {
     public sealed partial class Map
     {
+        private const string EmbeddedItemsRoot = "Items/";
+
         internal void Embed(string name, Stream content)
         {
             Challenge.UpdateEmbeddedZipData(zip =>
@@ -34,6 +36,23 @@ namespace Tman.Core.Maps
         {
             Embed(ident.Id, item);
             Challenge.PlaceAnchoredObject(ident, Vec3.Zero, Vec3.Zero, Vec3.Zero);
+        }
+
+        internal byte[]? EmbeddedItem(string id)
+        {
+            if (Challenge.EmbeddedZipData is not { Length: > 0 })
+            {
+                return null;
+            }
+            using var zip = Challenge.OpenReadEmbeddedZipData();
+            if (zip.GetEntry(EmbeddedItemsRoot + id.Replace('\\', '/')) is not { } entry)
+            {
+                return null;
+            }
+            using var content = entry.Open();
+            using var bytes = new MemoryStream();
+            content.CopyTo(bytes);
+            return bytes.ToArray();
         }
 
         internal IReadOnlyList<string> EmbeddedFiles

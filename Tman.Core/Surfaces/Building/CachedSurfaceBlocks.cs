@@ -7,7 +7,7 @@ namespace Tman.Core.Surfaces.Building
     {
         private readonly Lock building = new();
 
-        public byte[] Bytes(SurfaceBlockFile file)
+        public byte[]? Bytes(SurfaceBlockFile file)
         {
             lock (building)
             {
@@ -17,8 +17,19 @@ namespace Tman.Core.Surfaces.Building
                     return cached;
                 }
                 var bytes = builder.Build(file);
-                cache.Write(file.CachePath, bytes);
+                if (bytes is { Length: > 0 })
+                {
+                    cache.Write(file.CachePath, bytes);
+                }
                 return bytes;
+            }
+        }
+
+        public byte[]? CustomItemBytes(SurfaceBlockFile file, byte[] item)
+        {
+            lock (building)
+            {
+                return builder.BuildCustomItem(file, item);
             }
         }
     }

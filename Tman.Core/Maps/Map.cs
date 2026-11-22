@@ -91,6 +91,8 @@ namespace Tman.Core.Maps
             (Challenge.Blocks ?? []).Select(block => new Placement(block))
                 .Concat((Challenge.AnchoredObjects ?? []).Select(item => new Placement(item)));
 
+        internal IEnumerable<Placement> Baked => (Challenge.BakedBlocks ?? []).Select(block => new Placement(block));
+
         internal IEnumerable<Placement> Terrain =>
             (Challenge.Blocks ?? []).Concat(Challenge.BakedBlocks ?? []).Where(block => !block.IsFree).Select(block => new Placement(block));
 
@@ -103,7 +105,10 @@ namespace Tman.Core.Maps
         {
             if (placement.Block is not null)
             {
-                Challenge.RemoveBlock(placement.Block);
+                if (Challenge.BakedBlocks?.Remove(placement.Block) != true)
+                {
+                    Challenge.RemoveBlock(placement.Block);
+                }
             }
             else
             {

@@ -24,6 +24,8 @@ namespace Tman.Core.Maps
             }
         }
 
+        internal void RemoveBakedClips() => Challenge.BakedClipsAdditionalData?.Clear();
+
         internal void RemoveLightmap()
         {
             var gbx = Challenge;

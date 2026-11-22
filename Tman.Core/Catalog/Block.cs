@@ -7,5 +7,7 @@ namespace Tman.Core.Catalog
         public Block? As(Waypoint kind) => kind == Waypoint ? this : Blocks.Families.TryGetValue((Id, kind), out var twin) ? twin : null;
 
         public BlockVariant Variant(int n) => new(this, n);
+
+        public static Block Unlisted(string id) => new(id, 1, 1, null, Collections.All, Waypoint.None, true, true, 1);
     }
 }

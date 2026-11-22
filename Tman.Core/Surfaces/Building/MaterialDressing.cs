@@ -28,13 +28,16 @@ namespace Tman.Core.Surfaces.Building
 
         private readonly Dictionary<string, string> dressed = new(StringComparer.OrdinalIgnoreCase);
 
-        public static MaterialDressing For(IPakStore paks, GameMaterials materials, Collections collection, string infoPath, CGameCtnBlockInfo info, int ancestor)
+        public static MaterialDressing For(IPakStore paks, GameMaterials materials, Collections collection, string infoPath, CGameCtnBlockInfo info, int ancestor) =>
+            For(paks, materials, collection, infoPath, ancestor, info.MaterialModifierFile?.FilePath, info.MaterialModifier2File?.FilePath);
+
+        public static MaterialDressing For(IPakStore paks, GameMaterials materials, Collections collection, string ownerPath, int ancestor, params string?[] modifiers)
         {
-            var folders = new[] { info.MaterialModifierFile?.FilePath, info.MaterialModifier2File?.FilePath }
+            var folders = modifiers
                 .Where(modifier => modifier is not null)
                 .Select(modifier => modifier!.Replace(" ", ""))
                 .Where(modifier => modifier.EndsWith(TerrainModifierExtension, StringComparison.OrdinalIgnoreCase))
-                .Select(modifier => PakStore.Logical(infoPath, ancestor, modifier)[..^TerrainModifierExtension.Length])
+                .Select(modifier => PakStore.Logical(ownerPath, ancestor, modifier)[..^TerrainModifierExtension.Length])
                 .ToList();
             return new MaterialDressing(paks, materials, collection, folders);
         }

@@ -9,10 +9,12 @@ namespace Tman.Tests.Fakes
     {
         public List<SurfaceBlockFile> Requested { get; } = [];
 
-        public byte[] Bytes(SurfaceBlockFile file)
+        public byte[]? Bytes(SurfaceBlockFile file)
         {
             Requested.Add(file);
             return Encoding.UTF8.GetBytes(file.FileName);
         }
+
+        public byte[]? CustomItemBytes(SurfaceBlockFile file, byte[] item) => Bytes(file);
     }
 }
