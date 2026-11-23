@@ -1,16 +1,23 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using GBX.NET;
 using GBX.NET.Engines.MwFoundations;
 using GBX.NET.Engines.Plug;
 using GBX.NET.Serialization.Chunking;
+using Tman.Core.Catalog;
 using Tman.Core.Game;
+using Tman.Paks;
 
 namespace Tman.Core.Surfaces.Building
 {
     internal sealed class SurfaceBlockMesh(PartGeometry geometry, GameMaterials gameMaterials)
     {
         private const string PlaceholderMaterial = @"Stadium\Media\Material\TechnicsTrims";
+
+        private const string EnvironmentMaterialsFolder = @"Media\Material";
+
+        private static readonly string[] TerrainLookMaterials = [@"Stadium\Media\Material\DecoHill", @"Stadium\Media\Material\DecoHill2", @"Stadium\Media\Material\Deco"];
 
         public CPlugStaticObjectModel Merge(IReadOnlyList<PrefabParts.Part> parts, DeckFamily family, SurfaceTarget target, MaterialDressing dressing)
         {
@@ -131,6 +138,23 @@ namespace Tman.Core.Surfaces.Building
             return model;
         }
 
+        public CPlugStaticObjectModel? Terrain(IReadOnlyList<PrefabParts.Part> parts, DeckFamily family, MaterialDressing dressing, Collections collection)
+        {
+            if (Collision(parts, dressing) is not { Shape: not null } collision)
+            {
+                return null;
+            }
+            var looks = TerrainLookMaterials.Select(dressing.Dress).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var environment = PakPath.Join(collection.ToString(), EnvironmentMaterialsFolder) + PakPath.Separator;
+            var model = Merge(parts, family, SurfaceTarget.Of(family.NativeSurface ?? Surface.Road, family), dressing);
+            var solid = model.Mesh!;
+            var materials = solid.CustomMaterials ?? [];
+            solid.ShadedGeoms = [.. (solid.ShadedGeoms ?? []).Where(geom => materials.ElementAtOrDefault(geom.MaterialIndex)?.MaterialUserInst?.Link is { } link
+                && (looks.Contains(link) || (collection != Collections.Stadium && link.StartsWith(environment, StringComparison.OrdinalIgnoreCase))))];
+            model.Shape = collision.Shape;
+            return solid.ShadedGeoms.Length == 0 ? collision : model;
+        }
+
         public CPlugStaticObjectModel? Collision(IReadOnlyList<PrefabParts.Part> parts, MaterialDressing? dressing)
         {
             if (parts.FirstOrDefault(part => geometry.Solid(part).ShadedGeoms is { Length: > 0 }) is not { } shown)
@@ -209,9 +233,11 @@ namespace Tman.Core.Surfaces.Building
             {
                 stream.Positions = [.. stream.Positions!.Select((_, index) => index == 1 ? max : min)];
             }
-            if (visual is CPlugVisualIndexed { IndexBuffer: { Indices: { } indices } buffer })
+            if (visual is CPlugVisualIndexed { IndexBuffer: { Indices: { } indices } buffer } indexed)
             {
-                buffer.Indices = new int[indices.Length];
+                var hidden = (CPlugIndexBuffer)buffer.DeepClone();
+                hidden.Indices = new int[indices.Length];
+                indexed.IndexBuffer = hidden;
             }
             visual.BoundingBox = VisualTransform.Bounds(extent);
             var merged = new MergedMaterials();

@@ -121,11 +121,16 @@ namespace Tman.Core.Surfaces.Building
                 var rotation = mobil.HasGeomTransformation ? Transforms.FromEulerDegrees(mobil.GeomRotation) : Quat.Identity;
                 parts.AddRange(PrefabParts.Collect(paks, prefab, position, rotation));
             }
-            if (file.Block.Surface != Surface.Invisible)
+            if (file.Block.Surface != Surface.Invisible && file.Block.Surface != Surface.Terrain)
             {
                 return Shell(file, info, variant, Merge(file, parts, infoPath, info, ancestor), infoPath, ancestor);
             }
-            return mesh.Collision(parts, MaterialDressing.For(paks, materials, file.Collection, infoPath, info, ancestor)) is { Shape: not null } collision ? InvisibleShell(file, collision) : [];
+            var dressing = MaterialDressing.For(paks, materials, file.Collection, infoPath, info, ancestor);
+            if (file.Block.Surface == Surface.Terrain)
+            {
+                return DeckFamily.Of(file.Block.Archetype) is { } family && mesh.Terrain(parts, family, dressing, file.Collection) is { } terrain ? Shell(file, info, variant, terrain, infoPath, ancestor) : null;
+            }
+            return mesh.Collision(parts, dressing) is { Shape: not null } collision ? InvisibleShell(file, collision) : [];
         }
 
         private byte[]? InvisibleItem(SurfaceBlockFile file)

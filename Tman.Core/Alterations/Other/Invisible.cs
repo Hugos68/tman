@@ -13,6 +13,7 @@ namespace Tman.Core.Alterations.Other
         [
             new VistaMoodWarning(),
             new ItemsMadeInvisible(),
+            new TerrainDentsKept(),
             new SurfaceBlocksPlaced(block => block.Waypoint == Waypoint.None ? new SurfaceBlock(Surface.Invisible, block) : null),
             new BakedClipsMadeInvisible(),
             new WaypointsFreed(),
