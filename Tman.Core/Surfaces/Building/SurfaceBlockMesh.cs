@@ -109,6 +109,54 @@ namespace Tman.Core.Surfaces.Building
                     });
                 }
             }
+            Finish(solid, parts, visuals, islands, geoms, merged, lodDistances, vertices);
+            mesh.Vertices = [.. vertices];
+            mesh.Triangles = [.. triangles];
+            shape.Materials = [];
+            return model;
+        }
+
+        public CPlugStaticObjectModel? Visible(IReadOnlyList<PrefabParts.Part> parts, MaterialDressing dressing)
+        {
+            if (Collision(parts, dressing) is not { } model || parts.FirstOrDefault(part => geometry.Solid(part).ShadedGeoms is { Length: > 0 }) is not { } shown)
+            {
+                return null;
+            }
+            var solid = (CPlugSolid2Model)geometry.Solid(shown).DeepClone();
+            var merged = new MergedMaterials();
+            var visuals = new List<CPlugVisual3D>();
+            var islands = new List<IReadOnlyList<CPlugVisual3D>>();
+            var geoms = new List<CPlugSolid2Model.ShadedGeom>();
+            var lodDistances = LodLevels.Merge(parts.Select(part => geometry.Solid(part).LodMaxDistAtFov90 ?? []));
+            foreach (var part in parts)
+            {
+                var partSolid = geometry.Solid(part);
+                var materialMap = geometry.MaterialLinks(part, partSolid, geometry.Shape(part)).Select(link =>
+                {
+                    var dressed = dressing.Dress(link);
+                    var (physics, gameplay) = gameMaterials.SurfaceOf(dressed);
+                    return merged.IndexOf(dressed, physics, gameplay);
+                }).ToArray();
+                var visualBase = visuals.Count;
+                var partVisuals = (partSolid.Visuals ?? []).Select(visual => VisualTransform.Copy((CPlugVisual3D)visual, part.Position, part.Rotation)).ToList();
+                visuals.AddRange(partVisuals);
+                islands.Add(partVisuals);
+                geoms.AddRange((partSolid.ShadedGeoms ?? []).Select(geom => new CPlugSolid2Model.ShadedGeom
+                {
+                    VisualIndex = geom.VisualIndex + visualBase,
+                    MaterialIndex = materialMap[geom.MaterialIndex],
+                    U01 = geom.U01,
+                    LodMask = LodLevels.Remap(geom.LodMask, partSolid.LodMaxDistAtFov90 ?? [], lodDistances),
+                    U02 = geom.U02
+                }));
+            }
+            Finish(solid, parts, visuals, islands, geoms, merged, lodDistances, model.Shape?.Surf is CPlugSurface.Mesh shape ? shape.Vertices ?? [] : []);
+            model.Mesh = solid;
+            return model;
+        }
+
+        private void Finish(CPlugSolid2Model solid, IReadOnlyList<PrefabParts.Part> parts, List<CPlugVisual3D> visuals, List<IReadOnlyList<CPlugVisual3D>> islands, List<CPlugSolid2Model.ShadedGeom> geoms, MergedMaterials merged, float[] lodDistances, IEnumerable<Vec3> collision)
+        {
             solid.LodMaxDistAtFov90 = lodDistances;
             if (LightmapAtlas.Repack(islands) is { } layout && solid.PreLightGenerator is { } lightmap)
             {
@@ -124,11 +172,7 @@ namespace Tman.Core.Surfaces.Building
             solid.LightUserModels = [];
             solid.LightInsts = [];
             solid.FileWriteTime = null;
-            solid.Boxes = [VisualTransform.Bounds(vertices.Concat(visuals.SelectMany(visual => visual.VertexStreams![0].Positions!)))];
-            mesh.Vertices = [.. vertices];
-            mesh.Triangles = [.. triangles];
-            shape.Materials = [];
-            return model;
+            solid.Boxes = [VisualTransform.Bounds(collision.Concat(visuals.SelectMany(visual => visual.VertexStreams![0].Positions!)))];
         }
 
         public CPlugStaticObjectModel? Collision(IReadOnlyList<PrefabParts.Part> parts, MaterialDressing? dressing)

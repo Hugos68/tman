@@ -17,6 +17,7 @@ namespace Tman.Core.Alterations.Other
             new SurfaceBlocksPlaced(block => block.Waypoint == Waypoint.None ? new SurfaceBlock(Surface.Invisible, block) : null),
             new BakedClipsMadeInvisible(),
             new WaypointsFreed(),
+            new WaypointsUnclipped(),
             new BakedClipsRemoved()
         ];
     }

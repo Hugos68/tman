@@ -129,6 +129,12 @@ namespace Tman.Core.Surfaces.Building
                 var rotation = mobil.HasGeomTransformation ? Transforms.FromEulerDegrees(mobil.GeomRotation) : Quat.Identity;
                 parts.AddRange(PrefabParts.Collect(paks, prefab, position, rotation));
             }
+            if (file.Block.Surface == Surface.Waypoint)
+            {
+                return variant.WaterVolumes is not { Length: > 0 } && mesh.Visible(parts, MaterialDressing.For(paks, materials, file.Collection, infoPath, info, ancestor)) is { } look
+                    ? Shell(file, info, variant, look, infoPath, ancestor, info.WayPointType == CGameCtnBlockInfo.EWayPointType.Finish ? Blocks.GateFinish : Blocks.GateCheckpoint)
+                    : null;
+            }
             if (file.Block.Surface != Surface.Invisible)
             {
                 return Shell(file, info, variant, Merge(file, parts, infoPath, info, ancestor), infoPath, ancestor);
@@ -373,7 +379,7 @@ namespace Tman.Core.Surfaces.Building
             return stream.ToArray();
         }
 
-        private byte[] Shell(SurfaceBlockFile file, CGameCtnBlockInfo info, CGameCtnBlockInfoVariant variant, CPlugStaticObjectModel model, string infoPath, int ancestor)
+        private byte[] Shell(SurfaceBlockFile file, CGameCtnBlockInfo info, CGameCtnBlockInfoVariant variant, CPlugStaticObjectModel model, string infoPath, int ancestor, Block? archetype = null)
         {
             using var template = assets.Open(Assets.Template(Template));
             var item = Gbx.Parse<CGameItemModel>(template);
@@ -385,7 +391,7 @@ namespace Tman.Core.Surfaces.Building
             item.Node.IconWebP = info.IconWebP;
             item.Node.WaypointType = (CGameItemModel.EWaypointType)info.WayPointType;
             var edition = (CGameBlockItem)item.Node.EntityModelEdition!;
-            edition.ArchetypeBlockInfoId = file.Block.Archetype.Id;
+            edition.ArchetypeBlockInfoId = (archetype ?? file.Block.Archetype).Id;
             edition.ArchetypeBlockInfoCollectionId = collection;
             var properties = new CGameBlockItem.MobilProperties { Flags = StaticObjectFlag, StaticObject = model };
             if (info.WayPointType != CGameCtnBlockInfo.EWayPointType.None)
@@ -401,7 +407,7 @@ namespace Tman.Core.Surfaces.Building
                     properties.Flags |= SpawnFlag;
                 }
             }
-            edition.CustomizedVariants[0] = new CGameBlockItem.Mobil { Id = SurfaceBlockKey.Of(file.Ground, file.AdditionalVariant), Properties = properties };
+            edition.CustomizedVariants[0] = new CGameBlockItem.Mobil { Id = archetype is null ? SurfaceBlockKey.Of(file.Ground, file.AdditionalVariant) : SurfaceBlockKey.Of(false, 0), Properties = properties };
             using var stream = new MemoryStream();
             item.Save(stream);
             return stream.ToArray();

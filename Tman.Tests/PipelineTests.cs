@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Tman.Core.Alterations;
+using Tman.Core.Catalog;
 using Tman.Core.Maps.Placements;
 using Tman.Core.Surfaces;
 using Tman.Core.Surfaces.Building;
@@ -73,18 +74,24 @@ namespace Tman.Tests
             using var services = TestServices.Build(services => services.AddSingleton<ISurfaceBlocks>(blocks));
             var map = TestServices.LoadTestMap();
             var waypoints = map.Placements.OnlyBlocks().Where(placement => placement.IsWaypoint).Select(placement => placement.Id).ToList();
+            var unclipped = map.Placements.OnlyBlocks().Where(placement => placement.IsWaypoint && placement.BlockModel is { Waypoint: Waypoint.Checkpoint or Waypoint.Finish } model && DeckFamily.Of(model) is not null).Select(placement => placement.Id).ToList();
             var others = map.Placements.OnlyBlocks().Count(placement => !placement.IsWaypoint && placement.BlockModel is not null);
             var items = map.Placements.OnlyItems().Count(placement => !placement.IsWaypoint);
             var baked = map.Baked.Count();
             services.GetRequiredService<AlterationPipeline>().Apply("Invisible", map);
+            var invisible = blocks.Requested.Where(file => file.Block.Surface == Surface.Invisible).ToList();
+            var kept = map.Placements.OnlyBlocks().Where(placement => placement.IsWaypoint).ToList();
             Assert.NotEmpty(waypoints);
-            Assert.True(blocks.Requested.Count > others);
-            Assert.Equal(others + items + baked - map.Baked.Count(), blocks.Requested.Count);
+            Assert.NotEmpty(unclipped);
+            Assert.True(invisible.Count > others);
+            Assert.Equal(others + items + baked - map.Baked.Count(), invisible.Count);
             Assert.All(map.Placements.OnlyBlocks(), placement => Assert.True(placement.IsWaypoint || placement.BlockModel is null));
-            Assert.Equal(blocks.Requested.Select(file => file.Ident).Order(), map.Placements.OnlyItems().Where(placement => !placement.IsWaypoint).Select(placement => placement.Id).Order());
-            Assert.All(blocks.Requested, file => Assert.Equal(Surface.Invisible, file.Block.Surface));
-            Assert.Equal(waypoints, map.Placements.OnlyBlocks().Where(placement => placement.IsWaypoint).Select(placement => placement.Id).ToList());
-            Assert.All(map.Placements.OnlyBlocks().Where(placement => placement.IsWaypoint), placement => Assert.True(placement.IsFree));
+            Assert.Equal(invisible.Select(file => file.Ident).Order(), map.Placements.OnlyItems().Where(placement => !placement.IsWaypoint).Select(placement => placement.Id).Order());
+            Assert.Equal(unclipped.Order(), blocks.Requested.Where(file => file.Block.Surface == Surface.Waypoint).Select(file => file.Block.Archetype.Id).Order());
+            Assert.Equal(invisible.Count + unclipped.Count, blocks.Requested.Count);
+            Assert.Equal(waypoints.Count, kept.Count);
+            Assert.Equal(unclipped.Count, kept.Count(placement => placement.Id.EndsWith("_CustomBlock", StringComparison.Ordinal) && !placement.Block!.IsGround));
+            Assert.All(kept, placement => Assert.True(placement.IsFree));
             Assert.EndsWith("Invisible", map.Name);
         }
 
