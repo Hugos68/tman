@@ -35,11 +35,19 @@ namespace Tman.Core.Surfaces.Building
 
         private const string ClipFolder = @"GameCtnBlockInfo\GameCtnBlockInfoClip";
 
-        private static readonly string[] BlockInfoFolders = [@"GameCtnBlockInfo\GameCtnBlockInfoClassic", PillarFolder, ClipFolder];
+        private const string FlatFolder = @"GameCtnBlockInfo\GameCtnBlockInfoFlat";
+
+        private const string FrontierFolder = @"GameCtnBlockInfo\GameCtnBlockInfoFrontier";
+
+        private const string TransitionFolder = @"GameCtnBlockInfo\GameCtnBlockInfoTransition";
+
+        private static readonly string[] IndexedFolders = [PillarFolder, ClipFolder, FlatFolder, FrontierFolder, TransitionFolder];
+
+        private static readonly string[] BlockInfoFolders = [@"GameCtnBlockInfo\GameCtnBlockInfoClassic", .. IndexedFolders];
 
         private const char ExtensionStart = '.';
 
-        private static readonly string[] BlockInfoExtensions = [".EDClassic.Gbx", ".EDClip.Gbx", ".EDHorizontalClip.Gbx", ".EDVerticalClip.Gbx"];
+        private static readonly string[] BlockInfoExtensions = [".EDClassic.Gbx", ".EDClip.Gbx", ".EDHorizontalClip.Gbx", ".EDVerticalClip.Gbx", ".EDFlat.Gbx", ".EDFrontier.Gbx", ".EDTransition.Gbx"];
 
         private const int BlockInfoDepth = 3;
 
@@ -109,7 +117,7 @@ namespace Tman.Core.Surfaces.Building
             {
                 return file.Block.Surface == Surface.Invisible ? null : throw new InvalidOperationException($"No block definition for {file.Block.Archetype.Id} in {file.Collection}");
             }
-            var indexed = infoPath.Contains(PillarFolder, StringComparison.OrdinalIgnoreCase) || infoPath.Contains(ClipFolder, StringComparison.OrdinalIgnoreCase);
+            var indexed = IndexedFolders.Any(folder => infoPath.Contains(folder, StringComparison.OrdinalIgnoreCase));
             var variant = Variant(info, file.Ground, indexed ? 0 : file.AdditionalVariant) ?? throw new InvalidOperationException($"{file.Block.Archetype.Id} has no {(file.Ground ? "ground" : "air")} variant {file.AdditionalVariant}");
             var ancestor = paks.Open(infoPath)!.RefTable?.AncestorLevel ?? 0;
             var parts = new List<PrefabParts.Part>();
@@ -121,16 +129,11 @@ namespace Tman.Core.Surfaces.Building
                 var rotation = mobil.HasGeomTransformation ? Transforms.FromEulerDegrees(mobil.GeomRotation) : Quat.Identity;
                 parts.AddRange(PrefabParts.Collect(paks, prefab, position, rotation));
             }
-            if (file.Block.Surface != Surface.Invisible && file.Block.Surface != Surface.Terrain)
+            if (file.Block.Surface != Surface.Invisible)
             {
                 return Shell(file, info, variant, Merge(file, parts, infoPath, info, ancestor), infoPath, ancestor);
             }
-            var dressing = MaterialDressing.For(paks, materials, file.Collection, infoPath, info, ancestor);
-            if (file.Block.Surface == Surface.Terrain)
-            {
-                return DeckFamily.Of(file.Block.Archetype) is { } family && mesh.Terrain(parts, family, dressing, file.Collection) is { } terrain ? Shell(file, info, variant, terrain, infoPath, ancestor) : null;
-            }
-            return mesh.Collision(parts, dressing) is { Shape: not null } collision ? InvisibleShell(file, collision) : [];
+            return mesh.Collision(parts, MaterialDressing.For(paks, materials, file.Collection, infoPath, info, ancestor)) is { Shape: not null } collision ? InvisibleShell(file, collision) : [];
         }
 
         private byte[]? InvisibleItem(SurfaceBlockFile file)

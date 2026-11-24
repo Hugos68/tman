@@ -22,8 +22,6 @@ namespace Tman.Core.Surfaces
 
         public static readonly Surface Invisible = new("Invisible", "Invisible");
 
-        public static readonly Surface Terrain = new("Terrain", "Terrain");
-
         public static readonly IReadOnlyList<Surface> All = [Road, Dirt, Ice, Grass, Plastic, Wood, Metal, Magnet];
     }
 }

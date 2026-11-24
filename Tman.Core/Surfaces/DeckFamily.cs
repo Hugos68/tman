@@ -32,8 +32,6 @@ namespace Tman.Core.Surfaces
 
         private const string On = "On";
 
-        private const string Open = "Open";
-
         public static readonly IReadOnlyList<DeckFamily> All =
         [
             new("RoadTech", Decks(RoadTech, SnowRoad, SnowRoadBorder), Surface.Road),
@@ -61,8 +59,6 @@ namespace Tman.Core.Surfaces
             : All.Where(family => block.Id.StartsWith(family.Prefix, StringComparison.Ordinal)).OrderByDescending(family => family.Prefix.Length).FirstOrDefault();
 
         public bool IsPlatform => DeckMaterials.Contains(PlatformTech);
-
-        public bool IsOpenRoad => Prefix.StartsWith(Open, StringComparison.Ordinal);
 
         public bool IsDeck(string link) => DeckMaterials.Contains(link) || AllDeckMaterials.Value.Contains(link);
 

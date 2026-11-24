@@ -1,23 +1,16 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using GBX.NET;
 using GBX.NET.Engines.MwFoundations;
 using GBX.NET.Engines.Plug;
 using GBX.NET.Serialization.Chunking;
-using Tman.Core.Catalog;
 using Tman.Core.Game;
-using Tman.Paks;
 
 namespace Tman.Core.Surfaces.Building
 {
     internal sealed class SurfaceBlockMesh(PartGeometry geometry, GameMaterials gameMaterials)
     {
         private const string PlaceholderMaterial = @"Stadium\Media\Material\TechnicsTrims";
-
-        private const string EnvironmentMaterialsFolder = @"Media\Material";
-
-        private static readonly string[] TerrainLookMaterials = [@"Stadium\Media\Material\DecoHill", @"Stadium\Media\Material\DecoHill2", @"Stadium\Media\Material\Deco"];
 
         public CPlugStaticObjectModel Merge(IReadOnlyList<PrefabParts.Part> parts, DeckFamily family, SurfaceTarget target, MaterialDressing dressing)
         {
@@ -136,23 +129,6 @@ namespace Tman.Core.Surfaces.Building
             mesh.Triangles = [.. triangles];
             shape.Materials = [];
             return model;
-        }
-
-        public CPlugStaticObjectModel? Terrain(IReadOnlyList<PrefabParts.Part> parts, DeckFamily family, MaterialDressing dressing, Collections collection)
-        {
-            if (Collision(parts, dressing) is not { Shape: not null } collision)
-            {
-                return null;
-            }
-            var looks = TerrainLookMaterials.Select(dressing.Dress).ToHashSet(StringComparer.OrdinalIgnoreCase);
-            var environment = PakPath.Join(collection.ToString(), EnvironmentMaterialsFolder) + PakPath.Separator;
-            var model = Merge(parts, family, SurfaceTarget.Of(family.NativeSurface ?? Surface.Road, family), dressing);
-            var solid = model.Mesh!;
-            var materials = solid.CustomMaterials ?? [];
-            solid.ShadedGeoms = [.. (solid.ShadedGeoms ?? []).Where(geom => materials.ElementAtOrDefault(geom.MaterialIndex)?.MaterialUserInst?.Link is { } link
-                && (looks.Contains(link) || (collection != Collections.Stadium && link.StartsWith(environment, StringComparison.OrdinalIgnoreCase))))];
-            model.Shape = collision.Shape;
-            return solid.ShadedGeoms.Length == 0 ? collision : model;
         }
 
         public CPlugStaticObjectModel? Collision(IReadOnlyList<PrefabParts.Part> parts, MaterialDressing? dressing)
