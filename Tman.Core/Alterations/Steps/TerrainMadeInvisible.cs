@@ -8,7 +8,7 @@ using Tman.Core.Surfaces;
 
 namespace Tman.Core.Alterations.Steps
 {
-    internal sealed class TerrainMadeInvisible : Alteration
+    internal sealed class TerrainMadeInvisible(Surface surface) : Alteration
     {
         protected override void Run(Map map, AlterationContext context)
         {
@@ -27,7 +27,7 @@ namespace Tman.Core.Alterations.Steps
             }
             var ocean = map.Ocean(kinds);
             var terrain = blocks.Except(hidden).Concat(map.Baked).Where(placement => !placement.IsWaypoint && kinds.Contains(placement.Id) && (ocean is null || !Map.IsOcean(placement, ocean))).ToList();
-            var invisible = terrain.Count(placement => context.Replace(map, placement, new SurfaceBlock(Surface.Invisible, placement.BlockModel ?? Block.Unlisted(placement.Id))));
+            var invisible = terrain.Count(placement => context.Replace(map, placement, new SurfaceBlock(surface, placement.BlockModel ?? Block.Unlisted(placement.Id))));
             if (ocean is not null)
             {
                 map.Flood(ocean);

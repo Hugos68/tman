@@ -96,6 +96,24 @@ namespace Tman.Tests
         }
 
         [Fact]
+        public void InvisibleSeeThroughEmbedsTheSameItemsAsInvisibleButSeeThrough()
+        {
+            var hidden = new FixedSurfaceBlocks();
+            using (var services = TestServices.Build(services => services.AddSingleton<ISurfaceBlocks>(hidden)))
+            {
+                services.GetRequiredService<AlterationPipeline>().Apply("Invisible", TestServices.LoadTestMap());
+            }
+            var shown = new FixedSurfaceBlocks();
+            using var seeThrough = TestServices.Build(services => services.AddSingleton<ISurfaceBlocks>(shown));
+            var map = TestServices.LoadTestMap();
+            seeThrough.GetRequiredService<AlterationPipeline>().Apply("InvisibleSeeThrough", map);
+            Assert.Equal(hidden.Requested.Select(file => (file.Block.Surface == Surface.Invisible ? Surface.SeeThrough : file.Block.Surface, file.Block.Archetype.Id)), shown.Requested.Select(file => (file.Block.Surface, file.Block.Archetype.Id)));
+            Assert.Contains(shown.Requested, file => file.Block.Surface == Surface.SeeThrough);
+            Assert.All(shown.Requested.Where(file => file.Block.Surface == Surface.SeeThrough), file => Assert.True(file.Invisible));
+            Assert.EndsWith("Invisible See-Through", map.Name);
+        }
+
+        [Fact]
         public void PodiumReverseLeavesAMapWithoutAPodiumAlone()
         {
             using var services = TestServices.Build();

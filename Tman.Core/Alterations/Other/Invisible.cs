@@ -9,13 +9,15 @@ namespace Tman.Core.Alterations.Other
     {
         protected override string DisplayName => "Invisible";
 
-        protected override IEnumerable<Alteration> Steps =>
+        protected override IEnumerable<Alteration> Steps => For(Surface.Invisible);
+
+        internal static IEnumerable<Alteration> For(Surface surface) =>
         [
             new VistaMoodWarning(),
-            new ItemsMadeInvisible(),
-            new TerrainMadeInvisible(),
-            new SurfaceBlocksPlaced(block => block.Waypoint == Waypoint.None ? new SurfaceBlock(Surface.Invisible, block) : null),
-            new BakedClipsMadeInvisible(),
+            new ItemsMadeInvisible(surface),
+            new TerrainMadeInvisible(surface),
+            new SurfaceBlocksPlaced(block => block.Waypoint == Waypoint.None ? new SurfaceBlock(surface, block) : null),
+            new BakedClipsMadeInvisible(surface),
             new WaypointsFreed(),
             new WaypointsUnclipped(),
             new BakedClipsRemoved()

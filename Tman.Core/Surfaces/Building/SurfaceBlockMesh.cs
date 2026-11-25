@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using GBX.NET;
@@ -11,6 +12,10 @@ namespace Tman.Core.Surfaces.Building
     internal sealed class SurfaceBlockMesh(PartGeometry geometry, GameMaterials gameMaterials)
     {
         private const string PlaceholderMaterial = @"Stadium\Media\Material\TechnicsTrims";
+
+        private const string SeeThroughMaterial = @"Stadium\Media\Material_BlockCustom\CustomGlass";
+
+        private const int NearestLod = 1;
 
         public CPlugStaticObjectModel Merge(IReadOnlyList<PrefabParts.Part> parts, DeckFamily family, SurfaceTarget target, MaterialDressing dressing)
         {
@@ -122,38 +127,72 @@ namespace Tman.Core.Surfaces.Building
             {
                 return null;
             }
-            var solid = (CPlugSolid2Model)geometry.Solid(shown).DeepClone();
+            return Shaded(model, (CPlugSolid2Model)geometry.Solid(shown).DeepClone(), parts, false, (merged, part, partSolid) => [.. geometry.MaterialLinks(part, partSolid, geometry.Shape(part)).Select(link =>
+            {
+                var dressed = dressing.Dress(link);
+                var (physics, gameplay) = gameMaterials.SurfaceOf(dressed);
+                return merged.IndexOf(dressed, physics, gameplay);
+            })]);
+        }
+
+        public CPlugStaticObjectModel SeeThrough(CPlugStaticObjectModel model, IReadOnlyList<PrefabParts.Part> parts)
+        {
+            if (parts.FirstOrDefault(part => geometry.Solid(part).ShadedGeoms is { Length: > 0 }) is not { } shown)
+            {
+                return model;
+            }
+            return Shaded(model, BodyOnly((CPlugSolid2Model)geometry.Solid(shown).DeepClone()), parts, true, (merged, part, partSolid) =>
+            {
+                var glass = merged.IndexOf(SeeThroughMaterial, CPlugSurface.MaterialId.NotCollidable, CPlugSurface.GameplayId.None);
+                return [.. Enumerable.Repeat(glass, (partSolid.ShadedGeoms ?? []).Select(geom => geom.MaterialIndex + 1).DefaultIfEmpty(0).Max())];
+            });
+        }
+
+        private CPlugStaticObjectModel Shaded(CPlugStaticObjectModel model, CPlugSolid2Model solid, IReadOnlyList<PrefabParts.Part> parts, bool seeThrough, Func<MergedMaterials, PrefabParts.Part, CPlugSolid2Model, int[]> materials)
+        {
             var merged = new MergedMaterials();
             var visuals = new List<CPlugVisual3D>();
             var islands = new List<IReadOnlyList<CPlugVisual3D>>();
             var geoms = new List<CPlugSolid2Model.ShadedGeom>();
-            var lodDistances = LodLevels.Merge(parts.Select(part => geometry.Solid(part).LodMaxDistAtFov90 ?? []));
+            var lodDistances = seeThrough ? [] : LodLevels.Merge(parts.Select(part => geometry.Solid(part).LodMaxDistAtFov90 ?? []));
             foreach (var part in parts)
             {
                 var partSolid = geometry.Solid(part);
-                var materialMap = geometry.MaterialLinks(part, partSolid, geometry.Shape(part)).Select(link =>
-                {
-                    var dressed = dressing.Dress(link);
-                    var (physics, gameplay) = gameMaterials.SurfaceOf(dressed);
-                    return merged.IndexOf(dressed, physics, gameplay);
-                }).ToArray();
-                var visualBase = visuals.Count;
-                var partVisuals = (partSolid.Visuals ?? []).Select(visual => VisualTransform.Copy((CPlugVisual3D)visual, part.Position, part.Rotation)).ToList();
+                var materialMap = materials(merged, part, partSolid);
+                var kept = (partSolid.ShadedGeoms ?? []).Where(geom => !seeThrough || ((geom.LodMask & NearestLod) != 0 && Textured((CPlugVisual3D)partSolid.Visuals![geom.VisualIndex]))).ToList();
+                var used = seeThrough ? [.. kept.Select(geom => geom.VisualIndex).Distinct().Order()] : Enumerable.Range(0, partSolid.Visuals?.Length ?? 0).ToList();
+                var visualIndex = used.Select((source, index) => (source, index)).ToDictionary(pair => pair.source, pair => visuals.Count + pair.index);
+                var partVisuals = used.Select(index => VisualTransform.Copy((CPlugVisual3D)partSolid.Visuals![index], part.Position, part.Rotation)).ToList();
                 visuals.AddRange(partVisuals);
                 islands.Add(partVisuals);
-                geoms.AddRange((partSolid.ShadedGeoms ?? []).Select(geom => new CPlugSolid2Model.ShadedGeom
+                geoms.AddRange(kept.Select(geom => new CPlugSolid2Model.ShadedGeom
                 {
-                    VisualIndex = geom.VisualIndex + visualBase,
+                    VisualIndex = visualIndex[geom.VisualIndex],
                     MaterialIndex = materialMap[geom.MaterialIndex],
                     U01 = geom.U01,
-                    LodMask = LodLevels.Remap(geom.LodMask, partSolid.LodMaxDistAtFov90 ?? [], lodDistances),
+                    LodMask = seeThrough ? NearestLod : LodLevels.Remap(geom.LodMask, partSolid.LodMaxDistAtFov90 ?? [], lodDistances),
                     U02 = geom.U02
                 }));
+            }
+            if (geoms.Count == 0)
+            {
+                return model;
+            }
+            if (seeThrough)
+            {
+                solid.PreLightGenerator = null;
+                foreach (var stream in visuals.Select(visual => visual.VertexStreams![0]))
+                {
+                    var set = stream.UVs!.Keys.Max();
+                    stream.UVs[set] = new Vec2[stream.UVs[set].Length];
+                }
             }
             Finish(solid, parts, visuals, islands, geoms, merged, lodDistances, model.Shape?.Surf is CPlugSurface.Mesh shape ? shape.Vertices ?? [] : []);
             model.Mesh = solid;
             return model;
         }
+
+        private static bool Textured(CPlugVisual3D visual) => visual.VertexStreams?.FirstOrDefault()?.UVs is { Count: > 0 };
 
         private void Finish(CPlugSolid2Model solid, IReadOnlyList<PrefabParts.Part> parts, List<CPlugVisual3D> visuals, List<IReadOnlyList<CPlugVisual3D>> islands, List<CPlugSolid2Model.ShadedGeom> geoms, MergedMaterials merged, float[] lodDistances, IEnumerable<Vec3> collision)
         {

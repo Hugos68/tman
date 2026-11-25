@@ -27,7 +27,7 @@ namespace Tman.Core.Surfaces
 
         public string Name => $"{Block.Name}_{SurfaceBlockKey.Of(Ground, AdditionalVariant) + BaseVariant}{EnvironmentSuffix}";
 
-        public bool Invisible => Block.Surface == Surface.Invisible;
+        public bool Invisible => Block.Surface == Surface.Invisible || Block.Surface == Surface.SeeThrough;
 
         public string FileName => Name + (Invisible ? ItemExtension : BlockExtension);
 

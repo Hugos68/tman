@@ -8,7 +8,7 @@ using Tman.Core.Surfaces;
 
 namespace Tman.Core.Alterations.Steps
 {
-    internal sealed class ItemsMadeInvisible : Alteration
+    internal sealed class ItemsMadeInvisible(Surface surface) : Alteration
     {
         private const float UnitScale = 1;
 
@@ -19,7 +19,7 @@ namespace Tman.Core.Alterations.Steps
         protected override void Run(Map map, AlterationContext context)
         {
             var items = map.Placements.OnlyItems().Where(placement => !placement.IsWaypoint).ToList();
-            var replaced = items.Count(placement => MathF.Abs(placement.Item!.Scale - UnitScale) < ScaleTolerance && context.Replace(map, placement, new SurfaceBlock(Surface.Invisible, Block.Unlisted(Name(placement.Id)))));
+            var replaced = items.Count(placement => MathF.Abs(placement.Item!.Scale - UnitScale) < ScaleTolerance && context.Replace(map, placement, new SurfaceBlock(surface, Block.Unlisted(Name(placement.Id)))));
             context.Logger.LogInformation("{Step}: {Replaced} of {Items} items made invisible", GetType().Name, replaced, items.Count);
         }
 

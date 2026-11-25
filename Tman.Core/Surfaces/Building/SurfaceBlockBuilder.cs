@@ -99,7 +99,7 @@ namespace Tman.Core.Surfaces.Building
                     return null;
                 }
                 var parts = new List<PrefabParts.Part> { new(model, gbx, file.Ident, Vec3.Zero, Quat.Identity) };
-                return mesh.Collision(parts, null) is { Shape: not null } collision ? InvisibleShell(file, collision) : [];
+                return mesh.Collision(parts, null) is { Shape: not null } collision ? InvisibleShell(file, Shown(file, collision, parts)) : [];
             }
             catch (Exception exception) when (exception is not InvalidOperationException)
             {
@@ -115,7 +115,7 @@ namespace Tman.Core.Surfaces.Building
             }
             if (BlockInfo(file.Block.Archetype, file.Collection) is not var (infoPath, info))
             {
-                return file.Block.Surface == Surface.Invisible ? null : throw new InvalidOperationException($"No block definition for {file.Block.Archetype.Id} in {file.Collection}");
+                return file.Invisible ? null : throw new InvalidOperationException($"No block definition for {file.Block.Archetype.Id} in {file.Collection}");
             }
             var indexed = IndexedFolders.Any(folder => infoPath.Contains(folder, StringComparison.OrdinalIgnoreCase));
             var variant = Variant(info, file.Ground, indexed ? 0 : file.AdditionalVariant) ?? throw new InvalidOperationException($"{file.Block.Archetype.Id} has no {(file.Ground ? "ground" : "air")} variant {file.AdditionalVariant}");
@@ -135,12 +135,15 @@ namespace Tman.Core.Surfaces.Building
                     ? Shell(file, info, variant, look, infoPath, ancestor, info.WayPointType == CGameCtnBlockInfo.EWayPointType.Finish ? Blocks.GateFinish : Blocks.GateCheckpoint)
                     : null;
             }
-            if (file.Block.Surface != Surface.Invisible)
+            if (!file.Invisible)
             {
                 return Shell(file, info, variant, Merge(file, parts, infoPath, info, ancestor), infoPath, ancestor);
             }
-            return mesh.Collision(parts, MaterialDressing.For(paks, materials, file.Collection, infoPath, info, ancestor)) is { Shape: not null } collision ? InvisibleShell(file, collision) : [];
+            return mesh.Collision(parts, MaterialDressing.For(paks, materials, file.Collection, infoPath, info, ancestor)) is { Shape: not null } collision ? InvisibleShell(file, Shown(file, collision, parts)) : [];
         }
+
+        private CPlugStaticObjectModel Shown(SurfaceBlockFile file, CPlugStaticObjectModel model, IReadOnlyList<PrefabParts.Part> parts) =>
+            file.Block.Surface == Surface.SeeThrough ? mesh.SeeThrough(model, parts) : model;
 
         private byte[]? InvisibleItem(SurfaceBlockFile file)
         {
@@ -157,7 +160,7 @@ namespace Tman.Core.Surfaces.Building
                 return null;
             }
             var parts = PrefabParts.Collect(paks, entity, Vec3.Zero, Quat.Identity);
-            var collision = mesh.Collision(parts, dressing) is { Shape: not null } model ? model : null;
+            var collision = mesh.Collision(parts, dressing) is { Shape: not null } model ? Shown(file, model, parts) : null;
             var triggers = SpecialTriggers(entity, dressing);
             if (triggers.Count > 0)
             {
