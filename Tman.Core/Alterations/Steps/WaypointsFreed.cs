@@ -19,11 +19,9 @@ namespace Tman.Core.Alterations.Steps
             }
             foreach (var placement in waypoints)
             {
-                var ground = placement.Block!.IsGround;
                 map.Free(placement);
-                placement.Block.IsGround = ground;
             }
-            context.Logger.LogInformation("{Step}: {Freed} waypoint blocks freed, {Terrain} terrain blocks under them removed", GetType().Name, waypoints.Count, terrain.Count);
+            context.Logger.LogInformation("{Step}: {Freed} waypoint blocks freed in their air version, {Terrain} terrain blocks under them removed", GetType().Name, waypoints.Count, terrain.Count);
         }
     }
 }

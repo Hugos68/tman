@@ -24,8 +24,6 @@ namespace Tman.Core.Surfaces
 
         public static readonly Surface SeeThrough = new("SeeThrough", "SeeThrough");
 
-        public static readonly Surface Waypoint = new("Waypoint", "Waypoint");
-
         public static readonly IReadOnlyList<Surface> All = [Road, Dirt, Ice, Grass, Plastic, Wood, Metal, Magnet];
     }
 }

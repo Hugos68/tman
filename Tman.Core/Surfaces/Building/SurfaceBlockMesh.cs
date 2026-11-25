@@ -121,46 +121,23 @@ namespace Tman.Core.Surfaces.Building
             return model;
         }
 
-        public CPlugStaticObjectModel? Visible(IReadOnlyList<PrefabParts.Part> parts, MaterialDressing dressing)
-        {
-            if (Collision(parts, dressing) is not { } model || parts.FirstOrDefault(part => geometry.Solid(part).ShadedGeoms is { Length: > 0 }) is not { } shown)
-            {
-                return null;
-            }
-            return Shaded(model, (CPlugSolid2Model)geometry.Solid(shown).DeepClone(), parts, false, (merged, part, partSolid) => [.. geometry.MaterialLinks(part, partSolid, geometry.Shape(part)).Select(link =>
-            {
-                var dressed = dressing.Dress(link);
-                var (physics, gameplay) = gameMaterials.SurfaceOf(dressed);
-                return merged.IndexOf(dressed, physics, gameplay);
-            })]);
-        }
-
         public CPlugStaticObjectModel SeeThrough(CPlugStaticObjectModel model, IReadOnlyList<PrefabParts.Part> parts)
         {
             if (parts.FirstOrDefault(part => geometry.Solid(part).ShadedGeoms is { Length: > 0 }) is not { } shown)
             {
                 return model;
             }
-            return Shaded(model, BodyOnly((CPlugSolid2Model)geometry.Solid(shown).DeepClone()), parts, true, (merged, part, partSolid) =>
-            {
-                var glass = merged.IndexOf(SeeThroughMaterial, CPlugSurface.MaterialId.NotCollidable, CPlugSurface.GameplayId.None);
-                return [.. Enumerable.Repeat(glass, (partSolid.ShadedGeoms ?? []).Select(geom => geom.MaterialIndex + 1).DefaultIfEmpty(0).Max())];
-            });
-        }
-
-        private CPlugStaticObjectModel Shaded(CPlugStaticObjectModel model, CPlugSolid2Model solid, IReadOnlyList<PrefabParts.Part> parts, bool seeThrough, Func<MergedMaterials, PrefabParts.Part, CPlugSolid2Model, int[]> materials)
-        {
+            var solid = BodyOnly((CPlugSolid2Model)geometry.Solid(shown).DeepClone());
             var merged = new MergedMaterials();
+            var glass = merged.IndexOf(SeeThroughMaterial, CPlugSurface.MaterialId.NotCollidable, CPlugSurface.GameplayId.None);
             var visuals = new List<CPlugVisual3D>();
             var islands = new List<IReadOnlyList<CPlugVisual3D>>();
             var geoms = new List<CPlugSolid2Model.ShadedGeom>();
-            var lodDistances = seeThrough ? [] : LodLevels.Merge(parts.Select(part => geometry.Solid(part).LodMaxDistAtFov90 ?? []));
             foreach (var part in parts)
             {
                 var partSolid = geometry.Solid(part);
-                var materialMap = materials(merged, part, partSolid);
-                var kept = (partSolid.ShadedGeoms ?? []).Where(geom => !seeThrough || ((geom.LodMask & NearestLod) != 0 && Textured((CPlugVisual3D)partSolid.Visuals![geom.VisualIndex]))).ToList();
-                var used = seeThrough ? [.. kept.Select(geom => geom.VisualIndex).Distinct().Order()] : Enumerable.Range(0, partSolid.Visuals?.Length ?? 0).ToList();
+                var kept = (partSolid.ShadedGeoms ?? []).Where(geom => (geom.LodMask & NearestLod) != 0 && Textured((CPlugVisual3D)partSolid.Visuals![geom.VisualIndex])).ToList();
+                var used = kept.Select(geom => geom.VisualIndex).Distinct().Order().ToList();
                 var visualIndex = used.Select((source, index) => (source, index)).ToDictionary(pair => pair.source, pair => visuals.Count + pair.index);
                 var partVisuals = used.Select(index => VisualTransform.Copy((CPlugVisual3D)partSolid.Visuals![index], part.Position, part.Rotation)).ToList();
                 visuals.AddRange(partVisuals);
@@ -168,9 +145,9 @@ namespace Tman.Core.Surfaces.Building
                 geoms.AddRange(kept.Select(geom => new CPlugSolid2Model.ShadedGeom
                 {
                     VisualIndex = visualIndex[geom.VisualIndex],
-                    MaterialIndex = materialMap[geom.MaterialIndex],
+                    MaterialIndex = glass,
                     U01 = geom.U01,
-                    LodMask = seeThrough ? NearestLod : LodLevels.Remap(geom.LodMask, partSolid.LodMaxDistAtFov90 ?? [], lodDistances),
+                    LodMask = NearestLod,
                     U02 = geom.U02
                 }));
             }
@@ -178,16 +155,13 @@ namespace Tman.Core.Surfaces.Building
             {
                 return model;
             }
-            if (seeThrough)
+            solid.PreLightGenerator = null;
+            foreach (var stream in visuals.Select(visual => visual.VertexStreams![0]))
             {
-                solid.PreLightGenerator = null;
-                foreach (var stream in visuals.Select(visual => visual.VertexStreams![0]))
-                {
-                    var set = stream.UVs!.Keys.Max();
-                    stream.UVs[set] = new Vec2[stream.UVs[set].Length];
-                }
+                var set = stream.UVs!.Keys.Max();
+                stream.UVs[set] = new Vec2[stream.UVs[set].Length];
             }
-            Finish(solid, parts, visuals, islands, geoms, merged, lodDistances, model.Shape?.Surf is CPlugSurface.Mesh shape ? shape.Vertices ?? [] : []);
+            Finish(solid, parts, visuals, islands, geoms, merged, [], model.Shape?.Surf is CPlugSurface.Mesh shape ? shape.Vertices ?? [] : []);
             model.Mesh = solid;
             return model;
         }
