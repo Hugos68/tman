@@ -70,7 +70,7 @@ namespace Tman.Tests
         [Fact]
         public void StadiumFilesHaveNoEnvironmentSuffix()
         {
-            var file = new SurfaceBlockFile(new SurfaceBlock(Surface.Plastic, Blocks.RoadTechStart), true, 0, Collections.Stadium);
+            var file = new SurfaceBlockFile(new SurfaceBlock(Surface.Plastic, Blocks.RoadTechStart), true, 0, 0, Collections.Stadium);
             Assert.Equal("PlasticRoadTechStart_0.Block.Gbx", file.FileName);
             Assert.Equal(@"tman\Plastic\Ground\PlasticRoadTechStart_0.Block.Gbx", file.Ident);
             Assert.Equal(@"tman\Plastic\Ground\PlasticRoadTechStart_0.Block.Gbx_CustomBlock", file.RecordName);
@@ -80,7 +80,7 @@ namespace Tman.Tests
         [Fact]
         public void VistaFilesCarryTheEnvironmentAndTheAirKey()
         {
-            var file = new SurfaceBlockFile(new SurfaceBlock(Surface.Plastic, Blocks.RoadTechStart), false, 1, Collections.RedIsland);
+            var file = new SurfaceBlockFile(new SurfaceBlock(Surface.Plastic, Blocks.RoadTechStart), false, 1, 0, Collections.RedIsland);
             Assert.Equal("PlasticRoadTechStart_1001000RedIsland.Block.Gbx", file.FileName);
             Assert.Equal(@"tman\Plastic\Air\PlasticRoadTechStart_1001000RedIsland.Block.Gbx", file.Ident);
             Assert.Equal(System.IO.Path.Combine("Plastic", "Air", "PlasticRoadTechStart_1001000RedIsland.Block.Gbx"), file.CachePath);

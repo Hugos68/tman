@@ -22,10 +22,26 @@ namespace Tman.Core.Alterations
             map.Embed(Path.GetFileName(custom.Path), content);
         }
 
-        public void Replace(Map map, Placement placement, SurfaceBlock model)
+        public bool Replace(Map map, Placement placement, SurfaceBlock model)
         {
             var file = map.SurfaceBlockFile(placement, model);
-            map.Replace(placement, file, surfaceBlocks.Bytes(file));
+            var custom = placement.IsBlock ? null : map.EmbeddedItem(placement.Id);
+            if ((custom is null ? surfaceBlocks.Bytes(file) : surfaceBlocks.CustomItemBytes(file, custom)) is not { } bytes)
+            {
+                return false;
+            }
+            if (bytes.Length == 0)
+            {
+                map.Remove(placement);
+                return true;
+            }
+            if (file.Invisible)
+            {
+                map.PlaceInvisible(placement, file, bytes);
+                return true;
+            }
+            map.Replace(placement, file, bytes);
+            return true;
         }
     }
 }

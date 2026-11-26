@@ -20,6 +20,10 @@ namespace Tman.Core.Surfaces
 
         public static readonly Surface Magnet = new("Magnet", "Magnet");
 
+        public static readonly Surface Invisible = new("Invisible", "Invisible");
+
+        public static readonly Surface SeeThrough = new("SeeThrough", "SeeThrough");
+
         public static readonly IReadOnlyList<Surface> All = [Road, Dirt, Ice, Grass, Plastic, Wood, Metal, Magnet];
     }
 }

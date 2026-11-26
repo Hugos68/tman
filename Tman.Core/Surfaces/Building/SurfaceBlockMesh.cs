@@ -1,13 +1,22 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using GBX.NET;
+using GBX.NET.Engines.MwFoundations;
 using GBX.NET.Engines.Plug;
+using GBX.NET.Serialization.Chunking;
 using Tman.Core.Game;
 
 namespace Tman.Core.Surfaces.Building
 {
     internal sealed class SurfaceBlockMesh(PartGeometry geometry, GameMaterials gameMaterials)
     {
+        private const string PlaceholderMaterial = @"Stadium\Media\Material\TechnicsTrims";
+
+        private const string SeeThroughMaterial = @"Stadium\Media\Material_BlockCustom\CustomGlass";
+
+        private const int NearestLod = 1;
+
         public CPlugStaticObjectModel Merge(IReadOnlyList<PrefabParts.Part> parts, DeckFamily family, SurfaceTarget target, MaterialDressing dressing)
         {
             var collidable = parts.First(part => geometry.CollisionMesh(part) is not null);
@@ -105,6 +114,62 @@ namespace Tman.Core.Surfaces.Building
                     });
                 }
             }
+            Finish(solid, parts, visuals, islands, geoms, merged, lodDistances, vertices);
+            mesh.Vertices = [.. vertices];
+            mesh.Triangles = [.. triangles];
+            shape.Materials = [];
+            return model;
+        }
+
+        public CPlugStaticObjectModel SeeThrough(CPlugStaticObjectModel model, IReadOnlyList<PrefabParts.Part> parts)
+        {
+            if (parts.FirstOrDefault(part => geometry.Solid(part).ShadedGeoms is { Length: > 0 }) is not { } shown)
+            {
+                return model;
+            }
+            var solid = BodyOnly((CPlugSolid2Model)geometry.Solid(shown).DeepClone());
+            var merged = new MergedMaterials();
+            var glass = merged.IndexOf(SeeThroughMaterial, CPlugSurface.MaterialId.NotCollidable, CPlugSurface.GameplayId.None);
+            var visuals = new List<CPlugVisual3D>();
+            var islands = new List<IReadOnlyList<CPlugVisual3D>>();
+            var geoms = new List<CPlugSolid2Model.ShadedGeom>();
+            foreach (var part in parts)
+            {
+                var partSolid = geometry.Solid(part);
+                var kept = (partSolid.ShadedGeoms ?? []).Where(geom => (geom.LodMask & NearestLod) != 0 && Textured((CPlugVisual3D)partSolid.Visuals![geom.VisualIndex])).ToList();
+                var used = kept.Select(geom => geom.VisualIndex).Distinct().Order().ToList();
+                var visualIndex = used.Select((source, index) => (source, index)).ToDictionary(pair => pair.source, pair => visuals.Count + pair.index);
+                var partVisuals = used.Select(index => VisualTransform.Copy((CPlugVisual3D)partSolid.Visuals![index], part.Position, part.Rotation)).ToList();
+                visuals.AddRange(partVisuals);
+                islands.Add(partVisuals);
+                geoms.AddRange(kept.Select(geom => new CPlugSolid2Model.ShadedGeom
+                {
+                    VisualIndex = visualIndex[geom.VisualIndex],
+                    MaterialIndex = glass,
+                    U01 = geom.U01,
+                    LodMask = NearestLod,
+                    U02 = geom.U02
+                }));
+            }
+            if (geoms.Count == 0)
+            {
+                return model;
+            }
+            solid.PreLightGenerator = null;
+            foreach (var stream in visuals.Select(visual => visual.VertexStreams![0]))
+            {
+                var set = stream.UVs!.Keys.Max();
+                stream.UVs[set] = new Vec2[stream.UVs[set].Length];
+            }
+            Finish(solid, parts, visuals, islands, geoms, merged, [], model.Shape?.Surf is CPlugSurface.Mesh shape ? shape.Vertices ?? [] : []);
+            model.Mesh = solid;
+            return model;
+        }
+
+        private static bool Textured(CPlugVisual3D visual) => visual.VertexStreams?.FirstOrDefault()?.UVs is { Count: > 0 };
+
+        private void Finish(CPlugSolid2Model solid, IReadOnlyList<PrefabParts.Part> parts, List<CPlugVisual3D> visuals, List<IReadOnlyList<CPlugVisual3D>> islands, List<CPlugSolid2Model.ShadedGeom> geoms, MergedMaterials merged, float[] lodDistances, IEnumerable<Vec3> collision)
+        {
             solid.LodMaxDistAtFov90 = lodDistances;
             if (LightmapAtlas.Repack(islands) is { } layout && solid.PreLightGenerator is { } lightmap)
             {
@@ -120,11 +185,151 @@ namespace Tman.Core.Surfaces.Building
             solid.LightUserModels = [];
             solid.LightInsts = [];
             solid.FileWriteTime = null;
-            solid.Boxes = [VisualTransform.Bounds(vertices.Concat(visuals.SelectMany(visual => visual.VertexStreams![0].Positions!)))];
-            mesh.Vertices = [.. vertices];
-            mesh.Triangles = [.. triangles];
-            shape.Materials = [];
+            solid.Boxes = [VisualTransform.Bounds(collision.Concat(visuals.SelectMany(visual => visual.VertexStreams![0].Positions!)))];
+        }
+
+        public CPlugStaticObjectModel? Collision(IReadOnlyList<PrefabParts.Part> parts, MaterialDressing? dressing)
+        {
+            if (parts.FirstOrDefault(part => geometry.Solid(part).ShadedGeoms is { Length: > 0 }) is not { } shown)
+            {
+                return null;
+            }
+            var collidable = parts.FirstOrDefault(part => geometry.CollisionMesh(part) is not null);
+            var model = (CPlugStaticObjectModel)(collidable ?? parts[0]).Model.DeepClone();
+            model.Mesh = BodyOnly((CPlugSolid2Model)geometry.Solid(collidable ?? parts[0]).DeepClone());
+            model.Shape = collidable is null ? null : BodyOnly((CPlugSurface)geometry.Shape(collidable)!.DeepClone());
+            model.MeshFile = null;
+            model.ShapeFile = null;
+            var vertices = new List<Vec3>();
+            var triangles = new List<CPlugSurface.Mesh.Triangle>();
+            var surfaceSlots = 0;
+            foreach (var part in parts)
+            {
+                if (geometry.CollisionMesh(part) is not { } partMesh)
+                {
+                    continue;
+                }
+                var slots = dressing is null ? null : DressedSlots(part, geometry.Shape(part)!, dressing);
+                var vertexBase = vertices.Count;
+                var surfaceBase = surfaceSlots;
+                surfaceSlots += geometry.Shape(part)!.Materials!.Length;
+                vertices.AddRange(partMesh.Vertices!.Select(vertex => Transforms.Rotate(part.Rotation, vertex) + part.Position));
+                triangles.AddRange(partMesh.Triangles!.Select(triangle => new CPlugSurface.Mesh.Triangle
+                {
+                    Indices = triangle.Indices + new Int3(vertexBase, vertexBase, vertexBase),
+                    SurfaceIndex = (short)(triangle.SurfaceIndex + surfaceBase),
+                    U02 = slots?.ElementAtOrDefault(triangle.SurfaceIndex)?.Physics is { } physics ? (byte)physics : triangle.U02,
+                    U03 = slots?.ElementAtOrDefault(triangle.SurfaceIndex)?.Gameplay is { } gameplay ? (byte)gameplay : triangle.U03
+                }));
+            }
+            if (model.Shape is { Surf: CPlugSurface.Mesh source })
+            {
+                model.Shape.Surf = new CPlugSurface.Mesh { Version = source.Version, OctreeVersion = source.OctreeVersion, GameplayMainDir = source.GameplayMainDir, Vertices = [.. vertices], Triangles = [.. triangles] };
+                model.Shape.Materials = [];
+            }
+            Hide(model.Mesh, geometry.Solid(shown), shown.Position, shown.Rotation, vertices);
             return model;
+        }
+
+        public CPlugSolid2Model InvisibleSolid(CPlugSolid2Model source, IReadOnlyList<Vec3> extent)
+        {
+            var solid = BodyOnly((CPlugSolid2Model)source.DeepClone());
+            Hide(solid, source, Vec3.Zero, Quat.Identity, extent);
+            return solid;
+        }
+
+        private static void Hide(CPlugSolid2Model solid, CPlugSolid2Model source, Vec3 position, Quat rotation, IReadOnlyList<Vec3> extent)
+        {
+            var (placeholder, geom, material) = Placeholder(source, position, rotation, extent);
+            solid.Visuals = [placeholder];
+            solid.ShadedGeoms = [geom];
+            solid.CustomMaterials = [material];
+            solid.Materials = null;
+            solid.MaterialIds = [];
+            solid.MaterialInsts = null;
+            solid.Lights = [];
+            solid.LightUserModels = [];
+            solid.LightInsts = [];
+            solid.PreLightGenerator = null;
+            solid.FileWriteTime = null;
+            solid.Boxes = extent.Count == 0 ? solid.Boxes : [VisualTransform.Bounds(extent)];
+        }
+
+        private static (CPlugVisual3D Visual, CPlugSolid2Model.ShadedGeom Geom, CPlugSolid2Model.Material Material) Placeholder(CPlugSolid2Model source, Vec3 position, Quat rotation, IReadOnlyList<Vec3> collision)
+        {
+            var geom = source.ShadedGeoms![0];
+            var visual = VisualTransform.Copy((CPlugVisual3D)source.Visuals![geom.VisualIndex], position, rotation);
+            IReadOnlyList<Vec3> extent = collision.Count > 0 ? collision : visual.VertexStreams![0].Positions!;
+            var min = new Vec3(extent.Min(point => point.X), extent.Min(point => point.Y), extent.Min(point => point.Z));
+            var max = new Vec3(extent.Max(point => point.X), extent.Max(point => point.Y), extent.Max(point => point.Z));
+            foreach (var stream in visual.VertexStreams ?? [])
+            {
+                stream.Positions = [.. stream.Positions!.Select((_, index) => index == 1 ? max : min)];
+            }
+            if (visual is CPlugVisualIndexed { IndexBuffer: { Indices: { } indices } buffer } indexed)
+            {
+                var hidden = (CPlugIndexBuffer)buffer.DeepClone();
+                hidden.Indices = new int[indices.Length];
+                indexed.IndexBuffer = hidden;
+            }
+            visual.BoundingBox = VisualTransform.Bounds(extent);
+            var merged = new MergedMaterials();
+            merged.IndexOf(PlaceholderMaterial, CPlugSurface.MaterialId.NotCollidable, CPlugSurface.GameplayId.None);
+            return (visual, new CPlugSolid2Model.ShadedGeom { VisualIndex = 0, MaterialIndex = 0, U01 = geom.U01, LodMask = geom.LodMask, U02 = geom.U02 }, merged.ToArray()[0]);
+        }
+
+        private static T BodyOnly<T>(T node) where T : CMwNod
+        {
+            foreach (var chunk in node.Chunks.OfType<IHeaderChunk>().ToList())
+            {
+                node.Chunks.Remove(chunk);
+            }
+            return node;
+        }
+
+        public CPlugSurface InlineSurface(CPlugSurface surface, Gbx owner, string ownerPath, MaterialDressing dressing, CPlugMaterial template)
+        {
+            var copy = BodyOnly((CPlugSurface)surface.DeepClone());
+            var slots = (surface.Materials ?? []).Select(material => material.MaterialFile is { } file ? Slot(gameMaterials.Link(ownerPath, owner, file.FilePath), dressing) : new DressedSlot(null, null)).ToArray();
+            if (copy.Surf is not CPlugSurface.Mesh source)
+            {
+                copy.Materials = [.. (surface.Materials ?? []).Select((material, index) =>
+                {
+                    var (physics, gameplay) = material.MaterialFile is { } file ? gameMaterials.SurfaceOf(gameMaterials.Link(ownerPath, owner, file.FilePath)) : (material.Material?.SurfaceId ?? material.SurfaceId ?? CPlugSurface.MaterialId.Concrete, material.Material?.GameplayId ?? CPlugSurface.GameplayId.None);
+                    var inline = (CPlugMaterial)template.DeepClone();
+                    inline.SurfaceId = slots[index].Physics ?? physics;
+                    inline.GameplayId = slots[index].Gameplay ?? gameplay;
+                    return new CPlugSurface.SurfMaterial { Material = inline };
+                })];
+                return copy;
+            }
+            var surfaces = source.Triangles!.Select(triangle => (
+                Triangle: triangle,
+                Physics: slots.ElementAtOrDefault(triangle.SurfaceIndex)?.Physics is { } physics ? (byte)physics : triangle.U02,
+                Gameplay: slots.ElementAtOrDefault(triangle.SurfaceIndex)?.Gameplay is { } gameplay ? (byte)gameplay : triangle.U03)).ToList();
+            var kinds = surfaces.Select(surface => (surface.Physics, surface.Gameplay)).Distinct().ToList();
+            copy.Surf = new CPlugSurface.Mesh
+            {
+                Version = source.Version,
+                OctreeVersion = source.OctreeVersion,
+                GameplayMainDir = source.GameplayMainDir,
+                Vertices = source.Vertices,
+                Triangles = [.. surfaces.Select(surface => new CPlugSurface.Mesh.Triangle
+                {
+                    Indices = surface.Triangle.Indices,
+                    SurfaceIndex = (short)kinds.IndexOf((surface.Physics, surface.Gameplay)),
+                    U02 = surface.Physics,
+                    U03 = surface.Gameplay
+                })]
+            };
+            copy.Materials = [.. kinds.Select(kind =>
+            {
+                var material = (CPlugMaterial)template.DeepClone();
+                material.SurfaceId = (CPlugSurface.MaterialId)kind.Physics;
+                material.GameplayId = (CPlugSurface.GameplayId)kind.Gameplay;
+                return new CPlugSurface.SurfMaterial { Material = material };
+            })];
+            return copy;
         }
 
         public CPlugSurface TriggerShape(CPlugSurface surface, Gbx owner, string ownerPath)
@@ -144,6 +349,26 @@ namespace Tman.Core.Surfaces.Building
             var twin = DeckFamily.OpenBorderOf(target.Link);
             return gameMaterials.Exists(twin) ? twin : target.Link;
         }
+
+        private DressedSlot[] DressedSlots(PrefabParts.Part part, CPlugSurface shape, MaterialDressing dressing) =>
+            [.. shape.Materials!.Select(material => material.MaterialFile is { } file ? Slot(geometry.Link(part, file.FilePath), dressing) : new DressedSlot(null, null))];
+
+        private DressedSlot Slot(string link, MaterialDressing dressing)
+        {
+            if (GameMaterials.IsGameplayCollision(link))
+            {
+                return new DressedSlot(null, dressing.StripGameplay(link));
+            }
+            var dressed = dressing.Dress(link);
+            if (string.Equals(dressed, link, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return new DressedSlot(null, null);
+            }
+            var (physics, gameplay) = gameMaterials.SurfaceOf(dressed);
+            return new DressedSlot(physics, gameplay);
+        }
+
+        private sealed record DressedSlot(CPlugSurface.MaterialId? Physics, CPlugSurface.GameplayId? Gameplay);
 
         private SlotTreatment[] ShapeSlots(PrefabParts.Part part, CPlugSurface shape, DeckFamily family, SurfaceTarget target, MaterialDressing dressing) =>
             [.. shape.Materials!.Select(material =>

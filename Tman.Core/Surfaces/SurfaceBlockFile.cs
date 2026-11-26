@@ -3,7 +3,7 @@ using Tman.Core.Catalog;
 
 namespace Tman.Core.Surfaces
 {
-    internal sealed record SurfaceBlockFile(SurfaceBlock Block, bool Ground, int AdditionalVariant, Collections Collection)
+    internal sealed record SurfaceBlockFile(SurfaceBlock Block, bool Ground, int AdditionalVariant, int BaseVariant, Collections Collection, bool Item = false)
     {
         private const string Author = "tman (author:tman)";
 
@@ -13,15 +13,23 @@ namespace Tman.Core.Surfaces
 
         private const string AirFolder = "Air";
 
-        private const string Extension = ".Block.Gbx";
+        private const string ItemFolder = "Items";
+
+        private const string BlockExtension = ".Block.Gbx";
+
+        private const string ItemExtension = ".Item.Gbx";
 
         private const string CustomBlockSuffix = "_CustomBlock";
 
-        private const string EmbeddedRoot = "Blocks/";
+        private const string EmbeddedBlocksRoot = "Blocks/";
 
-        public string Name => $"{Block.Name}_{SurfaceBlockKey.Of(Ground, AdditionalVariant)}{EnvironmentSuffix}";
+        private const string EmbeddedItemsRoot = "Items/";
 
-        public string FileName => Name + Extension;
+        public string Name => $"{Block.Name}_{SurfaceBlockKey.Of(Ground, AdditionalVariant) + BaseVariant}{EnvironmentSuffix}";
+
+        public bool Invisible => Block.Surface == Surface.Invisible || Block.Surface == Surface.SeeThrough;
+
+        public string FileName => Name + (Invisible ? ItemExtension : BlockExtension);
 
         public string Ident => $@"{RootFolder}\{Block.Surface.Name}\{Folder}\{FileName}";
 
@@ -29,11 +37,11 @@ namespace Tman.Core.Surfaces
 
         public string RecordAuthor => Author;
 
-        public string EmbeddedEntry => EmbeddedRoot + Ident.Replace('\\', '/');
+        public string EmbeddedEntry => (Invisible ? EmbeddedItemsRoot : EmbeddedBlocksRoot) + Ident.Replace('\\', '/');
 
         public string CachePath => Path.Combine(Block.Surface.Name, Folder, FileName);
 
-        private string Folder => Ground ? GroundFolder : AirFolder;
+        private string Folder => Item ? ItemFolder : Ground ? GroundFolder : AirFolder;
 
         private string EnvironmentSuffix => Collection == Collections.Stadium ? "" : Collection.ToString();
     }
