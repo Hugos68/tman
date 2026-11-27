@@ -19,7 +19,7 @@ namespace Tman.Core.Alterations.Steps
             var blocks = map.Placements.OnlyBlocks().Where(placement => !placement.IsFree).ToList();
             var roads = blocks.Where(placement => placement.Block!.IsGround && placement.BlockModel is { } model && (placement.IsWaypoint || DeckFamily.Of(model) is not null));
             var covered = roads.SelectMany(placement => placement.Cells()).ToHashSet();
-            var hidden = blocks.Where(placement => !placement.IsWaypoint && kinds.Contains(placement.Id) && covered.Contains((placement.Cell.X, placement.Cell.Z))).ToList();
+            var hidden = blocks.Concat(map.Baked).Where(placement => !placement.IsWaypoint && kinds.Contains(placement.Id) && covered.Contains((placement.Cell.X, placement.Cell.Z))).ToList();
             foreach (var placement in hidden)
             {
                 map.Remove(placement);

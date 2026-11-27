@@ -45,12 +45,8 @@ namespace Tman.Core.Maps
         internal Placement PlaceInvisible(Placement source, SurfaceBlockFile file, byte[] bytes)
         {
             var pose = source.Pose(this);
-            if (source.Item is { } item)
-            {
-                pose.Move(Vec3.Zero - item.PivotPosition);
-            }
             EmbedSurfaceBlock(file, bytes);
-            var placement = new Placement(Challenge.PlaceAnchoredObject(new Ident(file.Ident, CollectionIds.Of(file.Collection), file.RecordAuthor), pose.Coords, pose.YawPitchRoll, Vec3.Zero));
+            var placement = new Placement(Challenge.PlaceAnchoredObject(new Ident(file.Ident, CollectionIds.Of(file.Collection), file.RecordAuthor), pose.Coords, pose.YawPitchRoll, source.Item?.PivotPosition ?? Vec3.Zero));
             Remove(source);
             return placement;
         }

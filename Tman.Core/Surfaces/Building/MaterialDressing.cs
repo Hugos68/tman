@@ -42,6 +42,10 @@ namespace Tman.Core.Surfaces.Building
             return new MaterialDressing(paks, materials, collection, folders);
         }
 
+        public MaterialDressing With(MaterialDressing owner) => new(paks, materials, collection, [.. modifierFolders, .. owner.Folders]);
+
+        private IReadOnlyList<string> Folders => modifierFolders;
+
         public string Dress(string link)
         {
             if (!dressed.TryGetValue(link, out var result))

@@ -16,8 +16,8 @@ namespace Tman.Core.Alterations.Other
             new VistaMoodWarning(),
             new ItemsMadeInvisible(surface),
             new TerrainMadeInvisible(surface),
-            new SurfaceBlocksPlaced(block => block.Waypoint == Waypoint.None ? new SurfaceBlock(surface, block) : null),
             new BakedClipsMadeInvisible(surface),
+            new SurfaceBlocksPlaced(block => block.Waypoint == Waypoint.None ? new SurfaceBlock(surface, block) : null),
             new WaypointsFreed(),
             new BakedClipsRemoved()
         ];
