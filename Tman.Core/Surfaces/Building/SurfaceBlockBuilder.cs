@@ -67,6 +67,8 @@ namespace Tman.Core.Surfaces.Building
 
         private const byte SpawnFlag = 4;
 
+        private const int SpecialTriggerVersion = 2;
+
         private readonly Lazy<BlockInfoIndex> blockInfos = new(() => BlockInfoIndex.Of(paks));
 
         private readonly Lazy<Dictionary<string, string>> items = new(() => ItemIndex(paks));
@@ -120,7 +122,14 @@ namespace Tman.Core.Surfaces.Building
             var indexed = IndexedFolders.Any(folder => infoPath.Contains(folder, StringComparison.OrdinalIgnoreCase));
             var variant = Variant(info, file.Ground, indexed ? 0 : file.AdditionalVariant) ?? throw new InvalidOperationException($"{file.Block.Archetype.Id} has no {(file.Ground ? "ground" : "air")} variant {file.AdditionalVariant}");
             var ancestor = paks.Open(infoPath)!.RefTable?.AncestorLevel ?? 0;
+            var dressing = MaterialDressing.For(paks, materials, file.Collection, infoPath, info, ancestor);
+            if (file.Block.Owner is { } owner && BlockInfo(owner, file.Collection) is var (ownerPath, ownerInfo))
+            {
+                dressing = dressing.With(MaterialDressing.For(paks, materials, file.Collection, ownerPath, ownerInfo, paks.Open(ownerPath)!.RefTable?.AncestorLevel ?? 0));
+            }
             var parts = new List<PrefabParts.Part>();
+            var triggers = new List<CPlugPrefab.EntRef>();
+            string? triggering = null;
             var mobils = (variant.Mobils ?? []).Select(variations => variations.FirstOrDefault());
             foreach (var mobil in (indexed ? mobils.Skip(file.BaseVariant).Take(1) : mobils).OfType<CGameCtnBlockInfoMobil>().Where(mobil => mobil.PrefabFidFile is not null))
             {
@@ -128,12 +137,23 @@ namespace Tman.Core.Surfaces.Building
                 var position = mobil.HasGeomTransformation ? mobil.GeomTranslation : Vec3.Zero;
                 var rotation = mobil.HasGeomTransformation ? Transforms.FromEulerDegrees(mobil.GeomRotation) : Quat.Identity;
                 parts.AddRange(PrefabParts.Collect(paks, prefab, position, rotation));
+                if (file.Invisible && SpecialTriggers(prefab, dressing) is { Count: > 0 } placed)
+                {
+                    triggers.AddRange(placed.Select(trigger => Placed(trigger, position, rotation)));
+                    triggering ??= prefab;
+                }
+                if (file.Invisible && info.WayPointType == CGameCtnBlockInfo.EWayPointType.None && variant.WaypointTriggerSolid is CPlugSolid { Tree: CPlugTree { Surface: CPlugSurface shape } } && triggering is null && paks.Open(prefab) is { Node: CPlugPrefab })
+                {
+                    var trigger = new NPlugTrigger_SSpecial { Version = SpecialTriggerVersion, TriggerShape = mesh.InlineSurface(shape, paks.Open(infoPath)!, infoPath, dressing, CollisionMaterial()) };
+                    triggers.Add(new CPlugPrefab.EntRef { Model = trigger, Position = Vec3.Zero, Rotation = Quat.Identity, U01 = "" });
+                    triggering = prefab;
+                }
             }
             if (!file.Invisible)
             {
                 return Shell(file, info, variant, Merge(file, parts, infoPath, info, ancestor), infoPath, ancestor);
             }
-            return mesh.Collision(parts, MaterialDressing.For(paks, materials, file.Collection, infoPath, info, ancestor)) is { Shape: not null } collision ? InvisibleShell(file, Shown(file, collision, parts)) : [];
+            return InvisibleShell(file, mesh.Collision(parts, dressing) is { Shape: not null } collision ? Shown(file, collision, parts) : null, triggers, triggering);
         }
 
         private CPlugStaticObjectModel Shown(SurfaceBlockFile file, CPlugStaticObjectModel model, IReadOnlyList<PrefabParts.Part> parts) =>
@@ -154,16 +174,22 @@ namespace Tman.Core.Surfaces.Building
                 return null;
             }
             var parts = PrefabParts.Collect(paks, entity, Vec3.Zero, Quat.Identity);
-            var collision = mesh.Collision(parts, dressing) is { Shape: not null } model ? Shown(file, model, parts) : null;
-            var triggers = SpecialTriggers(entity, dressing);
-            if (triggers.Count > 0)
-            {
-                var prefab = (CPlugPrefab)paks.Open(entity)!.Node!.DeepClone();
-                prefab.Ents = [.. (collision is null ? [] : new[] { new CPlugPrefab.EntRef { Model = collision, Position = Vec3.Zero, Rotation = Quat.Identity, U01 = "" } }), .. triggers];
-                return InvisiblePrefabShell(file, prefab);
-            }
-            return collision is not null ? InvisibleShell(file, collision) : [];
+            return InvisibleShell(file, mesh.Collision(parts, dressing) is { Shape: not null } model ? Shown(file, model, parts) : null, SpecialTriggers(entity, dressing), entity);
         }
+
+        private byte[] InvisibleShell(SurfaceBlockFile file, CPlugStaticObjectModel? collision, IReadOnlyList<CPlugPrefab.EntRef> triggers, string? source)
+        {
+            if (triggers.Count == 0 || source is null)
+            {
+                return collision is not null ? InvisibleShell(file, collision) : [];
+            }
+            var prefab = (CPlugPrefab)paks.Open(source)!.Node!.DeepClone();
+            prefab.Ents = [.. (collision is null ? [] : new[] { new CPlugPrefab.EntRef { Model = collision, Position = Vec3.Zero, Rotation = Quat.Identity, U01 = "" } }), .. triggers];
+            return InvisiblePrefabShell(file, prefab);
+        }
+
+        private static CPlugPrefab.EntRef Placed(CPlugPrefab.EntRef entity, Vec3 position, Quat rotation) =>
+            new() { Model = entity.Model, Position = position + Transforms.Rotate(rotation, entity.Position), Rotation = Transforms.Multiply(rotation, entity.Rotation), U01 = entity.U01 };
 
         private List<CPlugPrefab.EntRef> SpecialTriggers(string path, MaterialDressing dressing)
         {
