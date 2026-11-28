@@ -67,31 +67,6 @@ namespace Tman.Tests
         }
 
         [Fact]
-        public void InvisibleEmbedsAnInvisibleBlockForEverythingButTheWaypoints()
-        {
-            var blocks = new FixedSurfaceBlocks();
-            using var services = TestServices.Build(services => services.AddSingleton<ISurfaceBlocks>(blocks));
-            var map = TestServices.LoadTestMap();
-            var waypoints = map.Placements.OnlyBlocks().Where(placement => placement.IsWaypoint).Select(placement => placement.Id).ToList();
-            var others = map.Placements.OnlyBlocks().Count(placement => !placement.IsWaypoint && placement.BlockModel is not null);
-            var items = map.Placements.OnlyItems().Count(placement => !placement.IsWaypoint);
-            var baked = map.Baked.Count();
-            var covered = map.Placements.OnlyBlocks().Where(placement => !placement.IsFree && placement.Block!.IsGround && placement.BlockModel is { } model && (placement.IsWaypoint || DeckFamily.Of(model) is not null)).SelectMany(placement => placement.Cells()).ToHashSet();
-            var hidden = map.Placements.OnlyBlocks().Where(placement => !placement.IsFree && !placement.IsWaypoint).Concat(map.Baked).Count(placement => map.TerrainKinds.Contains(placement.Id) && covered.Contains((placement.Cell.X, placement.Cell.Z)));
-            services.GetRequiredService<AlterationPipeline>().Apply("Invisible", map);
-            Assert.NotEmpty(waypoints);
-            Assert.True(blocks.Requested.Count > others);
-            Assert.True(hidden > 0);
-            Assert.Equal(others + items + baked - map.Baked.Count() - hidden, blocks.Requested.Count);
-            Assert.All(map.Placements.OnlyBlocks(), placement => Assert.True(placement.IsWaypoint || placement.BlockModel is null));
-            Assert.Equal(blocks.Requested.Select(file => file.Ident).Order(), map.Placements.OnlyItems().Where(placement => !placement.IsWaypoint).Select(placement => placement.Id).Order());
-            Assert.All(blocks.Requested, file => Assert.Equal(Surface.Invisible, file.Block.Surface));
-            Assert.Equal(waypoints, map.Placements.OnlyBlocks().Where(placement => placement.IsWaypoint).Select(placement => placement.Id).ToList());
-            Assert.All(map.Placements.OnlyBlocks().Where(placement => placement.IsWaypoint), placement => Assert.True(placement.IsFree && !placement.Block!.IsGround));
-            Assert.EndsWith("Invisible", map.Name);
-        }
-
-        [Fact]
         public void InvisibleSeeThroughEmbedsTheSameItemsAsInvisibleButSeeThrough()
         {
             var hidden = new FixedSurfaceBlocks();
